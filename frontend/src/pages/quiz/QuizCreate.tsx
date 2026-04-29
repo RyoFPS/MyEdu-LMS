@@ -24,6 +24,9 @@ import {
   CheckCircle2,
   ChevronUp,
   ChevronDown,
+  Shield,
+  Repeat,
+  Hash,
 } from 'lucide-react';
 
 interface QuestionForm {
@@ -315,6 +318,99 @@ const QuizCreate: React.FC = () => {
                     value={formData.end_time}
                     onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                   />
+                </div>
+                {/* Attempt Mode */}
+                <div className="space-y-3 md:col-span-2">
+                  <Label>Attempt Mode</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {/* Single Attempt */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, max_attempts: '1' })}
+                      className={cn(
+                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
+                        formData.max_attempts === '1'
+                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                      )}
+                    >
+                      <div className={cn(
+                        'p-2.5 rounded-lg',
+                        formData.max_attempts === '1' ? 'bg-primary-100' : 'bg-gray-100'
+                      )}>
+                        <Shield className="h-5 w-5" />
+                      </div>
+                      <span className="font-semibold text-sm">Single Attempt</span>
+                      <span className="text-xs text-center opacity-70 leading-relaxed">
+                        Students can only take this quiz once
+                      </span>
+                    </button>
+
+                    {/* Unlimited Attempts */}
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, max_attempts: '0' })}
+                      className={cn(
+                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
+                        formData.max_attempts === '0'
+                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                      )}
+                    >
+                      <div className={cn(
+                        'p-2.5 rounded-lg',
+                        formData.max_attempts === '0' ? 'bg-primary-100' : 'bg-gray-100'
+                      )}>
+                        <Repeat className="h-5 w-5" />
+                      </div>
+                      <span className="font-semibold text-sm">Unlimited</span>
+                      <span className="text-xs text-center opacity-70 leading-relaxed">
+                        Students can retake as many times as they want
+                      </span>
+                    </button>
+
+                    {/* Custom Attempts */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (formData.max_attempts === '0' || formData.max_attempts === '1') {
+                          setFormData({ ...formData, max_attempts: '3' });
+                        }
+                      }}
+                      className={cn(
+                        'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
+                        Number(formData.max_attempts) > 1
+                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                      )}
+                    >
+                      <div className={cn(
+                        'p-2.5 rounded-lg',
+                        Number(formData.max_attempts) > 1 ? 'bg-primary-100' : 'bg-gray-100'
+                      )}>
+                        <Hash className="h-5 w-5" />
+                      </div>
+                      <span className="font-semibold text-sm">Custom Limit</span>
+                      {Number(formData.max_attempts) > 1 ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="number"
+                            min="2"
+                            max="100"
+                            value={formData.max_attempts}
+                            onChange={(e) => setFormData({ ...formData, max_attempts: e.target.value })}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-16 h-7 text-center text-xs"
+                          />
+                          <span className="text-xs opacity-70">attempts</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-center opacity-70 leading-relaxed">
+                          Set a specific number of attempts
+                        </span>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </CardContent>
