@@ -12,6 +12,7 @@ export interface User {
 export interface ClassRoom {
   id: number;
   name: string;
+  slug: string;
   grade_level: string;
   academic_year: string;
   description?: string;

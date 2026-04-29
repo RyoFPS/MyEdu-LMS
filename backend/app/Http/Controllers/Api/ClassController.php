@@ -13,6 +13,17 @@ use Illuminate\Http\Request;
 class ClassController extends Controller
 {
     /**
+     * Find a class by slug or numeric ID.
+     */
+    private function findClass(string $identifier): ClassRoom
+    {
+        if (is_numeric($identifier)) {
+            return ClassRoom::findOrFail((int) $identifier);
+        }
+        return ClassRoom::where('slug', $identifier)->firstOrFail();
+    }
+
+    /**
      * GET /api/classes
      *
      * List classes. Admins see all; teachers see their classes; students see enrolled classes.
@@ -74,11 +85,11 @@ class ClassController extends Controller
      *
      * Show a class with its teachers and students.
      */
-    public function show(int $id): JsonResponse
+    public function show(string $id): JsonResponse
     {
-        $classRoom = ClassRoom::with(['teachers', 'students'])
-            ->withCount(['students', 'teachers'])
-            ->findOrFail($id);
+        $classRoom = $this->findClass($id);
+        $classRoom->load(['teachers', 'students']);
+        $classRoom->loadCount(['students', 'teachers']);
 
         return response()->json([
             'data' => new ClassResource($classRoom),
@@ -90,13 +101,13 @@ class ClassController extends Controller
      *
      * Update a class (admin only).
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         if (! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        $classRoom = ClassRoom::findOrFail($id);
+        $classRoom = $this->findClass($id);
 
         $validated = $request->validate([
             'name'          => ['sometimes', 'string', 'max:255'],
@@ -117,13 +128,13 @@ class ClassController extends Controller
      *
      * Delete a class (admin only).
      */
-    public function destroy(Request $request, int $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
         if (! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        $classRoom = ClassRoom::findOrFail($id);
+        $classRoom = $this->findClass($id);
         $classRoom->delete();
 
         return response()->json([
@@ -136,7 +147,7 @@ class ClassController extends Controller
      *
      * Assign a teacher to a class with an optional subject.
      */
-    public function assignTeacher(Request $request, int $id): JsonResponse
+    public function assignTeacher(Request $request, string $id): JsonResponse
     {
         if (! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
@@ -155,7 +166,7 @@ class ClassController extends Controller
             ], 422);
         }
 
-        $classRoom = ClassRoom::findOrFail($id);
+        $classRoom = $this->findClass($id);
 
         // Attach teacher (ignore if already attached with same subject)
         $classRoom->teachers()->syncWithoutDetaching([
@@ -175,7 +186,7 @@ class ClassController extends Controller
      *
      * Assign a student to a class.
      */
-    public function assignStudent(Request $request, int $id): JsonResponse
+    public function assignStudent(Request $request, string $id): JsonResponse
     {
         if (! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
@@ -193,7 +204,7 @@ class ClassController extends Controller
             ], 422);
         }
 
-        $classRoom = ClassRoom::findOrFail($id);
+        $classRoom = $this->findClass($id);
         $classRoom->students()->syncWithoutDetaching([$validated['student_id']]);
 
         $classRoom->load('students');
@@ -209,13 +220,13 @@ class ClassController extends Controller
      *
      * Remove a teacher from a class.
      */
-    public function removeTeacher(Request $request, int $id, int $teacherId): JsonResponse
+    public function removeTeacher(Request $request, string $id, int $teacherId): JsonResponse
     {
         if (! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        $classRoom = ClassRoom::findOrFail($id);
+        $classRoom = $this->findClass($id);
         $classRoom->teachers()->detach($teacherId);
 
         return response()->json([
@@ -228,13 +239,13 @@ class ClassController extends Controller
      *
      * Remove a student from a class.
      */
-    public function removeStudent(Request $request, int $id, int $studentId): JsonResponse
+    public function removeStudent(Request $request, string $id, int $studentId): JsonResponse
     {
         if (! $request->user()->isAdmin()) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
 
-        $classRoom = ClassRoom::findOrFail($id);
+        $classRoom = $this->findClass($id);
         $classRoom->students()->detach($studentId);
 
         return response()->json([

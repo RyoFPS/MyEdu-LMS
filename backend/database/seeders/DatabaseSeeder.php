@@ -79,10 +79,10 @@ class DatabaseSeeder extends Seeder
 
         // ─── 5. Classes (4) ─────────────────────────────────────────────
         $classData = [
-            ['name' => 'Kelas 7A', 'grade_level' => '7', 'academic_year' => '2024/2025'],
-            ['name' => 'Kelas 7B', 'grade_level' => '7', 'academic_year' => '2024/2025'],
-            ['name' => 'Kelas 8A', 'grade_level' => '8', 'academic_year' => '2024/2025'],
-            ['name' => 'Kelas 8B', 'grade_level' => '8', 'academic_year' => '2024/2025'],
+            ['name' => 'Kelas 7A', 'slug' => 'kelas-7a', 'grade_level' => '7', 'academic_year' => '2024/2025'],
+            ['name' => 'Kelas 7B', 'slug' => 'kelas-7b', 'grade_level' => '7', 'academic_year' => '2024/2025'],
+            ['name' => 'Kelas 8A', 'slug' => 'kelas-8a', 'grade_level' => '8', 'academic_year' => '2024/2025'],
+            ['name' => 'Kelas 8B', 'slug' => 'kelas-8b', 'grade_level' => '8', 'academic_year' => '2024/2025'],
         ];
 
         $classes = [];

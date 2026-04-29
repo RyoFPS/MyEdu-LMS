@@ -172,7 +172,7 @@ const ClassList: React.FC = () => {
               <Card
                 key={cls.id}
                 className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-pointer group"
-                onClick={() => navigate(`/classes/${cls.id}`)}
+                onClick={() => navigate(`/classes/${cls.slug}`)}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class ClassRoom extends Model
 {
@@ -21,9 +22,39 @@ class ClassRoom extends Model
      */
     protected $fillable = [
         'name',
+        'slug',
         'grade_level',
         'academic_year',
     ];
+
+    /* ------------------------------------------------------------------ */
+    /*  Boot                                                               */
+    /* ------------------------------------------------------------------ */
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($classRoom) {
+            if (empty($classRoom->slug)) {
+                $classRoom->slug = Str::slug($classRoom->name);
+            }
+        });
+
+        static::updating(function ($classRoom) {
+            if ($classRoom->isDirty('name')) {
+                $classRoom->slug = Str::slug($classRoom->name);
+            }
+        });
+    }
+
+    /**
+     * Use slug for route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
 
     /* ------------------------------------------------------------------ */
     /*  Relationships                                                      */

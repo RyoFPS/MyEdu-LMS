@@ -15,6 +15,7 @@ class ClassResource extends JsonResource
         return [
             'id'            => $this->id,
             'name'          => $this->name,
+            'slug'          => $this->slug,
             'grade_level'   => $this->grade_level,
             'academic_year' => $this->academic_year,
             'created_at'    => $this->created_at?->toISOString(),
