@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/ta
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Avatar } from '../../components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
-import { Select } from '../../components/ui/select';
+import { SearchableSelect } from '../../components/ui/searchable-select';
 import { Input } from '../../components/ui/input';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
@@ -461,11 +461,13 @@ const ClassDetail: React.FC = () => {
                 {availableTeachers.length === 0 ? (
                   <p className="text-sm text-gray-400 py-2">All teachers are already assigned to this class.</p>
                 ) : (
-                  <Select
+                  <SearchableSelect
                     value={selectedTeacherId}
-                    onChange={(e) => setSelectedTeacherId(e.target.value)}
-                    options={availableTeachers.map((t) => ({ value: String(t.id), label: t.name }))}
+                    onChange={(val) => setSelectedTeacherId(val)}
+                    options={availableTeachers.map((t) => ({ value: String(t.id), label: t.name, subtitle: t.email }))}
                     placeholder="Choose a teacher..."
+                    searchPlaceholder="Search by name or email..."
+                    emptyMessage="No teachers found."
                   />
                 )}
               </div>
@@ -499,11 +501,13 @@ const ClassDetail: React.FC = () => {
                 {availableStudents.length === 0 ? (
                   <p className="text-sm text-gray-400 py-2">All students are already enrolled in this class.</p>
                 ) : (
-                  <Select
+                  <SearchableSelect
                     value={selectedStudentId}
-                    onChange={(e) => setSelectedStudentId(e.target.value)}
-                    options={availableStudents.map((s) => ({ value: String(s.id), label: s.name }))}
+                    onChange={(val) => setSelectedStudentId(val)}
+                    options={availableStudents.map((s) => ({ value: String(s.id), label: s.name, subtitle: s.email }))}
                     placeholder="Choose a student..."
+                    searchPlaceholder="Search by name or email..."
+                    emptyMessage="No students found."
                   />
                 )}
               </div>
@@ -523,9 +527,4 @@ const ClassDetail: React.FC = () => {
 
 const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon, message }) => (
   <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-    <div className="h-10 w-10 mb-2 opacity-50">{icon}</div>
-    <p className="text-sm">{message}</p>
-  </div>
-);
-
-export default ClassDetail;
+    <div className="h-                                                                                                                        
