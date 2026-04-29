@@ -102,7 +102,7 @@ const ClassDetail: React.FC = () => {
 
   const openAssignStudent = async () => {
     try {
-      const res = await api.get('/students');
+      const res = await api.get('/students', { params: { per_page: 200 } });
       const allStudents = res.data.data || [];
       const assignedIds = students.map((s) => s.id);
       setAvailableStudents(allStudents.filter((s: User) => !assignedIds.includes(s.id)));
