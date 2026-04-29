@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
@@ -20,6 +20,8 @@ import {
   Plus,
   Loader2,
   FileX,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 const statusBadgeVariant: Record<string, 'success' | 'destructive' | 'warning' | 'info'> = {
@@ -29,60 +31,122 @@ const statusBadgeVariant: Record<string, 'success' | 'destructive' | 'warning' |
   excused: 'info',
 };
 
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
 const AttendanceList: React.FC = () => {
   const { isTeacher, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
+
+  // Filters
   const [search, setSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [page, setPage] = useState(1);
 
-  const fetchAttendance = useCallback(async () => {
+  // Debounce ref
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchAttendance = useCallback(async (currentPage: number = 1) => {
     setLoading(true);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page: currentPage, per_page: 15 };
+      if (search.trim()) params.search = search.trim();
       if (selectedClass) params.class_id = selectedClass;
       if (selectedStatus) params.status = selectedStatus;
       if (dateFrom) params.date_from = dateFrom;
       if (dateTo) params.date_to = dateTo;
 
       const response = await api.get('/attendances', { params });
-      const data = response.data.data || response.data;
-      setAttendance(Array.isArray(data) ? data : data.data || []);
+      setAttendance(response.data.data || []);
+      if (response.data.meta) setMeta(response.data.meta);
     } catch {
       setAttendance([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedClass, selectedStatus, dateFrom, dateTo]);
+  }, [search, selectedClass, selectedStatus, dateFrom, dateTo]);
 
-  const fetchClasses = useCallback(async () => {
-    try {
-      const response = await api.get('/classes');
-      const data = response.data.data || response.data;
-      setClasses(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setClasses([]);
-    }
+  // Fetch classes for filter dropdown (once)
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        const response = await api.get('/classes', { params: { per_page: 100 } });
+        const data = response.data.data || [];
+        setClasses(Array.isArray(data) ? data : []);
+      } catch {
+        setClasses([]);
+      }
+    };
+    loadClasses();
   }, []);
 
+  // Fetch when dropdown/date filters change (reset to page 1)
   useEffect(() => {
-    fetchAttendance();
-    fetchClasses();
-  }, [fetchAttendance, fetchClasses]);
+    setPage(1);
+    fetchAttendance(1);
+  }, [selectedClass, selectedStatus, dateFrom, dateTo]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filteredAttendance = attendance.filter((record) => {
-    if (!search) return true;
-    const searchLower = search.toLowerCase();
-    return (
-      record.user?.name?.toLowerCase().includes(searchLower) ||
-      record.class_room?.name?.toLowerCase().includes(searchLower)
-    );
-  });
+  // Debounced search
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setPage(1);
+      fetchAttendance(1);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch when page changes
+  useEffect(() => {
+    fetchAttendance(page);
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= meta.last_page) {
+      setPage(newPage);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearch('');
+    setSelectedClass('');
+    setSelectedStatus('');
+    setDateFrom('');
+    setDateTo('');
+    setPage(1);
+  };
+
+  const hasActiveFilters = !!(search || selectedClass || selectedStatus || dateFrom || dateTo);
+
+  const getPageNumbers = (): (number | '...')[] => {
+    const pages: (number | '...')[] = [];
+    const { current_page, last_page } = meta;
+    if (last_page <= 7) {
+      for (let i = 1; i <= last_page; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current_page > 3) pages.push('...');
+      const start = Math.max(2, current_page - 1);
+      const end = Math.min(last_page - 1, current_page + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (current_page < last_page - 2) pages.push('...');
+      pages.push(last_page);
+    }
+    return pages;
+  };
 
   return (
     <>
@@ -96,6 +160,9 @@ const AttendanceList: React.FC = () => {
           <div className="flex items-center gap-2">
             <ClipboardCheck className="h-6 w-6 text-primary-500" />
             <h2 className="text-lg font-semibold">Attendance Records</h2>
+            {meta.total > 0 && (
+              <Badge variant="secondary" className="ml-1">{meta.total} records</Badge>
+            )}
           </div>
           {(isTeacher || isAdmin) && (
             <Button onClick={() => navigate('/attendance/record')}>
@@ -109,11 +176,11 @@ const AttendanceList: React.FC = () => {
         <Card>
           <CardContent className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Search - spans full width on mobile, 2 cols on large */}
-              <div className="relative md:col-span-2 lg:col-span-2">
+              {/* Search */}
+              <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by student name or class..."
+                  placeholder="Search by student name or email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -156,20 +223,10 @@ const AttendanceList: React.FC = () => {
                   onChange={(e) => setDateTo(e.target.value)}
                 />
               </div>
-              {/* Clear button - only show when filters active */}
-              {(selectedClass || selectedStatus || dateFrom || dateTo) && (
-                <div className="flex items-end md:col-span-2 lg:col-span-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedClass('');
-                      setSelectedStatus('');
-                      setDateFrom('');
-                      setDateTo('');
-                    }}
-                    className="w-full sm:w-auto"
-                  >
+              {/* Clear filters */}
+              {hasActiveFilters && (
+                <div className="flex items-end md:col-span-2">
+                  <Button variant="outline" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
                     <Filter className="h-4 w-4" />
                     Clear Filters
                   </Button>
@@ -185,56 +242,105 @@ const AttendanceList: React.FC = () => {
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
             </div>
-          ) : filteredAttendance.length === 0 ? (
+          ) : attendance.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">No attendance records found</p>
               <p className="text-sm mt-1">Try adjusting your filters</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Notes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredAttendance.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar name={record.user?.name || ''} size="sm" />
-                        <div>
-                          <p className="font-medium text-gray-900">{record.user?.name || 'N/A'}</p>
-                          <p className="text-xs text-gray-400">{record.user?.email}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-700">{record.class_room?.name || 'N/A'}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(record.date)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={statusBadgeVariant[record.status]} className="capitalize">
-                        {record.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-500">{record.notes || '-'}</span>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Class</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Notes</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {attendance.map((record, index) => (
+                    <TableRow key={record.id}>
+                      <TableCell className="text-gray-400">
+                        {(meta.current_page - 1) * meta.per_page + index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar name={record.user?.name || ''} size="sm" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 truncate">{record.user?.name || 'N/A'}</p>
+                            <p className="text-xs text-gray-400 truncate">{record.user?.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-700">{record.class_room?.name || 'N/A'}</span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                          <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                          {formatDate(record.date)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusBadgeVariant[record.status]} className="capitalize">
+                          {record.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-500 truncate block max-w-[200px]">{record.notes || '-'}</span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination */}
+              {meta.last_page > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100">
+                  <p className="text-sm text-gray-500">
+                    Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
+                    {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} records
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {getPageNumbers().map((p, i) =>
+                      p === '...' ? (
+                        <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+                      ) : (
+                        <Button
+                          key={p}
+                          variant={p === page ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePageChange(p)}
+                          className="min-w-[36px]"
+                        >
+                          {p}
+                        </Button>
+                      )
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page >= meta.last_page}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </Card>
       </div>

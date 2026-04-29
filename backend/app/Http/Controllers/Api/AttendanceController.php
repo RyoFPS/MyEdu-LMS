@@ -55,6 +55,14 @@ class AttendanceController extends Controller
             $query->where('status', $request->input('status'));
         }
 
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
         $attendances = $query->orderByDesc('date')
                              ->orderBy('user_id')
                              ->paginate($request->input('per_page', 15));
