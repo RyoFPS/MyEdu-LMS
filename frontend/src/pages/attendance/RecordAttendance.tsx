@@ -9,6 +9,7 @@ import { Select } from '../../components/ui/select';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Avatar } from '../../components/ui/avatar';
 import { Badge } from '../../components/ui/badge';
+import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import type { ClassRoom, User, AttendanceRecord } from '../../types';
@@ -224,40 +225,53 @@ const RecordAttendance: React.FC = () => {
                   <p className="text-sm mt-1">This class has no enrolled students</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
+                  {/* Column headers */}
+                  <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
+                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Student</span>
+                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">Status</span>
+                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Notes</span>
+                  </div>
+
                   {students.map((student, index) => (
                     <div
                       key={student.id}
-                      className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50/50 transition-colors"
+                      className={cn(
+                        'grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-3 sm:gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50/50 transition-colors',
+                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30',
+                      )}
                     >
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className="text-xs text-gray-400 w-6 text-right">{index + 1}.</span>
+                      {/* Student info */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
                         <Avatar name={student.name} size="sm" />
                         <div className="min-w-0">
                           <p className="font-medium text-gray-900 truncate">{student.name}</p>
-                          <p className="text-xs text-gray-400">{student.email}</p>
+                          <p className="text-xs text-gray-400 truncate">{student.email}</p>
                         </div>
                       </div>
 
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+                      {/* Status radio buttons - fixed width for alignment */}
+                      <div className="w-full sm:w-[320px] flex-shrink-0">
                         <RadioGroup
                           value={records[student.id]?.status || 'present'}
-                          onValueChange={(value) => updateRecord(student.id, 'status', value)}
-                          className="flex flex-wrap gap-3"
+                          onValueChange={(val) => updateRecord(student.id, 'status', val)}
+                          className="grid grid-cols-4 gap-1"
                         >
                           <RadioGroupItem value="present" label="Present" id={`present-${student.id}`} />
                           <RadioGroupItem value="absent" label="Absent" id={`absent-${student.id}`} />
                           <RadioGroupItem value="late" label="Late" id={`late-${student.id}`} />
                           <RadioGroupItem value="excused" label="Excused" id={`excused-${student.id}`} />
                         </RadioGroup>
-
-                        <Input
-                          placeholder="Notes (optional)"
-                          value={records[student.id]?.notes || ''}
-                          onChange={(e) => updateRecord(student.id, 'notes', e.target.value)}
-                          className="w-full sm:w-40 text-xs"
-                        />
                       </div>
+
+                      {/* Notes - fixed width, right aligned */}
+                      <Input
+                        placeholder="Notes..."
+                        value={records[student.id]?.notes || ''}
+                        onChange={(e) => updateRecord(student.id, 'notes', e.target.value)}
+                        className="w-full sm:w-[160px] text-xs"
+                      />
                     </div>
                   ))}
                 </div>
