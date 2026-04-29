@@ -7,8 +7,13 @@ import { Badge } from '../../components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Avatar } from '../../components/ui/avatar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Select } from '../../components/ui/select';
+import { Input } from '../../components/ui/input';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
+import { useAuth } from '../../hooks/useAuth';
+import toast from 'react-hot-toast';
 import type { ClassRoom, User, Attendance, Quiz } from '../../types';
 import {
   BookOpen,
@@ -21,17 +26,30 @@ import {
   Mail,
   Loader2,
   FileX,
+  Trash2,
+  UserPlus,
 } from 'lucide-react';
 
 const ClassDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [students, setStudents] = useState<User[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Assign dialog state
+  const [showAssignTeacher, setShowAssignTeacher] = useState(false);
+  const [showAssignStudent, setShowAssignStudent] = useState(false);
+  const [availableTeachers, setAvailableTeachers] = useState<User[]>([]);
+  const [availableStudents, setAvailableStudents] = useState<User[]>([]);
+  const [selectedTeacherId, setSelectedTeacherId] = useState('');
+  const [teacherSubject, setTeacherSubject] = useState('');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [assigning, setAssigning] = useState(false);
 
   const fetchClassDetail = useCallback(async () => {
     setLoading(true);
@@ -66,6 +84,99 @@ const ClassDetail: React.FC = () => {
   useEffect(() => {
     fetchClassDetail();
   }, [fetchClassDetail]);
+
+  // --- Assign dialog openers ---
+  const openAssignTeacher = async () => {
+    try {
+      const res = await api.get('/teachers');
+      const allTeachers = res.data.data || [];
+      const assignedIds = teachers.map((t) => t.id);
+      setAvailableTeachers(allTeachers.filter((t: User) => !assignedIds.includes(t.id)));
+    } catch {
+      /* ignore */
+    }
+    setSelectedTeacherId('');
+    setTeacherSubject('');
+    setShowAssignTeacher(true);
+  };
+
+  const openAssignStudent = async () => {
+    try {
+      const res = await api.get('/students');
+      const allStudents = res.data.data || [];
+      const assignedIds = students.map((s) => s.id);
+      setAvailableStudents(allStudents.filter((s: User) => !assignedIds.includes(s.id)));
+    } catch {
+      /* ignore */
+    }
+    setSelectedStudentId('');
+    setShowAssignStudent(true);
+  };
+
+  // --- Assign/Remove handlers ---
+  const handleAssignTeacher = async () => {
+    if (!selectedTeacherId || !classRoom) return;
+    setAssigning(true);
+    try {
+      await api.post(`/classes/${id}/assign-teacher`, {
+        teacher_id: Number(selectedTeacherId),
+        subject: teacherSubject || null,
+      });
+      toast.success('Teacher assigned successfully');
+      setShowAssignTeacher(false);
+      setSelectedTeacherId('');
+      setTeacherSubject('');
+      fetchClassDetail();
+    } catch (error: any) {
+      if (!error.response || ![403, 422, 500].includes(error.response.status)) {
+        toast.error('Failed to assign teacher');
+      }
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleAssignStudent = async () => {
+    if (!selectedStudentId || !classRoom) return;
+    setAssigning(true);
+    try {
+      await api.post(`/classes/${id}/assign-student`, {
+        student_id: Number(selectedStudentId),
+      });
+      toast.success('Student assigned successfully');
+      setShowAssignStudent(false);
+      setSelectedStudentId('');
+      fetchClassDetail();
+    } catch (error: any) {
+      if (!error.response || ![403, 422, 500].includes(error.response.status)) {
+        toast.error('Failed to assign student');
+      }
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleRemoveTeacher = async (teacherId: number) => {
+    if (!confirm('Remove this teacher from the class?')) return;
+    try {
+      await api.delete(`/classes/${id}/remove-teacher/${teacherId}`);
+      toast.success('Teacher removed');
+      fetchClassDetail();
+    } catch {
+      toast.error('Failed to remove teacher');
+    }
+  };
+
+  const handleRemoveStudent = async (studentId: number) => {
+    if (!confirm('Remove this student from the class?')) return;
+    try {
+      await api.delete(`/classes/${id}/remove-student/${studentId}`);
+      toast.success('Student removed');
+      fetchClassDetail();
+    } catch {
+      toast.error('Failed to remove student');
+    }
+  };
 
   if (loading) {
     return (
@@ -161,8 +272,14 @@ const ClassDetail: React.FC = () => {
           {/* Students Tab */}
           <TabsContent value="students">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Students ({students.length})</CardTitle>
+                {isAdmin && (
+                  <Button size="sm" onClick={openAssignStudent}>
+                    <UserPlus className="h-4 w-4" />
+                    Add Student
+                  </Button>
+                )}
               </CardHeader>
               {students.length === 0 ? (
                 <EmptyState icon={<GraduationCap />} message="No students enrolled" />
@@ -174,6 +291,7 @@ const ClassDetail: React.FC = () => {
                       <TableHead>Student</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Joined</TableHead>
+                      {isAdmin && <TableHead className="w-16">Action</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -198,6 +316,13 @@ const ClassDetail: React.FC = () => {
                             {formatDate(student.created_at)}
                           </div>
                         </TableCell>
+                        {isAdmin && (
+                          <TableCell>
+                            <Button variant="ghost" size="icon" onClick={() => handleRemoveStudent(student.id)}>
+                              <Trash2 className="h-4 w-4 text-red-400" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -209,8 +334,14 @@ const ClassDetail: React.FC = () => {
           {/* Teachers Tab */}
           <TabsContent value="teachers">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Teachers ({teachers.length})</CardTitle>
+                {isAdmin && (
+                  <Button size="sm" onClick={openAssignTeacher}>
+                    <UserPlus className="h-4 w-4" />
+                    Add Teacher
+                  </Button>
+                )}
               </CardHeader>
               {teachers.length === 0 ? (
                 <EmptyState icon={<Users />} message="No teachers assigned" />
@@ -222,13 +353,18 @@ const ClassDetail: React.FC = () => {
                       className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
                     >
                       <Avatar name={teacher.name} size="lg" />
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900">{teacher.name}</p>
                         <p className="text-sm text-gray-500">{teacher.email}</p>
                         {teacher.phone && (
                           <p className="text-xs text-gray-400 mt-0.5">{teacher.phone}</p>
                         )}
                       </div>
+                      {isAdmin && (
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveTeacher(teacher.id)}>
+                          <Trash2 className="h-4 w-4 text-red-400" />
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -312,6 +448,74 @@ const ClassDetail: React.FC = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Assign Teacher Dialog */}
+        <Dialog open={showAssignTeacher} onOpenChange={() => setShowAssignTeacher(false)}>
+          <DialogContent onClose={() => setShowAssignTeacher(false)}>
+            <DialogHeader>
+              <DialogTitle>Assign Teacher to {classRoom.name}</DialogTitle>
+            </DialogHeader>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Select Teacher</label>
+                {availableTeachers.length === 0 ? (
+                  <p className="text-sm text-gray-400 py-2">All teachers are already assigned to this class.</p>
+                ) : (
+                  <Select
+                    value={selectedTeacherId}
+                    onChange={(e) => setSelectedTeacherId(e.target.value)}
+                    options={availableTeachers.map((t) => ({ value: String(t.id), label: t.name }))}
+                    placeholder="Choose a teacher..."
+                  />
+                )}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Subject (optional)</label>
+                <Input
+                  value={teacherSubject}
+                  onChange={(e) => setTeacherSubject(e.target.value)}
+                  placeholder="e.g., Matematika"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignTeacher(false)}>Cancel</Button>
+              <Button onClick={handleAssignTeacher} isLoading={assigning} disabled={!selectedTeacherId}>
+                Assign Teacher
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Student Dialog */}
+        <Dialog open={showAssignStudent} onOpenChange={() => setShowAssignStudent(false)}>
+          <DialogContent onClose={() => setShowAssignStudent(false)}>
+            <DialogHeader>
+              <DialogTitle>Add Student to {classRoom.name}</DialogTitle>
+            </DialogHeader>
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Select Student</label>
+                {availableStudents.length === 0 ? (
+                  <p className="text-sm text-gray-400 py-2">All students are already enrolled in this class.</p>
+                ) : (
+                  <Select
+                    value={selectedStudentId}
+                    onChange={(e) => setSelectedStudentId(e.target.value)}
+                    options={availableStudents.map((s) => ({ value: String(s.id), label: s.name }))}
+                    placeholder="Choose a student..."
+                  />
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAssignStudent(false)}>Cancel</Button>
+              <Button onClick={handleAssignStudent} isLoading={assigning} disabled={!selectedStudentId}>
+                Add Student
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
