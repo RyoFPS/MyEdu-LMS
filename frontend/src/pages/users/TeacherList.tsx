@@ -1,0 +1,120 @@
+import React, { useEffect, useState } from 'react';
+import { Header } from '../../components/layout/Header';
+import { Card, CardContent } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
+import { Avatar } from '../../components/ui/avatar';
+import api from '../../lib/axios';
+import type { User } from '../../types';
+import {
+  Search,
+  Mail,
+  Phone,
+  BookOpen,
+  Loader2,
+  FileX,
+  UserCircle,
+} from 'lucide-react';
+
+const TeacherList: React.FC = () => {
+  const [teachers, setTeachers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
+
+  const fetchTeachers = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get('/users', { params: { role: 'teacher' } });
+      const data = response.data.data || response.data;
+      setTeachers(Array.isArray(data) ? data : data.data || []);
+    } catch {
+      setTeachers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredTeachers = teachers.filter((teacher) => {
+    if (!search) return true;
+    const searchLower = search.toLowerCase();
+    return (
+      teacher.name.toLowerCase().includes(searchLower) ||
+      teacher.email.toLowerCase().includes(searchLower)
+    );
+  });
+
+  return (
+    <>
+      <Header title="Teachers" description="View all teachers" />
+      <div className="page-container">
+        {/* Search */}
+        <div className="flex items-center gap-2">
+          <UserCircle className="h-6 w-6 text-primary-500" />
+          <h2 className="text-lg font-semibold">All Teachers</h2>
+          <Badge variant="secondary">{teachers.length}</Badge>
+        </div>
+
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search teachers..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        {/* Teacher Grid */}
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+          </div>
+        ) : filteredTeachers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <FileX className="h-12 w-12 mb-3 opacity-50" />
+            <p className="text-lg font-medium">No teachers found</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredTeachers.map((teacher) => (
+              <Card key={teacher.id} className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar name={teacher.name} src={teacher.avatar} size="lg" />
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate">{teacher.name}</h3>
+                      <Badge variant="info" className="mt-1">Teacher</Badge>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{teacher.email}</span>
+                    </div>
+                    {teacher.phone && (
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Phone className="h-3.5 w-3.5 shrink-0" />
+                        <span>{teacher.phone}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <BookOpen className="h-3.5 w-3.5 shrink-0" />
+                      <span>Teacher</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default TeacherList;

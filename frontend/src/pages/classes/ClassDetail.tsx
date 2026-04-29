@@ -1,0 +1,335 @@
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Header } from '../../components/layout/Header';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
+import { Avatar } from '../../components/ui/avatar';
+import api from '../../lib/axios';
+import { formatDate } from '../../lib/utils';
+import type { ClassRoom, User, Attendance, Quiz } from '../../types';
+import {
+  BookOpen,
+  ArrowLeft,
+  GraduationCap,
+  Users,
+  ClipboardCheck,
+  FileQuestion,
+  Calendar,
+  Mail,
+  Loader2,
+  FileX,
+} from 'lucide-react';
+
+const ClassDetail: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
+  const [students, setStudents] = useState<User[]>([]);
+  const [teachers, setTeachers] = useState<User[]>([]);
+  const [attendance, setAttendance] = useState<Attendance[]>([]);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchClassDetail = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [classRes, studentsRes, teachersRes, attendanceRes, quizzesRes] = await Promise.allSettled([
+        api.get(`/classes/${id}`),
+        api.get(`/classes/${id}/students`),
+        api.get(`/classes/${id}/teachers`),
+        api.get(`/classes/${id}/attendance`),
+        api.get(`/classes/${id}/quizzes`),
+      ]);
+
+      if (classRes.status === 'fulfilled') {
+        const data = classRes.value.data.data || classRes.value.data;
+        setClassRoom(data);
+      }
+      if (studentsRes.status === 'fulfilled') {
+        const data = studentsRes.value.data.data || studentsRes.value.data;
+        setStudents(Array.isArray(data) ? data : data.data || []);
+      }
+      if (teachersRes.status === 'fulfilled') {
+        const data = teachersRes.value.data.data || teachersRes.value.data;
+        setTeachers(Array.isArray(data) ? data : data.data || []);
+      }
+      if (attendanceRes.status === 'fulfilled') {
+        const data = attendanceRes.value.data.data || attendanceRes.value.data;
+        setAttendance(Array.isArray(data) ? data : data.data || []);
+      }
+      if (quizzesRes.status === 'fulfilled') {
+        const data = quizzesRes.value.data.data || quizzesRes.value.data;
+        setQuizzes(Array.isArray(data) ? data : data.data || []);
+      }
+    } catch {
+      // handled individually
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchClassDetail();
+  }, [fetchClassDetail]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+      </div>
+    );
+  }
+
+  if (!classRoom) {
+    return (
+      <>
+        <Header title="Class Not Found" />
+        <div className="page-container">
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <FileX className="h-12 w-12 mb-3 opacity-50" />
+            <p className="text-lg font-medium">Class not found</p>
+            <Button variant="outline" className="mt-4" onClick={() => navigate('/classes')}>
+              Back to Classes
+            </Button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const statusBadgeVariant: Record<string, 'success' | 'destructive' | 'warning' | 'info'> = {
+    present: 'success',
+    absent: 'destructive',
+    late: 'warning',
+    excused: 'info',
+  };
+
+  return (
+    <>
+      <Header title={classRoom.name} description={`${classRoom.grade_level} - ${classRoom.academic_year}`} />
+      <div className="page-container">
+        <Button variant="ghost" onClick={() => navigate('/classes')} className="mb-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Classes
+        </Button>
+
+        {/* Class Info Header */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
+                <BookOpen className="h-8 w-8" />
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-gray-900">{classRoom.name}</h2>
+                <p className="text-gray-500 mt-0.5">{classRoom.description || classRoom.grade_level}</p>
+              </div>
+              <div className="flex gap-3">
+                <div className="text-center px-4 py-2 bg-gray-50 rounded-lg">
+                  <p className="text-xl font-bold text-gray-900">{students.length}</p>
+                  <p className="text-xs text-gray-500">Students</p>
+                </div>
+                <div className="text-center px-4 py-2 bg-gray-50 rounded-lg">
+                  <p className="text-xl font-bold text-gray-900">{teachers.length}</p>
+                  <p className="text-xs text-gray-500">Teachers</p>
+                </div>
+                <div className="text-center px-4 py-2 bg-gray-50 rounded-lg">
+                  <p className="text-xl font-bold text-gray-900">{quizzes.length}</p>
+                  <p className="text-xs text-gray-500">Quizzes</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabs */}
+        <Tabs defaultValue="students">
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="students">
+              <GraduationCap className="h-4 w-4 mr-1.5" />
+              Students
+            </TabsTrigger>
+            <TabsTrigger value="teachers">
+              <Users className="h-4 w-4 mr-1.5" />
+              Teachers
+            </TabsTrigger>
+            <TabsTrigger value="attendance">
+              <ClipboardCheck className="h-4 w-4 mr-1.5" />
+              Attendance
+            </TabsTrigger>
+            <TabsTrigger value="quizzes">
+              <FileQuestion className="h-4 w-4 mr-1.5" />
+              Quizzes
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Students Tab */}
+          <TabsContent value="students">
+            <Card>
+              <CardHeader>
+                <CardTitle>Students ({students.length})</CardTitle>
+              </CardHeader>
+              {students.length === 0 ? (
+                <EmptyState icon={<GraduationCap />} message="No students enrolled" />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>#</TableHead>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Joined</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {students.map((student, index) => (
+                      <TableRow key={student.id}>
+                        <TableCell className="text-gray-400">{index + 1}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar name={student.name} size="sm" />
+                            <span className="font-medium text-gray-900">{student.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                            <Mail className="h-3.5 w-3.5" />
+                            {student.email}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                            <Calendar className="h-3.5 w-3.5" />
+                            {formatDate(student.created_at)}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* Teachers Tab */}
+          <TabsContent value="teachers">
+            <Card>
+              <CardHeader>
+                <CardTitle>Teachers ({teachers.length})</CardTitle>
+              </CardHeader>
+              {teachers.length === 0 ? (
+                <EmptyState icon={<Users />} message="No teachers assigned" />
+              ) : (
+                <div className="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {teachers.map((teacher) => (
+                    <div
+                      key={teacher.id}
+                      className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                    >
+                      <Avatar name={teacher.name} size="lg" />
+                      <div>
+                        <p className="font-medium text-gray-900">{teacher.name}</p>
+                        <p className="text-sm text-gray-500">{teacher.email}</p>
+                        {teacher.phone && (
+                          <p className="text-xs text-gray-400 mt-0.5">{teacher.phone}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* Attendance Tab */}
+          <TabsContent value="attendance">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Attendance</CardTitle>
+              </CardHeader>
+              {attendance.length === 0 ? (
+                <EmptyState icon={<ClipboardCheck />} message="No attendance records" />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Notes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {attendance.slice(0, 20).map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar name={record.user?.name || ''} size="sm" />
+                            <span className="font-medium text-gray-900">{record.user?.name || 'N/A'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-600">{formatDate(record.date)}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusBadgeVariant[record.status]} className="capitalize">
+                            {record.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-gray-500">{record.notes || '-'}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </Card>
+          </TabsContent>
+
+          {/* Quizzes Tab */}
+          <TabsContent value="quizzes">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quizzes ({quizzes.length})</CardTitle>
+              </CardHeader>
+              {quizzes.length === 0 ? (
+                <EmptyState icon={<FileQuestion />} message="No quizzes for this class" />
+              ) : (
+                <div className="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {quizzes.map((quiz) => (
+                    <div
+                      key={quiz.id}
+                      className="p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/quizzes/${quiz.id}/results`)}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="font-medium text-gray-900">{quiz.title}</h4>
+                        <Badge variant={quiz.is_active ? 'success' : 'secondary'}>
+                          {quiz.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-2 line-clamp-1">{quiz.description}</p>
+                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                        <span>{quiz.duration_minutes} min</span>
+                        <span>{quiz.questions_count || 0} questions</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </>
+  );
+};
+
+const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon, message }) => (
+  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+    <div className="h-10 w-10 mb-2 opacity-50">{icon}</div>
+    <p className="text-sm">{message}</p>
+  </div>
+);
+
+export default ClassDetail;

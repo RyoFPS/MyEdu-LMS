@@ -1,0 +1,191 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class UserController extends Controller
+{
+    /**
+     * GET /api/users
+     *
+     * List all users with optional role filter. Paginated.
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $query = User::query();
+
+        // Filter by role
+        if ($request->filled('role')) {
+            $query->where('role', $request->input('role'));
+        }
+
+        // Search by name or email
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->orderBy('name')->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'data' => UserResource::collection($users),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page'    => $users->lastPage(),
+                'per_page'     => $users->perPage(),
+                'total'        => $users->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * POST /api/users
+     *
+     * Create a new user (admin only).
+     */
+    public function store(StoreUserRequest $request): JsonResponse
+    {
+        $user = User::create($request->validated());
+
+        return response()->json([
+            'message' => 'User berhasil dibuat.',
+            'data'    => new UserResource($user),
+        ], 201);
+    }
+
+    /**
+     * GET /api/users/{id}
+     *
+     * Show a single user with their class relationships.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+
+        // Load relationships based on role
+        if ($user->isTeacher()) {
+            $user->load('teachingClasses');
+        } elseif ($user->isStudent()) {
+            $user->load('enrolledClasses');
+        }
+
+        return response()->json([
+            'data' => new UserResource($user),
+        ]);
+    }
+
+    /**
+     * PUT /api/users/{id}
+     *
+     * Update a user (admin only).
+     */
+    public function update(UpdateUserRequest $request, int $id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+        $user->update($request->validated());
+
+        return response()->json([
+            'message' => 'User berhasil diperbarui.',
+            'data'    => new UserResource($user->fresh()),
+        ]);
+    }
+
+    /**
+     * DELETE /api/users/{id}
+     *
+     * Delete a user (admin only).
+     */
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        if (! $request->user()->isAdmin()) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        // Prevent deleting yourself
+        if ($user->id === $request->user()->id) {
+            return response()->json([
+                'message' => 'Tidak dapat menghapus akun sendiri.',
+            ], 422);
+        }
+
+        $user->delete();
+
+        return response()->json([
+            'message' => 'User berhasil dihapus.',
+        ]);
+    }
+
+    /**
+     * GET /api/teachers
+     *
+     * List all teachers.
+     */
+    public function teachers(Request $request): JsonResponse
+    {
+        $query = User::where('role', 'teacher');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $teachers = $query->orderBy('name')->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'data' => UserResource::collection($teachers),
+            'meta' => [
+                'current_page' => $teachers->currentPage(),
+                'last_page'    => $teachers->lastPage(),
+                'per_page'     => $teachers->perPage(),
+                'total'        => $teachers->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * GET /api/students
+     *
+     * List all students, optionally filtered by class.
+     */
+    public function students(Request $request): JsonResponse
+    {
+        $query = User::where('role', 'student');
+
+        // Filter by class
+        if ($request->filled('class_id')) {
+            $classId = $request->input('class_id');
+            $query->whereHas('enrolledClasses', function ($q) use ($classId) {
+                $q->where('classes.id', $classId);
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $students = $query->orderBy('name')->paginate($request->input('per_page', 15));
+
+        return response()->json([
+            'data' => UserResource::collection($students),
+            'meta' => [
+                'current_page' => $students->currentPage(),
+                'last_page'    => $students->lastPage(),
+                'per_page'     => $students->perPage(),
+                'total'        => $students->total(),
+            ],
+        ]);
+    }
+}
