@@ -82,6 +82,7 @@ class QuizController extends Controller
                 'teacher_id'       => $request->user()->id,
                 'duration_minutes' => $request->input('duration_minutes'),
                 'is_active'        => $request->boolean('is_active', false),
+                'max_attempts'     => $request->input('max_attempts', 1),
                 'start_time'       => $request->input('start_time'),
                 'end_time'         => $request->input('end_time'),
             ]);
@@ -160,7 +161,7 @@ class QuizController extends Controller
         DB::transaction(function () use ($request, $quiz) {
             $quiz->update($request->only([
                 'title', 'description', 'class_id', 'duration_minutes',
-                'is_active', 'start_time', 'end_time',
+                'is_active', 'max_attempts', 'start_time', 'end_time',
             ]));
 
             // Update questions if provided
@@ -263,29 +264,38 @@ class QuizController extends Controller
             return response()->json(['message' => 'Anda tidak terdaftar di kelas ini.'], 403);
         }
 
-        // Check if already attempted
-        $existingAttempt = QuizAttempt::where('quiz_id', $quiz->id)
+        // Check existing attempts
+        $attemptCount = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('student_id', $user->id)
+            ->count();
+
+        $completedAttempts = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', $user->id)
+            ->whereNotNull('completed_at')
+            ->count();
+
+        // Check if there's an in-progress attempt
+        $inProgressAttempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('student_id', $user->id)
+            ->whereNull('completed_at')
             ->first();
 
-        if ($existingAttempt) {
-            // If already completed, deny
-            if ($existingAttempt->completed_at) {
-                return response()->json(['message' => 'Anda sudah menyelesaikan kuis ini.'], 422);
-            }
-
+        if ($inProgressAttempt) {
             // Return existing in-progress attempt
             return response()->json([
                 'message' => 'Melanjutkan kuis yang sedang dikerjakan.',
                 'data'    => [
-                    'attempt_id'       => $existingAttempt->id,
-                    'started_at'       => $existingAttempt->started_at?->toISOString(),
+                    'attempt_id'       => $inProgressAttempt->id,
+                    'attempt_number'   => $attemptCount,
+                    'max_attempts'     => $quiz->max_attempts,
+                    'started_at'       => $inProgressAttempt->started_at?->toISOString(),
                     'duration_minutes' => $quiz->duration_minutes,
                     'quiz'             => [
                         'id'               => $quiz->id,
                         'title'            => $quiz->title,
                         'description'      => $quiz->description,
                         'duration_minutes' => $quiz->duration_minutes,
+                        'max_attempts'     => $quiz->max_attempts,
                     ],
                     'questions'        => $quiz->questions->map(fn ($q) => [
                         'id'       => $q->id,
@@ -298,6 +308,17 @@ class QuizController extends Controller
                     ]),
                 ],
             ]);
+        }
+
+        // Check if max attempts reached (0 = unlimited)
+        if ($quiz->max_attempts > 0 && $completedAttempts >= $quiz->max_attempts) {
+            return response()->json([
+                'message' => 'Anda sudah mencapai batas maksimal percobaan untuk kuis ini.',
+                'data'    => [
+                    'completed_attempts' => $completedAttempts,
+                    'max_attempts'       => $quiz->max_attempts,
+                ],
+            ], 422);
         }
 
         // Create new attempt
@@ -314,6 +335,8 @@ class QuizController extends Controller
             'message' => 'Kuis dimulai.',
             'data'    => [
                 'attempt_id'       => $attempt->id,
+                'attempt_number'   => $completedAttempts + 1,
+                'max_attempts'     => $quiz->max_attempts,
                 'started_at'       => $attempt->started_at->toISOString(),
                 'duration_minutes' => $quiz->duration_minutes,
                 'quiz'             => [
@@ -321,6 +344,7 @@ class QuizController extends Controller
                     'title'            => $quiz->title,
                     'description'      => $quiz->description,
                     'duration_minutes' => $quiz->duration_minutes,
+                    'max_attempts'     => $quiz->max_attempts,
                 ],
                 'questions'        => $quiz->questions->map(fn ($q) => [
                     'id'       => $q->id,

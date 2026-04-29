@@ -36,6 +36,9 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  Repeat,
+  Shield,
+  Hash,
 } from 'lucide-react';
 
 interface PaginationMeta {
@@ -290,6 +293,24 @@ const QuizList: React.FC = () => {
                         <Users className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{quiz.questions_count || 0} questions</span>
                       </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        {quiz.max_attempts === 0 ? (
+                          <>
+                            <Repeat className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span>Unlimited attempts</span>
+                          </>
+                        ) : quiz.max_attempts === 1 ? (
+                          <>
+                            <Shield className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span>Single attempt</span>
+                          </>
+                        ) : (
+                          <>
+                            <Hash className="h-3.5 w-3.5 flex-shrink-0" />
+                            <span>{quiz.max_attempts} attempts</span>
+                          </>
+                        )}
+                      </div>
                       {quiz.start_time && (
                         <div className="text-xs text-gray-400">
                           Starts: {formatDateTime(quiz.start_time)}
@@ -380,7 +401,7 @@ const QuizList: React.FC = () => {
           </>
         )}
 
-        {/* Delete Confirmation Dialog */}
+                {/* Delete Confirmation Dialog */}
         <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
           <DialogContent onClose={() => setDeleteId(null)}>
             <DialogHeader>

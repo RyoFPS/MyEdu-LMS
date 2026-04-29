@@ -20,6 +20,7 @@ class QuizResource extends JsonResource
             'teacher_id'       => $this->teacher_id,
             'duration_minutes' => $this->duration_minutes,
             'is_active'        => $this->is_active,
+            'max_attempts'     => $this->max_attempts,
             'start_time'       => $this->start_time?->toISOString(),
             'end_time'         => $this->end_time?->toISOString(),
             'created_at'       => $this->created_at?->toISOString(),

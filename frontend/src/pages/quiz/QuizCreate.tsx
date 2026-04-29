@@ -64,6 +64,7 @@ const QuizCreate: React.FC = () => {
     start_time: '',
     end_time: '',
     is_active: true,
+    max_attempts: '1',
   });
 
   const [questions, setQuestions] = useState<QuestionForm[]>([{ ...emptyQuestion }]);
@@ -95,6 +96,7 @@ const QuizCreate: React.FC = () => {
         start_time: quiz.start_time ? quiz.start_time.slice(0, 16) : '',
         end_time: quiz.end_time ? quiz.end_time.slice(0, 16) : '',
         is_active: quiz.is_active,
+        max_attempts: String(quiz.max_attempts ?? 1),
       });
       if (quiz.questions && quiz.questions.length > 0) {
         setQuestions(
@@ -208,6 +210,7 @@ const QuizCreate: React.FC = () => {
         ...formData,
         class_id: Number(formData.class_id),
         duration_minutes: Number(formData.duration_minutes),
+        max_attempts: Number(formData.max_attempts),
         questions,
       };
 

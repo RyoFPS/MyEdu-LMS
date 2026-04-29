@@ -25,6 +25,7 @@ class UpdateQuizRequest extends FormRequest
             'class_id'         => ['sometimes', 'exists:classes,id'],
             'duration_minutes' => ['sometimes', 'integer', 'min:1', 'max:300'],
             'is_active'        => ['sometimes', 'boolean'],
+            'max_attempts'     => ['sometimes', 'integer', 'min:0', 'max:100'],
             'start_time'       => ['nullable', 'date'],
             'end_time'         => ['nullable', 'date', 'after:start_time'],
 

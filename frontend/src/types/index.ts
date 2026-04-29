@@ -43,6 +43,7 @@ export interface Quiz {
   teacher_id: number;
   duration_minutes: number;
   is_active: boolean;
+  max_attempts?: number;
   start_time?: string;
   end_time?: string;
   questions?: QuizQuestion[];
