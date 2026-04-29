@@ -36,33 +36,25 @@ const ClassDetail: React.FC = () => {
   const fetchClassDetail = useCallback(async () => {
     setLoading(true);
     try {
-      const [classRes, studentsRes, teachersRes, attendanceRes, quizzesRes] = await Promise.allSettled([
+      const [classRes, attendanceRes, quizzesRes] = await Promise.allSettled([
         api.get(`/classes/${id}`),
-        api.get(`/classes/${id}/students`),
-        api.get(`/classes/${id}/teachers`),
-        api.get(`/classes/${id}/attendance`),
-        api.get(`/classes/${id}/quizzes`),
+        api.get(`/attendances`, { params: { class_id: id } }),
+        api.get(`/quizzes`, { params: { class_id: id } }),
       ]);
 
       if (classRes.status === 'fulfilled') {
-        const data = classRes.value.data.data || classRes.value.data;
+        const data = classRes.value.data.data;
         setClassRoom(data);
-      }
-      if (studentsRes.status === 'fulfilled') {
-        const data = studentsRes.value.data.data || studentsRes.value.data;
-        setStudents(Array.isArray(data) ? data : data.data || []);
-      }
-      if (teachersRes.status === 'fulfilled') {
-        const data = teachersRes.value.data.data || teachersRes.value.data;
-        setTeachers(Array.isArray(data) ? data : data.data || []);
+        setStudents(data.students || []);
+        setTeachers(data.teachers || []);
       }
       if (attendanceRes.status === 'fulfilled') {
-        const data = attendanceRes.value.data.data || attendanceRes.value.data;
-        setAttendance(Array.isArray(data) ? data : data.data || []);
+        const data = attendanceRes.value.data.data;
+        setAttendance(Array.isArray(data) ? data : []);
       }
       if (quizzesRes.status === 'fulfilled') {
-        const data = quizzesRes.value.data.data || quizzesRes.value.data;
-        setQuizzes(Array.isArray(data) ? data : data.data || []);
+        const data = quizzesRes.value.data.data;
+        setQuizzes(Array.isArray(data) ? data : []);
       }
     } catch {
       // handled individually
