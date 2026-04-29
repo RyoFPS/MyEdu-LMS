@@ -15,7 +15,8 @@ class UserController extends Controller
     /**
      * GET /api/users
      *
-     * List all users with optional role filter. Paginated.
+     * List all users with optional role, search, and date filters. Paginated.
+     * Includes role counts (unaffected by filters).
      */
     public function index(Request $request): JsonResponse
     {
@@ -35,16 +36,33 @@ class UserController extends Controller
             });
         }
 
+        // Filter by joined date (created_at)
+        if ($request->filled('joined_from')) {
+            $query->whereDate('created_at', '>=', $request->input('joined_from'));
+        }
+        if ($request->filled('joined_to')) {
+            $query->whereDate('created_at', '<=', $request->input('joined_to'));
+        }
+
         $users = $query->orderBy('name')->paginate($request->input('per_page', 15));
 
+        // Role counts (unaffected by filters)
+        $counts = [
+            'total'   => User::count(),
+            'admin'   => User::where('role', 'admin')->count(),
+            'teacher' => User::where('role', 'teacher')->count(),
+            'student' => User::where('role', 'student')->count(),
+        ];
+
         return response()->json([
-            'data' => UserResource::collection($users),
-            'meta' => [
+            'data'   => UserResource::collection($users),
+            'meta'   => [
                 'current_page' => $users->currentPage(),
                 'last_page'    => $users->lastPage(),
                 'per_page'     => $users->perPage(),
                 'total'        => $users->total(),
             ],
+            'counts' => $counts,
         ]);
     }
 

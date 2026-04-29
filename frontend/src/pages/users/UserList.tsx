@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -32,6 +32,10 @@ import {
   Loader2,
   FileX,
   AlertTriangle,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  GraduationCap,
 } from 'lucide-react';
 
 const roleBadgeVariant: Record<string, 'destructive' | 'info' | 'success'> = {
@@ -40,11 +44,37 @@ const roleBadgeVariant: Record<string, 'destructive' | 'info' | 'success'> = {
   student: 'success',
 };
 
+interface PaginationMeta {
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+}
+
+interface RoleCounts {
+  total: number;
+  admin: number;
+  teacher: number;
+  student: number;
+}
+
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
+  const [counts, setCounts] = useState<RoleCounts>({ total: 0, admin: 0, teacher: 0, student: 0 });
+
+  // Filters
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [joinedFrom, setJoinedFrom] = useState('');
+  const [joinedTo, setJoinedTo] = useState('');
+  const [page, setPage] = useState(1);
+
+  // Debounce ref for search
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // CRUD state
   const [showCreate, setShowCreate] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -57,24 +87,64 @@ const UserList: React.FC = () => {
     phone: '',
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, [roleFilter]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async (currentPage: number = 1) => {
     setLoading(true);
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = { page: currentPage, per_page: 15 };
+      if (search.trim()) params.search = search.trim();
       if (roleFilter) params.role = roleFilter;
+      if (joinedFrom) params.joined_from = joinedFrom;
+      if (joinedTo) params.joined_to = joinedTo;
+
       const response = await api.get('/users', { params });
-      const data = response.data.data || response.data;
-      setUsers(Array.isArray(data) ? data : data.data || []);
+      setUsers(response.data.data || []);
+      if (response.data.meta) setMeta(response.data.meta);
+      if (response.data.counts) setCounts(response.data.counts);
     } catch {
       setUsers([]);
     } finally {
       setLoading(false);
     }
+  }, [search, roleFilter, joinedFrom, joinedTo]);
+
+  // Fetch when filters change (except search which is debounced)
+  useEffect(() => {
+    setPage(1);
+    fetchUsers(1);
+  }, [roleFilter, joinedFrom, joinedTo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Debounced search
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setPage(1);
+      fetchUsers(1);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch when page changes
+  useEffect(() => {
+    fetchUsers(page);
+  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= meta.last_page) {
+      setPage(newPage);
+    }
   };
+
+  const clearFilters = () => {
+    setSearch('');
+    setRoleFilter('');
+    setJoinedFrom('');
+    setJoinedTo('');
+    setPage(1);
+  };
+
+  const hasActiveFilters = !!(search || roleFilter || joinedFrom || joinedTo);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,19 +158,18 @@ const UserList: React.FC = () => {
           phone: formData.phone,
         };
         if (formData.password) payload.password = formData.password;
-        const response = await api.put(`/users/${editingUser.id}`, payload);
-        const updated = response.data.data || response.data;
-        setUsers((prev) => prev.map((u) => (u.id === editingUser.id ? updated : u)));
+        await api.put(`/users/${editingUser.id}`, payload);
         toast.success('User updated successfully');
       } else {
-        const response = await api.post('/users', formData);
-        const newUser = response.data.data || response.data;
-        setUsers((prev) => [...prev, newUser]);
+        await api.post('/users', formData);
         toast.success('User created successfully');
       }
       resetForm();
-    } catch {
-      toast.error(`Failed to ${editingUser ? 'update' : 'create'} user`);
+      fetchUsers(page);
+    } catch (error: any) {
+      if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
+        toast.error(`Failed to ${editingUser ? 'update' : 'create'} user`);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -111,10 +180,12 @@ const UserList: React.FC = () => {
     setSubmitting(true);
     try {
       await api.delete(`/users/${deleteId}`);
-      setUsers((prev) => prev.filter((u) => u.id !== deleteId));
       toast.success('User deleted successfully');
-    } catch {
-      toast.error('Failed to delete user');
+      fetchUsers(page);
+    } catch (error: any) {
+      if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
+        toast.error('Failed to delete user');
+      }
     } finally {
       setSubmitting(false);
       setDeleteId(null);
@@ -139,58 +210,48 @@ const UserList: React.FC = () => {
     setFormData({ name: '', email: '', password: '', role: 'student', phone: '' });
   };
 
-  const filteredUsers = users.filter((user) => {
-    if (!search) return true;
-    const searchLower = search.toLowerCase();
-    return (
-      user.name.toLowerCase().includes(searchLower) ||
-      user.email.toLowerCase().includes(searchLower)
-    );
-  });
+  // Generate page numbers for pagination
+  const getPageNumbers = (): (number | '...')[] => {
+    const pages: (number | '...')[] = [];
+    const { current_page, last_page } = meta;
+    if (last_page <= 7) {
+      for (let i = 1; i <= last_page; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (current_page > 3) pages.push('...');
+      const start = Math.max(2, current_page - 1);
+      const end = Math.min(last_page - 1, current_page + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (current_page < last_page - 2) pages.push('...');
+      pages.push(last_page);
+    }
+    return pages;
+  };
 
   return (
     <>
       <Header title="Users" description="Manage all system users" />
       <div className="page-container">
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex flex-1 gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search users..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              options={[
-                { value: 'admin', label: 'Admin' },
-                { value: 'teacher', label: 'Teacher' },
-                { value: 'student', label: 'Student' },
-              ]}
-              placeholder="All Roles"
-              className="w-40"
-            />
-          </div>
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="h-4 w-4" />
-            Add User
-          </Button>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{counts.total}</p>
+                <p className="text-xs text-gray-500">Total Users</p>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-lg bg-red-50 text-red-600">
                 <Shield className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{users.filter((u) => u.role === 'admin').length}</p>
+                <p className="text-2xl font-bold">{counts.admin}</p>
                 <p className="text-xs text-gray-500">Admins</p>
               </div>
             </CardContent>
@@ -201,7 +262,7 @@ const UserList: React.FC = () => {
                 <Users className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{users.filter((u) => u.role === 'teacher').length}</p>
+                <p className="text-2xl font-bold">{counts.teacher}</p>
                 <p className="text-xs text-gray-500">Teachers</p>
               </div>
             </CardContent>
@@ -209,15 +270,78 @@ const UserList: React.FC = () => {
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
               <div className="p-2 rounded-lg bg-green-50 text-green-600">
-                <Users className="h-5 w-5" />
+                <GraduationCap className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{users.filter((u) => u.role === 'student').length}</p>
+                <p className="text-2xl font-bold">{counts.student}</p>
                 <p className="text-xs text-gray-500">Students</p>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Filters */}
+        <Card>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search - spans 2 cols */}
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search by name or email..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              {/* Role filter */}
+              <Select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                options={[
+                  { value: 'admin', label: 'Admin' },
+                  { value: 'teacher', label: 'Teacher' },
+                  { value: 'student', label: 'Student' },
+                ]}
+                placeholder="All Roles"
+              />
+              {/* Add User button */}
+              <div className="flex items-end">
+                <Button onClick={() => setShowCreate(true)} className="w-full">
+                  <Plus className="h-4 w-4" />
+                  Add User
+                </Button>
+              </div>
+              {/* Date From */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500">Joined From</label>
+                <Input
+                  type="date"
+                  value={joinedFrom}
+                  onChange={(e) => setJoinedFrom(e.target.value)}
+                />
+              </div>
+              {/* Date To */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500">Joined To</label>
+                <Input
+                  type="date"
+                  value={joinedTo}
+                  onChange={(e) => setJoinedTo(e.target.value)}
+                />
+              </div>
+              {/* Clear filters */}
+              {hasActiveFilters && (
+                <div className="flex items-end md:col-span-2">
+                  <Button variant="outline" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
+                    <Filter className="h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Table */}
         <Card>
@@ -225,74 +349,122 @@ const UserList: React.FC = () => {
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
             </div>
-          ) : filteredUsers.length === 0 ? (
+          ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">No users found</p>
+              <p className="text-sm mt-1">Try adjusting your filters</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user, index) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="text-gray-400">{index + 1}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar name={user.name} size="sm" />
-                        <div>
-                          <p className="font-medium text-gray-900">{user.name}</p>
-                          <p className="text-xs text-gray-400 flex items-center gap-1">
-                            <Mail className="h-3 w-3" />
-                            {user.email}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={roleBadgeVariant[user.role]} className="capitalize">
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {user.phone ? (
-                        <span className="text-sm text-gray-600 flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {user.phone}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-400">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm text-gray-500 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatDate(user.created_at)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
-                          <Edit className="h-4 w-4 text-gray-400" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(user.id)}>
-                          <Trash2 className="h-4 w-4 text-red-400" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user, index) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="text-gray-400">
+                        {(meta.current_page - 1) * meta.per_page + index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar name={user.name} size="sm" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 truncate">{user.name}</p>
+                            <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
+                              <Mail className="h-3 w-3 flex-shrink-0" />
+                              {user.email}
+                            </p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={roleBadgeVariant[user.role]} className="capitalize">
+                          {user.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.phone ? (
+                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                            <Phone className="h-3 w-3 flex-shrink-0" />
+                            {user.phone}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                          <Calendar className="h-3 w-3 flex-shrink-0" />
+                          {formatDate(user.created_at)}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
+                            <Edit className="h-4 w-4 text-gray-400" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setDeleteId(user.id)}>
+                            <Trash2 className="h-4 w-4 text-red-400" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination */}
+              {meta.last_page > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100">
+                  <p className="text-sm text-gray-500">
+                    Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
+                    {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} users
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {getPageNumbers().map((p, i) =>
+                      p === '...' ? (
+                        <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+                      ) : (
+                        <Button
+                          key={p}
+                          variant={p === page ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => handlePageChange(p)}
+                          className="min-w-[36px]"
+                        >
+                          {p}
+                        </Button>
+                      )
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page >= meta.last_page}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </Card>
 
