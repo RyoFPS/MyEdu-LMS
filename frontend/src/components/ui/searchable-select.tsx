@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '../../lib/utils';
 import { Search, X, Check, ChevronDown } from 'lucide-react';
 
@@ -32,7 +33,10 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -47,10 +51,46 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     );
   });
 
-  // Close on click outside
+  // Calculate dropdown position based on trigger button
+  const updatePosition = useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const dropdownHeight = 340; // approximate max height
+    const openUpward = spaceBelow < dropdownHeight && rect.top > dropdownHeight;
+
+    setDropdownStyle({
+      position: 'fixed',
+      left: rect.left,
+      width: rect.width,
+      ...(openUpward
+        ? { bottom: window.innerHeight - rect.top + 4 }
+        : { top: rect.bottom + 4 }),
+      zIndex: 9999,
+    });
+  }, []);
+
+  // Update position when opened and on scroll/resize
+  useEffect(() => {
+    if (!isOpen) return;
+    updatePosition();
+
+    const handleScrollOrResize = () => updatePosition();
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [isOpen, updatePosition]);
+
+  // Close on click outside (check both container and portal dropdown)
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const isInsideContainer = containerRef.current?.contains(target);
+      const isInsideDropdown = dropdownRef.current?.contains(target);
+      if (!isInsideContainer && !isInsideDropdown) {
         setIsOpen(false);
         setSearchQuery('');
       }
@@ -62,7 +102,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   // Focus search input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+      // Small delay to ensure portal is rendered
+      requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [isOpen]);
 
@@ -135,7 +176,6 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     [isOpen, filteredOptions, highlightedIndex, handleSelect],
   );
 
-  // Generate initials for avatar
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -145,7 +185,6 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       .toUpperCase();
   };
 
-  // Generate a consistent color from name
   const getColor = (name: string) => {
     const colors = [
       'bg-blue-500',
@@ -164,10 +203,89 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     return colors[Math.abs(hash) % colors.length];
   };
 
+  // Dropdown content (rendered via portal)
+  const dropdownContent = isOpen ? (
+    <div
+      ref={dropdownRef}
+      style={dropdownStyle}
+      className="rounded-lg border border-gray-200 bg-white shadow-xl"
+      onKeyDown={handleKeyDown}
+    >
+      {/* Search input */}
+      <div className="p-2 border-b border-gray-100">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+          <input
+            ref={inputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={searchPlaceholder}
+            className="w-full h-8 pl-8 pr-3 text-sm rounded-md border border-gray-200 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white placeholder:text-gray-400 transition-colors"
+          />
+        </div>
+      </div>
+
+      {/* Options list */}
+      <div ref={listRef} className="max-h-[240px] overflow-y-auto p-1">
+        {filteredOptions.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-6 text-gray-400">
+            <Search className="h-5 w-5 mb-1.5 opacity-50" />
+            <p className="text-sm">{emptyMessage}</p>
+          </div>
+        ) : (
+          filteredOptions.map((option, index) => (
+            <button
+              key={option.value}
+              type="button"
+              data-option
+              onClick={() => handleSelect(option.value)}
+              className={cn(
+                'flex items-center gap-3 w-full px-2.5 py-2 rounded-md text-left text-sm transition-colors',
+                index === highlightedIndex && 'bg-primary-50',
+                option.value === value
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-gray-700 hover:bg-gray-50',
+              )}
+            >
+              <div
+                className={cn(
+                  'h-7 w-7 rounded-full flex items-center justify-center text-white text-[10px] font-medium flex-shrink-0',
+                  getColor(option.label),
+                )}
+              >
+                {getInitials(option.label)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{option.label}</p>
+                {option.subtitle && (
+                  <p className="text-xs text-gray-400 truncate">{option.subtitle}</p>
+                )}
+              </div>
+              {option.value === value && (
+                <Check className="h-4 w-4 text-primary-600 flex-shrink-0" />
+              )}
+            </button>
+          ))
+        )}
+      </div>
+
+      {/* Footer with count */}
+      {filteredOptions.length > 0 && (
+        <div className="px-3 py-1.5 border-t border-gray-100 text-xs text-gray-400">
+          {filteredOptions.length} of {options.length}{' '}
+          {options.length === 1 ? 'result' : 'results'}
+        </div>
+      )}
+    </div>
+  ) : null;
+
   return (
     <div ref={containerRef} className={cn('relative w-full', className)} onKeyDown={handleKeyDown}>
       {/* Trigger button */}
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
@@ -215,77 +333,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         </div>
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
-        <div className="absolute z-50 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg animate-fade-in">
-          {/* Search input */}
-          <div className="p-2 border-b border-gray-100">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={searchPlaceholder}
-                className="w-full h-8 pl-8 pr-3 text-sm rounded-md border border-gray-200 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white placeholder:text-gray-400 transition-colors"
-              />
-            </div>
-          </div>
-
-          {/* Options list */}
-          <div ref={listRef} className="max-h-[240px] overflow-y-auto p-1">
-            {filteredOptions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-gray-400">
-                <Search className="h-5 w-5 mb-1.5 opacity-50" />
-                <p className="text-sm">{emptyMessage}</p>
-              </div>
-            ) : (
-              filteredOptions.map((option, index) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  data-option
-                  onClick={() => handleSelect(option.value)}
-                  className={cn(
-                    'flex items-center gap-3 w-full px-2.5 py-2 rounded-md text-left text-sm transition-colors',
-                    index === highlightedIndex && 'bg-primary-50',
-                    option.value === value
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-gray-700 hover:bg-gray-50',
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'h-7 w-7 rounded-full flex items-center justify-center text-white text-[10px] font-medium flex-shrink-0',
-                      getColor(option.label),
-                    )}
-                  >
-                    {getInitials(option.label)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{option.label}</p>
-                    {option.subtitle && (
-                      <p className="text-xs text-gray-400 truncate">{option.subtitle}</p>
-                    )}
-                  </div>
-                  {option.value === value && (
-                    <Check className="h-4 w-4 text-primary-600 flex-shrink-0" />
-                  )}
-                </button>
-              ))
-            )}
-          </div>
-
-          {/* Footer with count */}
-          {filteredOptions.length > 0 && (
-            <div className="px-3 py-1.5 border-t border-gray-100 text-xs text-gray-400">
-              {filteredOptions.length} of {options.length}{' '}
-              {options.length === 1 ? 'result' : 'results'}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Render dropdown via portal to escape overflow containers */}
+      {dropdownContent && createPortal(dropdownContent, document.body)}
     </div>
   );
 };
