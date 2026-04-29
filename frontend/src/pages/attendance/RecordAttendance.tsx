@@ -65,9 +65,9 @@ const RecordAttendance: React.FC = () => {
   const fetchStudents = async (classId: string) => {
     setLoadingStudents(true);
     try {
-      const response = await api.get(`/classes/${classId}/students`);
-      const data = response.data.data || response.data;
-      const studentList = Array.isArray(data) ? data : data.data || [];
+      const response = await api.get(`/classes/${classId}`);
+      const classData = response.data.data;
+      const studentList: User[] = classData.students || [];
       setStudents(studentList);
       // Initialize records
       const initialRecords: Record<number, AttendanceRecord> = {};
