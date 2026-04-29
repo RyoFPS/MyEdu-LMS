@@ -50,7 +50,7 @@ const AttendanceList: React.FC = () => {
       if (dateFrom) params.date_from = dateFrom;
       if (dateTo) params.date_to = dateTo;
 
-      const response = await api.get('/attendance', { params });
+      const response = await api.get('/attendances', { params });
       const data = response.data.data || response.data;
       setAttendance(Array.isArray(data) ? data : data.data || []);
     } catch {

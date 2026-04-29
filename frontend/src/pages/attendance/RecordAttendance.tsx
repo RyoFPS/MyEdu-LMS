@@ -119,7 +119,7 @@ const RecordAttendance: React.FC = () => {
 
     setSubmitting(true);
     try {
-      await api.post('/attendance/bulk', {
+      await api.post('/attendances/bulk', {
         class_id: Number(selectedClass),
         date,
         records: Object.values(records),
