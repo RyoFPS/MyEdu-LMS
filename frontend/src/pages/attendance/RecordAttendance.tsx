@@ -123,12 +123,14 @@ const RecordAttendance: React.FC = () => {
       await api.post('/attendances/bulk', {
         class_id: Number(selectedClass),
         date,
-        records: Object.values(records),
+        attendances: Object.values(records),
       });
       toast.success('Attendance recorded successfully!');
       navigate('/attendance');
-    } catch {
-      toast.error('Failed to record attendance');
+    } catch (error: any) {
+      if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
+        toast.error('Failed to record attendance');
+      }
     } finally {
       setSubmitting(false);
     }
