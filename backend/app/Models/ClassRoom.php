@@ -31,35 +31,50 @@ class ClassRoom extends Model
     /*  Boot                                                               */
     /* ------------------------------------------------------------------ */
 
-    protected static function boot(): void
+    protected static function booted(): void
     {
-        parent::boot();
-
-        static::creating(function ($classRoom) {
+        static::creating(function (ClassRoom $classRoom) {
             if (empty($classRoom->slug)) {
-                $slug = Str::slug($classRoom->name);
-                $originalSlug = $slug;
-                $count = 1;
-                while (static::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $count;
-                    $count++;
-                }
-                $classRoom->slug = $slug;
+                $classRoom->slug = static::generateUniqueSlug($classRoom->name);
             }
         });
 
-        static::updating(function ($classRoom) {
+        static::updating(function (ClassRoom $classRoom) {
             if ($classRoom->isDirty('name')) {
-                $slug = Str::slug($classRoom->name);
-                $originalSlug = $slug;
-                $count = 1;
-                while (static::where('slug', $slug)->where('id', '!=', $classRoom->id)->exists()) {
-                    $slug = $originalSlug . '-' . $count;
-                    $count++;
-                }
-                $classRoom->slug = $slug;
+                $classRoom->slug = static::generateUniqueSlug($classRoom->name, $classRoom->id);
             }
         });
+    }
+
+    /**
+     * Generate a unique slug from the given name.
+     */
+    public static function generateUniqueSlug(string $name, ?int $excludeId = null): string
+    {
+        $slug = Str::slug($name);
+
+        if (empty($slug)) {
+            $slug = 'class-' . time();
+        }
+
+        $originalSlug = $slug;
+        $count = 1;
+
+        $query = static::where('slug', $slug);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        while ($query->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+            $query = static::where('slug', $slug);
+            if ($excludeId) {
+                $query->where('id', '!=', $excludeId);
+            }
+        }
+
+        return $slug;
     }
 
     /**

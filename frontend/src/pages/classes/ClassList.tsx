@@ -78,8 +78,11 @@ const ClassList: React.FC = () => {
       }
       resetForm();
       fetchClasses(); // Refresh to get fresh data with slugs
-    } catch {
-      toast.error(`Failed to ${editingClass ? 'update' : 'create'} class`);
+    } catch (error: any) {
+      // Only show generic error if axios interceptor didn't already handle it
+      if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
+        toast.error(`Failed to ${editingClass ? 'update' : 'create'} class`);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -92,8 +95,11 @@ const ClassList: React.FC = () => {
       await api.delete(`/classes/${deleteSlug}`);
       setClasses((prev) => prev.filter((c) => c.slug !== deleteSlug));
       toast.success('Class deleted successfully');
-    } catch {
-      toast.error('Failed to delete class');
+    } catch (error: any) {
+      // Only show generic error if axios interceptor didn't already handle it
+      if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
+        toast.error('Failed to delete class');
+      }
     } finally {
       setSubmitting(false);
       setDeleteSlug(null);
