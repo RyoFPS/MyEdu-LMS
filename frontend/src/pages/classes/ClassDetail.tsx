@@ -54,18 +54,20 @@ const ClassDetail: React.FC = () => {
   const fetchClassDetail = useCallback(async () => {
     setLoading(true);
     try {
-      const [classRes, attendanceRes, quizzesRes] = await Promise.allSettled([
-        api.get(`/classes/${id}`),
-        api.get(`/attendances`, { params: { class_id: id } }),
-        api.get(`/quizzes`, { params: { class_id: id } }),
+      // Step 1: Fetch class detail (accepts slug)
+      const classRes = await api.get(`/classes/${id}`);
+      const classData = classRes.data.data;
+      setClassRoom(classData);
+      setStudents(classData.students || []);
+      setTeachers(classData.teachers || []);
+
+      // Step 2: Use the numeric class ID for related data
+      const numericId = classData.id;
+      const [attendanceRes, quizzesRes] = await Promise.allSettled([
+        api.get('/attendances', { params: { class_id: numericId } }),
+        api.get('/quizzes', { params: { class_id: numericId } }),
       ]);
 
-      if (classRes.status === 'fulfilled') {
-        const data = classRes.value.data.data;
-        setClassRoom(data);
-        setStudents(data.students || []);
-        setTeachers(data.teachers || []);
-      }
       if (attendanceRes.status === 'fulfilled') {
         const data = attendanceRes.value.data.data;
         setAttendance(Array.isArray(data) ? data : []);
@@ -75,7 +77,7 @@ const ClassDetail: React.FC = () => {
         setQuizzes(Array.isArray(data) ? data : []);
       }
     } catch {
-      // handled individually
+      // Class not found
     } finally {
       setLoading(false);
     }
