@@ -45,6 +45,13 @@ class QuizController extends Controller
         if ($request->filled('is_active')) {
             $query->where('is_active', filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
 
         $quizzes = $query->orderByDesc('created_at')
                          ->paginate($request->input('per_page', 15));
