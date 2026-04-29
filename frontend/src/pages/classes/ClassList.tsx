@@ -39,7 +39,7 @@ const ClassList: React.FC = () => {
   const [search, setSearch] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassRoom | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -70,17 +70,14 @@ const ClassList: React.FC = () => {
     setSubmitting(true);
     try {
       if (editingClass) {
-        const response = await api.put(`/classes/${editingClass.id}`, formData);
-        const updated = response.data.data || response.data;
-        setClasses((prev) => prev.map((c) => (c.id === editingClass.id ? updated : c)));
+        await api.put(`/classes/${editingClass.slug}`, formData);
         toast.success('Class updated successfully');
       } else {
-        const response = await api.post('/classes', formData);
-        const newClass = response.data.data || response.data;
-        setClasses((prev) => [...prev, newClass]);
+        await api.post('/classes', formData);
         toast.success('Class created successfully');
       }
       resetForm();
+      fetchClasses(); // Refresh to get fresh data with slugs
     } catch {
       toast.error(`Failed to ${editingClass ? 'update' : 'create'} class`);
     } finally {
@@ -89,17 +86,17 @@ const ClassList: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteId) return;
+    if (!deleteSlug) return;
     setSubmitting(true);
     try {
-      await api.delete(`/classes/${deleteId}`);
-      setClasses((prev) => prev.filter((c) => c.id !== deleteId));
+      await api.delete(`/classes/${deleteSlug}`);
+      setClasses((prev) => prev.filter((c) => c.slug !== deleteSlug));
       toast.success('Class deleted successfully');
     } catch {
       toast.error('Failed to delete class');
     } finally {
       setSubmitting(false);
-      setDeleteId(null);
+      setDeleteSlug(null);
     }
   };
 
@@ -207,7 +204,7 @@ const ClassList: React.FC = () => {
                         <Button variant="ghost" size="icon" onClick={() => openEdit(cls)}>
                           <Edit className="h-3.5 w-3.5 text-gray-400" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(cls.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteSlug(cls.slug)}>
                           <Trash2 className="h-3.5 w-3.5 text-red-400" />
                         </Button>
                       </div>
@@ -276,8 +273,8 @@ const ClassList: React.FC = () => {
         </Dialog>
 
         {/* Delete Confirmation */}
-        <Dialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
-          <DialogContent onClose={() => setDeleteId(null)}>
+        <Dialog open={deleteSlug !== null} onOpenChange={() => setDeleteSlug(null)}>
+          <DialogContent onClose={() => setDeleteSlug(null)}>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -290,7 +287,7 @@ const ClassList: React.FC = () => {
               </p>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteId(null)}>
+              <Button variant="outline" onClick={() => setDeleteSlug(null)}>
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleDelete} isLoading={submitting}>

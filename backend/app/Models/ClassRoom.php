@@ -37,13 +37,27 @@ class ClassRoom extends Model
 
         static::creating(function ($classRoom) {
             if (empty($classRoom->slug)) {
-                $classRoom->slug = Str::slug($classRoom->name);
+                $slug = Str::slug($classRoom->name);
+                $originalSlug = $slug;
+                $count = 1;
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+                $classRoom->slug = $slug;
             }
         });
 
         static::updating(function ($classRoom) {
             if ($classRoom->isDirty('name')) {
-                $classRoom->slug = Str::slug($classRoom->name);
+                $slug = Str::slug($classRoom->name);
+                $originalSlug = $slug;
+                $count = 1;
+                while (static::where('slug', $slug)->where('id', '!=', $classRoom->id)->exists()) {
+                    $slug = $originalSlug . '-' . $count;
+                    $count++;
+                }
+                $classRoom->slug = $slug;
             }
         });
     }
