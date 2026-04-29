@@ -107,24 +107,26 @@ const AttendanceList: React.FC = () => {
 
         {/* Filters */}
         <Card>
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-3">
-              <div className="relative flex-1">
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search - spans full width on mobile, 2 cols on large */}
+              <div className="relative md:col-span-2 lg:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by student or class..."
+                  placeholder="Search by student name or class..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
                 />
               </div>
+              {/* Class filter */}
               <Select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
                 placeholder="All Classes"
-                className="w-full md:w-48"
               />
+              {/* Status filter */}
               <Select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
@@ -135,38 +137,43 @@ const AttendanceList: React.FC = () => {
                   { value: 'excused', label: 'Excused' },
                 ]}
                 placeholder="All Status"
-                className="w-full md:w-40"
               />
-              <div className="flex gap-2">
+              {/* Date From */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500">From Date</label>
                 <Input
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full md:w-40"
-                  placeholder="From"
                 />
+              </div>
+              {/* Date To */}
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-gray-500">To Date</label>
                 <Input
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
-                  className="w-full md:w-40"
-                  placeholder="To"
                 />
               </div>
+              {/* Clear button - only show when filters active */}
               {(selectedClass || selectedStatus || dateFrom || dateTo) && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedClass('');
-                    setSelectedStatus('');
-                    setDateFrom('');
-                    setDateTo('');
-                  }}
-                >
-                  <Filter className="h-4 w-4" />
-                  Clear
-                </Button>
+                <div className="flex items-end md:col-span-2 lg:col-span-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedClass('');
+                      setSelectedStatus('');
+                      setDateFrom('');
+                      setDateTo('');
+                    }}
+                    className="w-full sm:w-auto"
+                  >
+                    <Filter className="h-4 w-4" />
+                    Clear Filters
+                  </Button>
+                </div>
               )}
             </div>
           </CardContent>
