@@ -39,6 +39,8 @@ api.interceptors.response.use(
         }
       } else if (status === 403) {
         toast.error('You do not have permission to perform this action.');
+      } else if (status === 419) {
+        toast.error('Session expired. Please refresh the page.');
       } else if (status === 422) {
         const messages = data.errors
           ? Object.values(data.errors).flat().join('\n')

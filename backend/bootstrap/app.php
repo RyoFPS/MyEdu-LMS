@@ -15,9 +15,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);
-
-        // Configure Sanctum stateful middleware for SPA
-        $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Render all exceptions as JSON for API
