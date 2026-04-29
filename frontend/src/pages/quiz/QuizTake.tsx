@@ -48,11 +48,11 @@ const QuizTake: React.FC = () => {
       try {
         // Start attempt
         const response = await api.post(`/quizzes/${id}/start`);
-        const data = response.data.data || response.data;
+        const data = response.data.data;
         setQuiz(data.quiz);
-        setQuestions(data.quiz?.questions || data.questions || []);
-        setAttemptId(data.attempt_id || data.id);
-        setTimeLeft((data.quiz?.duration_minutes || data.duration_minutes || 30) * 60);
+        setQuestions(data.questions || []);
+        setAttemptId(data.attempt_id);
+        setTimeLeft((data.duration_minutes || 30) * 60);
 
         // Start timer
         timerRef.current = setInterval(() => {

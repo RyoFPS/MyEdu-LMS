@@ -281,6 +281,12 @@ class QuizController extends Controller
                     'attempt_id'       => $existingAttempt->id,
                     'started_at'       => $existingAttempt->started_at?->toISOString(),
                     'duration_minutes' => $quiz->duration_minutes,
+                    'quiz'             => [
+                        'id'               => $quiz->id,
+                        'title'            => $quiz->title,
+                        'description'      => $quiz->description,
+                        'duration_minutes' => $quiz->duration_minutes,
+                    ],
                     'questions'        => $quiz->questions->map(fn ($q) => [
                         'id'       => $q->id,
                         'question' => $q->question,
@@ -310,6 +316,12 @@ class QuizController extends Controller
                 'attempt_id'       => $attempt->id,
                 'started_at'       => $attempt->started_at->toISOString(),
                 'duration_minutes' => $quiz->duration_minutes,
+                'quiz'             => [
+                    'id'               => $quiz->id,
+                    'title'            => $quiz->title,
+                    'description'      => $quiz->description,
+                    'duration_minutes' => $quiz->duration_minutes,
+                ],
                 'questions'        => $quiz->questions->map(fn ($q) => [
                     'id'       => $q->id,
                     'question' => $q->question,
