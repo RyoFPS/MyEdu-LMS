@@ -9,6 +9,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Select } from '../../components/ui/select';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Badge } from '../../components/ui/badge';
+import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import type { ClassRoom, QuizQuestion } from '../../types';
@@ -21,6 +22,8 @@ import {
   Loader2,
   ArrowLeft,
   CheckCircle2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 
 interface QuestionForm {
@@ -64,6 +67,10 @@ const QuizCreate: React.FC = () => {
   });
 
   const [questions, setQuestions] = useState<QuestionForm[]>([{ ...emptyQuestion }]);
+
+  // Drag-and-drop state
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const fetchClasses = useCallback(async () => {
     try {
@@ -133,6 +140,49 @@ const QuizCreate: React.FC = () => {
     setQuestions((prev) =>
       prev.map((q, i) => (i === index ? { ...q, [field]: value } : q))
     );
+  };
+
+  // Drag-and-drop handlers
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (index: number) => {
+    if (dragIndex === null || dragIndex === index) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    const reordered = [...questions];
+    const [moved] = reordered.splice(dragIndex, 1);
+    reordered.splice(index, 0, moved);
+    setQuestions(reordered);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  // Move up/down as alternative to drag
+  const moveQuestion = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === questions.length - 1) return;
+    const reordered = [...questions];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    setQuestions(reordered);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -280,23 +330,77 @@ const QuizCreate: React.FC = () => {
           </div>
 
           {questions.map((question, index) => (
-            <Card key={index} className="relative">
+            <Card
+              key={index}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={() => handleDrop(index)}
+              onDragEnd={handleDragEnd}
+              className={cn(
+                'relative transition-all duration-200',
+                dragIndex === index && 'opacity-50 scale-[0.98] shadow-lg',
+                dragOverIndex === index && dragIndex !== index && 'ring-2 ring-primary-500 ring-offset-2',
+              )}
+            >
+              {/* Drop indicator line */}
+              {dragOverIndex === index && dragIndex !== null && dragIndex !== index && (
+                <div className="absolute -top-1 left-4 right-4 h-0.5 bg-primary-500 rounded-full" />
+              )}
+
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <GripVertical className="h-4 w-4 text-gray-300" />
+                    <div
+                      className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 transition-colors"
+                      title="Drag to reorder"
+                    >
+                      <GripVertical className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold">
+                      {index + 1}
+                    </span>
                     Question {index + 1}
                     <Badge variant="secondary">{question.points} pts</Badge>
                   </CardTitle>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeQuestion(index)}
-                    className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    {/* Move up button */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveQuestion(index, 'up')}
+                      disabled={index === 0}
+                      className="h-8 w-8 text-gray-400 hover:text-gray-600"
+                      title="Move up"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                    {/* Move down button */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveQuestion(index, 'down')}
+                      disabled={index === questions.length - 1}
+                      className="h-8 w-8 text-gray-400 hover:text-gray-600"
+                      title="Move down"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                    {/* Delete button */}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeQuestion(index)}
+                      className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+                      title="Delete question"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
