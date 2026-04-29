@@ -527,4 +527,9 @@ const ClassDetail: React.FC = () => {
 
 const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon, message }) => (
   <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-    <div className="h-                                                                                                                        
+    <div className="h-10 w-10 mb-2 opacity-50">{icon}</div>
+    <p className="text-sm">{message}</p>
+  </div>
+);
+
+export default ClassDetail;
