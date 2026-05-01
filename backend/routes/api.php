@@ -83,6 +83,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/subjects/{id}', [\App\Http\Controllers\Api\SubjectController::class, 'update'])->middleware('role:admin');
     Route::delete('/subjects/{id}', [\App\Http\Controllers\Api\SubjectController::class, 'destroy'])->middleware('role:admin');
 
+    // ── Library (Core Curriculum) ────────────────────────────────────────
+    Route::get('/library', [\App\Http\Controllers\Api\LibraryController::class, 'index']);
+    Route::get('/library/grade-levels', [\App\Http\Controllers\Api\LibraryController::class, 'gradeLevels']);
+    Route::post('/library', [\App\Http\Controllers\Api\LibraryController::class, 'store'])->middleware('role:admin');
+    Route::post('/library/{id}/update', [\App\Http\Controllers\Api\LibraryController::class, 'update'])->middleware('role:admin');
+    Route::delete('/library/{id}', [\App\Http\Controllers\Api\LibraryController::class, 'destroy'])->middleware('role:admin');
+
     // ── Subject Matters (Materi Pelajaran) ───────────────────────────────
     Route::get('/classes/{classId}/subject-matters', [\App\Http\Controllers\Api\SubjectMatterController::class, 'index']);
     Route::post('/classes/{classId}/subject-matters', [\App\Http\Controllers\Api\SubjectMatterController::class, 'store'])->middleware('role:admin|teacher');

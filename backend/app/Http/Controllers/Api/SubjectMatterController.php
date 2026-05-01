@@ -41,12 +41,10 @@ class SubjectMatterController extends Controller
         }
 
         $query = SubjectMatter::with(['subject', 'uploader:id,name,role'])
-            ->where('class_id', $class->id);
+            ->where('class_id', $class->id)
+            ->where('type', 'optional');
 
         // Filters
-        if ($request->filled('type')) {
-            $query->where('type', $request->input('type'));
-        }
         if ($request->filled('subject_id')) {
             $query->where('subject_id', $request->input('subject_id'));
         }
@@ -107,7 +105,7 @@ class SubjectMatterController extends Controller
             'file_name'   => pathinfo($file->getClientOriginalName(), PATHINFO_BASENAME),
             'file_size'   => $file->getSize(),
             'file_type'   => $file->getMimeType(),
-            'type'        => $request->input('type', 'optional'),
+            'type'        => 'optional',
             'class_id'    => $class->id,
             'subject_id'  => $request->input('subject_id'),
             'uploaded_by'  => $user->id,

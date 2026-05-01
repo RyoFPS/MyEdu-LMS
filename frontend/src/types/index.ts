@@ -153,6 +153,7 @@ export interface SubjectMatter {
   file_size_formatted: string;
   file_type: string;
   type: 'main' | 'optional';
+  grade_level?: string;
   class_id: number;
   subject_id?: number;
   uploaded_by: number;

@@ -18,6 +18,7 @@ class SubjectMatter extends Model
         'file_size',
         'file_type',
         'type',
+        'grade_level',
         'class_id',
         'subject_id',
         'uploaded_by',
@@ -61,6 +62,11 @@ class SubjectMatter extends Model
     public function isOptional(): bool
     {
         return $this->type === 'optional';
+    }
+
+    public function isLibrary(): bool
+    {
+        return $this->type === 'main' && $this->class_id === null;
     }
 
     /**

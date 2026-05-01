@@ -21,6 +21,7 @@ import UserList from './pages/users/UserList';
 import TeacherList from './pages/users/TeacherList';
 import StudentList from './pages/users/StudentList';
 import SubjectList from './pages/subjects/SubjectList';
+import Library from './pages/library/Library';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -110,6 +111,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Library */}
+        <Route path="/library" element={<Library />} />
       </Route>
 
       {/* Redirect */}

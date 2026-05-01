@@ -10,16 +10,7 @@ class StoreSubjectMatterRequest extends FormRequest
     {
         $user = $this->user();
         if (!$user) return false;
-
-        // Admin can upload both main and optional
-        if ($user->isAdmin()) return true;
-
-        // Teacher can only upload optional type
-        if ($user->isTeacher()) {
-            return $this->input('type', 'optional') === 'optional';
-        }
-
-        return false;
+        return $user->isAdmin() || $user->isTeacher();
     }
 
     public function rules(): array
@@ -28,7 +19,6 @@ class StoreSubjectMatterRequest extends FormRequest
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'file'        => ['required', 'file', 'max:10240', 'mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,mp4,avi,webp,svg'],
-            'type'        => ['required', 'in:main,optional'],
             'subject_id'  => ['nullable', 'exists:subjects,id'],
         ];
     }
@@ -39,8 +29,6 @@ class StoreSubjectMatterRequest extends FormRequest
             'file.max'   => 'Ukuran file maksimal 10 MB.',
             'file.mimes' => 'Format file tidak didukung. Format yang diizinkan: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG, MP4, AVI.',
             'title.required' => 'Judul materi wajib diisi.',
-            'type.required'  => 'Tipe materi wajib dipilih.',
-            'type.in'        => 'Tipe materi harus main atau optional.',
         ];
     }
 }

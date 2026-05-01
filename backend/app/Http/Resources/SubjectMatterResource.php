@@ -18,6 +18,7 @@ class SubjectMatterResource extends JsonResource
             'file_size_formatted' => $this->formattedFileSize(),
             'file_type'      => $this->file_type,
             'type'           => $this->type,
+            'grade_level'    => $this->grade_level,
             'class_id'       => $this->class_id,
             'subject_id'     => $this->subject_id,
             'uploaded_by'    => $this->uploaded_by,

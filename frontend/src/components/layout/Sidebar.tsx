@@ -10,6 +10,7 @@ import {
   ClipboardCheck,
   FileQuestion,
   BookOpen,
+  BookMarked,
   UserCircle,
   Tag,
   LogOut,
@@ -50,6 +51,12 @@ const navItems: NavItem[] = [
     path: '/subjects',
     icon: <Tag className="h-5 w-5" />,
     roles: ['admin'],
+  },
+  {
+    label: 'Library',
+    path: '/library',
+    icon: <BookMarked className="h-5 w-5" />,
+    roles: ['admin', 'teacher', 'student'],
   },
   {
     label: 'Attendance',

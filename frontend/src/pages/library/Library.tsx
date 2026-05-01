@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { Header } from '../../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
@@ -27,11 +28,11 @@ import {
   Plus,
   X,
   Eye,
+  GraduationCap,
+  Tag,
 } from 'lucide-react';
 
-interface SubjectMatterTabProps {
-  classId: number;
-}
+// ─── Helpers ────────────────────────────────────────────────────────────────────
 
 const getFileIcon = (fileType: string) => {
   if (fileType.includes('pdf') || fileType.includes('word') || fileType.includes('document')) {
@@ -53,66 +54,97 @@ const getFileIcon = (fileType: string) => {
 };
 
 const getFileExtension = (fileName: string): string => {
-  const ext = fileName.split('.').pop()?.toUpperCase() || '';
-  return ext;
+  return fileName.split('.').pop()?.toUpperCase() || '';
 };
 
-const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
-  const { isAdmin, isTeacher, user } = useAuth();
-  const canUpload = isAdmin || isTeacher;
+const isPreviewable = (fileType: string): boolean => {
+  return (
+    fileType.includes('pdf') ||
+    fileType.includes('image') ||
+    fileType.includes('video')
+  );
+};
 
+// ─── Component ──────────────────────────────────────────────────────────────────
+
+const Library: React.FC = () => {
+  const { isAdmin, user } = useAuth();
+
+  // Data
   const [materials, setMaterials] = useState<SubjectMatter[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [gradeLevels, setGradeLevels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [filterGradeLevel, setFilterGradeLevel] = useState('');
+  const [filterSubjectId, setFilterSubjectId] = useState('');
 
-  // Upload dialog state
+  // Upload dialog
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     title: '',
     description: '',
+    grade_level: '',
     subject_id: '',
     file: null as File | null,
   });
 
-  // Edit dialog state
+  // Edit dialog
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<SubjectMatter | null>(null);
   const [editForm, setEditForm] = useState({
     title: '',
     description: '',
+    grade_level: '',
     subject_id: '',
     file: null as File | null,
   });
   const [saving, setSaving] = useState(false);
 
-  // Preview dialog state
+  // Preview dialog
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [previewMaterial, setPreviewMaterial] = useState<SubjectMatter | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [previewLoading, setPreviewLoading] = useState(false);
+
+  // ─── Debounced search ───────────────────────────────────────────────────────
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // ─── Fetch data ─────────────────────────────────────────────────────────────
+
   const fetchMaterials = useCallback(async () => {
     setLoading(true);
     try {
       const params: Record<string, string> = {};
       if (debouncedSearch) params.search = debouncedSearch;
+      if (filterGradeLevel) params.grade_level = filterGradeLevel;
+      if (filterSubjectId) params.subject_id = filterSubjectId;
 
-      const res = await api.get(`/classes/${classId}/subject-matters`, { params });
+      const res = await api.get('/library', { params });
       setMaterials(res.data.data || []);
     } catch {
       // handled by interceptor
     } finally {
       setLoading(false);
     }
-  }, [classId, debouncedSearch]);
+  }, [debouncedSearch, filterGradeLevel, filterSubjectId]);
+
+  const fetchGradeLevels = useCallback(async () => {
+    try {
+      const res = await api.get('/library/grade-levels');
+      setGradeLevels(res.data.data || []);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const fetchSubjects = useCallback(async () => {
     try {
@@ -128,22 +160,30 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   }, [fetchMaterials]);
 
   useEffect(() => {
+    fetchGradeLevels();
     fetchSubjects();
-  }, [fetchSubjects]);
+  }, [fetchGradeLevels, fetchSubjects]);
 
-  // Check if file type is previewable in browser
-  const isPreviewable = (fileType: string): boolean => {
-    return (
-      fileType.includes('pdf') ||
-      fileType.includes('image') ||
-      fileType.includes('video')
-    );
+  // ─── Upload ─────────────────────────────────────────────────────────────────
+
+  const resetUploadForm = () => {
+    setUploadForm({
+      title: '',
+      description: '',
+      grade_level: '',
+      subject_id: '',
+      file: null,
+    });
   };
 
-  // Upload handler
+  const openUploadDialog = () => {
+    resetUploadForm();
+    setShowUploadDialog(true);
+  };
+
   const handleUpload = async () => {
-    if (!uploadForm.title || !uploadForm.file) {
-      toast.error('Title and file are required.');
+    if (!uploadForm.title || !uploadForm.file || !uploadForm.grade_level || !uploadForm.subject_id) {
+      toast.error('Title, grade level, subject, and file are required.');
       return;
     }
 
@@ -152,13 +192,11 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       const formData = new FormData();
       formData.append('title', uploadForm.title);
       formData.append('description', uploadForm.description);
-      formData.append('type', 'optional');
+      formData.append('grade_level', uploadForm.grade_level);
+      formData.append('subject_id', uploadForm.subject_id);
       formData.append('file', uploadForm.file);
-      if (uploadForm.subject_id) {
-        formData.append('subject_id', uploadForm.subject_id);
-      }
 
-      await api.post(`/classes/${classId}/subject-matters`, formData, {
+      await api.post('/library', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -166,6 +204,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       setShowUploadDialog(false);
       resetUploadForm();
       fetchMaterials();
+      fetchGradeLevels(); // refresh grade levels in case a new one was added
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
         toast.error('Failed to upload material.');
@@ -175,21 +214,14 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     }
   };
 
-  const resetUploadForm = () => {
-    setUploadForm({
-      title: '',
-      description: '',
-      subject_id: '',
-      file: null,
-    });
-  };
+  // ─── Edit ───────────────────────────────────────────────────────────────────
 
-  // Edit handler
   const openEditDialog = (material: SubjectMatter) => {
     setEditingMaterial(material);
     setEditForm({
       title: material.title,
       description: material.description || '',
+      grade_level: material.grade_level || '',
       subject_id: material.subject_id ? String(material.subject_id) : '',
       file: null,
     });
@@ -197,8 +229,8 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   };
 
   const handleEdit = async () => {
-    if (!editingMaterial || !editForm.title) {
-      toast.error('Title is required.');
+    if (!editingMaterial || !editForm.title || !editForm.grade_level || !editForm.subject_id) {
+      toast.error('Title, grade level, and subject are required.');
       return;
     }
 
@@ -207,14 +239,13 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       const formData = new FormData();
       formData.append('title', editForm.title);
       formData.append('description', editForm.description);
-      if (editForm.subject_id) {
-        formData.append('subject_id', editForm.subject_id);
-      }
+      formData.append('grade_level', editForm.grade_level);
+      formData.append('subject_id', editForm.subject_id);
       if (editForm.file) {
         formData.append('file', editForm.file);
       }
 
-      await api.post(`/subject-matters/${editingMaterial.id}/update`, formData, {
+      await api.post(`/library/${editingMaterial.id}/update`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
@@ -222,6 +253,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       setShowEditDialog(false);
       setEditingMaterial(null);
       fetchMaterials();
+      fetchGradeLevels();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
         toast.error('Failed to update material.');
@@ -231,12 +263,13 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     }
   };
 
-  // Delete handler
+  // ─── Delete ─────────────────────────────────────────────────────────────────
+
   const handleDelete = async (material: SubjectMatter) => {
     if (!confirm(`Delete "${material.title}"? This action cannot be undone.`)) return;
 
     try {
-      await api.delete(`/subject-matters/${material.id}`);
+      await api.delete(`/library/${material.id}`);
       toast.success('Material deleted successfully.');
       fetchMaterials();
     } catch {
@@ -244,7 +277,8 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     }
   };
 
-  // Download handler
+  // ─── Download ───────────────────────────────────────────────────────────────
+
   const handleDownload = async (material: SubjectMatter) => {
     try {
       const response = await api.get(`/subject-matters/${material.id}/download`, {
@@ -264,7 +298,8 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     }
   };
 
-  // Preview handler
+  // ─── Preview ────────────────────────────────────────────────────────────────
+
   const handlePreview = async (material: SubjectMatter) => {
     setPreviewMaterial(material);
     setShowPreviewDialog(true);
@@ -294,157 +329,199 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     }
   };
 
-  // Check if user can edit/delete a material
+  // ─── Permissions ────────────────────────────────────────────────────────────
+
   const canModify = (material: SubjectMatter): boolean => {
     if (isAdmin) return true;
-    if (isTeacher && material.uploaded_by === user?.id) return true;
     return false;
   };
 
-  const openUploadDialog = () => {
-    resetUploadForm();
-    setShowUploadDialog(true);
-  };
+  // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            Class Materials ({materials.length})
-          </CardTitle>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search materials..."
-                className="pl-9 w-full sm:w-48"
-              />
-            </div>
-            {/* Upload Button */}
-            {canUpload && (
-              <Button size="sm" onClick={openUploadDialog}>
-                <Plus className="h-4 w-4" />
-                Upload
-              </Button>
-            )}
-          </div>
-        </CardHeader>
+      <Header title="Library" description="Core curriculum materials" />
 
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-            </div>
-          ) : materials.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-              <BookOpen className="h-10 w-10 mb-2 opacity-50" />
-              <p className="text-sm">No class materials yet</p>
-              {canUpload && (
-                <Button variant="outline" size="sm" className="mt-3" onClick={openUploadDialog}>
-                  <Upload className="h-4 w-4" />
-                  Upload First Material
-                </Button>
+      <div className="page-container">
+        {/* Filters Bar */}
+        <Card>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Search - spans 2 cols on md+ */}
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search materials..."
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Grade Level Filter */}
+              <Select
+                value={filterGradeLevel}
+                onChange={(e) => setFilterGradeLevel(e.target.value)}
+                options={[
+                  { value: '', label: 'All Grade Levels' },
+                  ...gradeLevels.map((gl) => ({ value: gl, label: `Grade ${gl}` })),
+                ]}
+              />
+
+              {/* Subject Filter */}
+              <Select
+                value={filterSubjectId}
+                onChange={(e) => setFilterSubjectId(e.target.value)}
+                options={[
+                  { value: '', label: 'All Subjects' },
+                  ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
+                ]}
+              />
+
+              {/* Upload Button (admin only) */}
+              {isAdmin && (
+                <div className="flex items-end md:col-span-2 lg:col-span-4">
+                  <Button onClick={openUploadDialog} className="w-full sm:w-auto">
+                    <Plus className="h-4 w-4" />
+                    Upload Material
+                  </Button>
+                </div>
               )}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {materials.map((material) => (
-                <div
-                  key={material.id}
-                  className="flex items-start gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  {/* File Icon */}
-                  <div className="shrink-0 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
-                    {getFileIcon(material.file_type)}
-                  </div>
+          </CardContent>
+        </Card>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {material.title}
-                        </h4>
-                        {material.description && (
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
-                            {material.description}
-                          </p>
+        {/* Materials Grid */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BookOpen className="h-5 w-5" />
+              Materials ({materials.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+              </div>
+            ) : materials.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                <BookOpen className="h-12 w-12 mb-3 opacity-50" />
+                <p className="text-base font-medium mb-1">No materials found</p>
+                <p className="text-sm">
+                  {debouncedSearch || filterGradeLevel || filterSubjectId
+                    ? 'Try adjusting your filters or search query.'
+                    : 'No curriculum materials have been uploaded yet.'}
+                </p>
+                {isAdmin && !debouncedSearch && !filterGradeLevel && !filterSubjectId && (
+                  <Button variant="outline" size="sm" className="mt-4" onClick={openUploadDialog}>
+                    <Upload className="h-4 w-4" />
+                    Upload First Material
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {materials.map((material) => (
+                  <div
+                    key={material.id}
+                    className="flex items-start gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
+                    {/* File Icon */}
+                    <div className="shrink-0 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      {getFileIcon(material.file_type)}
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                            {material.title}
+                          </h4>
+                          {material.description && (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
+                              {material.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Badges & Meta */}
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-400">
+                        <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                          {getFileExtension(material.file_name)}
+                        </span>
+                        <span>{material.file_size_formatted}</span>
+                        {material.grade_level && (
+                          <Badge variant="default" className="text-xs py-0">
+                            <GraduationCap className="h-3 w-3 mr-1" />
+                            Grade {material.grade_level}
+                          </Badge>
+                        )}
+                        {material.subject && (
+                          <Badge variant="outline" className="text-xs py-0">
+                            <Tag className="h-3 w-3 mr-1" />
+                            {material.subject.name}
+                          </Badge>
+                        )}
+                        <span>by {material.uploader?.name || 'Unknown'}</span>
+                        {material.created_at && <span>{formatDate(material.created_at)}</span>}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 mt-3">
+                        {isPreviewable(material.file_type) && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            onClick={() => handlePreview(material)}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            View
+                          </Button>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(material)}
+                        >
+                          <Download className="h-3.5 w-3.5" />
+                          Download
+                        </Button>
+                        {canModify(material) && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(material)}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(material)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
-
-                    {/* Meta info */}
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-400">
-                      <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
-                        {getFileExtension(material.file_name)}
-                      </span>
-                      <span>{material.file_size_formatted}</span>
-                      {material.subject && (
-                        <Badge variant="outline" className="text-xs py-0">
-                          {material.subject.name}
-                        </Badge>
-                      )}
-                      <span>by {material.uploader?.name || 'Unknown'}</span>
-                      {material.created_at && <span>{formatDate(material.created_at)}</span>}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-1 mt-3">
-                      {isPreviewable(material.file_type) && (
-                        <Button
-                          variant="default"
-                          size="sm"
-                          onClick={() => handlePreview(material)}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          View
-                        </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownload(material)}
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                        Download
-                      </Button>
-                      {canModify(material) && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditDialog(material)}
-                          >
-                            <Pencil className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(material)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Upload Dialog */}
+      {/* ─── Upload Dialog ─────────────────────────────────────────────────────── */}
       <Dialog open={showUploadDialog} onOpenChange={() => setShowUploadDialog(false)}>
         <DialogContent className="max-w-md" onClose={() => setShowUploadDialog(false)}>
           <DialogHeader>
-            <DialogTitle>Upload Class Material</DialogTitle>
+            <DialogTitle>Upload Library Material</DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             {/* Title */}
@@ -455,7 +532,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
               <Input
                 value={uploadForm.title}
                 onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
-                placeholder="e.g., Chapter 1 - Introduction"
+                placeholder="e.g., Chapter 1 - Introduction to Algebra"
               />
             </div>
 
@@ -472,16 +549,36 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
               />
             </div>
 
+            {/* Grade Level */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Grade Level <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Input
+                  value={uploadForm.grade_level}
+                  onChange={(e) => setUploadForm({ ...uploadForm, grade_level: e.target.value })}
+                  placeholder="e.g., 7, 8, 9, 10"
+                  list="grade-level-options"
+                />
+                <datalist id="grade-level-options">
+                  {gradeLevels.map((gl) => (
+                    <option key={gl} value={gl} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+
             {/* Subject */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Subject (optional)
+                Subject <span className="text-red-500">*</span>
               </label>
               <Select
                 value={uploadForm.subject_id}
                 onChange={(e) => setUploadForm({ ...uploadForm, subject_id: e.target.value })}
                 options={[
-                  { value: '', label: 'No specific subject' },
+                  { value: '', label: 'Select a subject' },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -547,7 +644,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             <Button
               onClick={handleUpload}
               isLoading={uploading}
-              disabled={!uploadForm.title || !uploadForm.file}
+              disabled={!uploadForm.title || !uploadForm.file || !uploadForm.grade_level || !uploadForm.subject_id}
             >
               <Upload className="h-4 w-4" />
               Upload Material
@@ -556,11 +653,11 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
+      {/* ─── Edit Dialog ───────────────────────────────────────────────────────── */}
       <Dialog open={showEditDialog} onOpenChange={() => setShowEditDialog(false)}>
         <DialogContent className="max-w-md" onClose={() => setShowEditDialog(false)}>
           <DialogHeader>
-            <DialogTitle>Edit Class Material</DialogTitle>
+            <DialogTitle>Edit Library Material</DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             {/* Title */}
@@ -588,16 +685,36 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
               />
             </div>
 
+            {/* Grade Level */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Grade Level <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Input
+                  value={editForm.grade_level}
+                  onChange={(e) => setEditForm({ ...editForm, grade_level: e.target.value })}
+                  placeholder="e.g., 7, 8, 9, 10"
+                  list="edit-grade-level-options"
+                />
+                <datalist id="edit-grade-level-options">
+                  {gradeLevels.map((gl) => (
+                    <option key={gl} value={gl} />
+                  ))}
+                </datalist>
+              </div>
+            </div>
+
             {/* Subject */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Subject (optional)
+                Subject <span className="text-red-500">*</span>
               </label>
               <Select
                 value={editForm.subject_id}
                 onChange={(e) => setEditForm({ ...editForm, subject_id: e.target.value })}
                 options={[
-                  { value: '', label: 'No specific subject' },
+                  { value: '', label: 'Select a subject' },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -658,20 +775,34 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleEdit} isLoading={saving} disabled={!editForm.title}>
+            <Button
+              onClick={handleEdit}
+              isLoading={saving}
+              disabled={!editForm.title || !editForm.grade_level || !editForm.subject_id}
+            >
               Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Preview Dialog */}
+      {/* ─── Preview Dialog ────────────────────────────────────────────────────── */}
       <Dialog open={showPreviewDialog} onOpenChange={closePreview}>
         <DialogContent className="max-w-5xl w-[95vw] h-[90vh]" onClose={closePreview}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 pr-8">
               <Eye className="h-5 w-5 text-primary-500" />
               <span className="truncate">{previewMaterial?.title}</span>
+              {previewMaterial?.grade_level && (
+                <Badge variant="default" className="ml-2 shrink-0">
+                  Grade {previewMaterial.grade_level}
+                </Badge>
+              )}
+              {previewMaterial?.subject && (
+                <Badge variant="outline" className="ml-1 shrink-0">
+                  {previewMaterial.subject.name}
+                </Badge>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden p-6 pt-0" style={{ height: 'calc(90vh - 140px)' }}>
@@ -744,4 +875,4 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   );
 };
 
-export default SubjectMatterTab;
+export default Library;
