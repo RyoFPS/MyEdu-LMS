@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Activity,
 } from 'lucide-react';
 
 interface NavItem {
@@ -70,6 +71,12 @@ const navItems: NavItem[] = [
     path: '/quizzes',
     icon: <FileQuestion className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
+  },
+  {
+    label: 'activity_log',
+    path: '/activity-log',
+    icon: <Activity className="h-5 w-5" />,
+    roles: ['admin'],
   },
   {
     label: 'teachers',

@@ -98,6 +98,17 @@ class ClassController extends Controller
     {
         $classRoom = ClassRoom::create($request->validated());
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'create',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} created class '{$classRoom->name}' (Grade {$classRoom->grade_level}).",
+            $classRoom->id,
+            ['grade_level' => $classRoom->grade_level, 'academic_year' => $classRoom->academic_year],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Kelas berhasil dibuat.',
             'data'    => new ClassResource($classRoom),
@@ -141,6 +152,17 @@ class ClassController extends Controller
 
         $classRoom->update($validated);
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'update',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} updated class '{$classRoom->name}'.",
+            $classRoom->id,
+            null,
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Kelas berhasil diperbarui.',
             'data'    => new ClassResource($classRoom->fresh()),
@@ -159,6 +181,18 @@ class ClassController extends Controller
         }
 
         $classRoom = $this->findClass($id);
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'delete',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} deleted class '{$classRoom->name}'.",
+            $classRoom->id,
+            null,
+            $request->ip()
+        );
+
         $classRoom->delete();
 
         return response()->json([
@@ -198,6 +232,17 @@ class ClassController extends Controller
         ]);
 
         $classRoom->load('teachers');
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'assign',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} assigned teacher '{$teacher->name}' to class '{$classRoom->name}'.",
+            $classRoom->id,
+            ['teacher_id' => $teacher->id, 'teacher_name' => $teacher->name, 'subject' => $validated['subject'] ?? null],
+            $request->ip()
+        );
 
         return response()->json([
             'message' => 'Guru berhasil ditambahkan ke kelas.',
@@ -251,6 +296,17 @@ class ClassController extends Controller
 
         $classRoom->load('students');
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'assign',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} added student '{$student->name}' to class '{$classRoom->name}'.",
+            $classRoom->id,
+            ['student_id' => $student->id, 'student_name' => $student->name],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Siswa berhasil ditambahkan ke kelas.',
             'data'    => new ClassResource($classRoom),
@@ -271,6 +327,17 @@ class ClassController extends Controller
         $classRoom = $this->findClass($id);
         $classRoom->teachers()->detach($teacherId);
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'remove',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} removed a teacher from class '{$classRoom->name}'.",
+            $classRoom->id,
+            ['teacher_id' => $teacherId],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Guru berhasil dihapus dari kelas.',
         ]);
@@ -289,6 +356,17 @@ class ClassController extends Controller
 
         $classRoom = $this->findClass($id);
         $classRoom->students()->detach($studentId);
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'remove',
+            'class',
+            $classRoom->name,
+            "{$request->user()->name} removed a student from class '{$classRoom->name}'.",
+            $classRoom->id,
+            ['student_id' => $studentId],
+            $request->ip()
+        );
 
         return response()->json([
             'message' => 'Siswa berhasil dihapus dari kelas.',

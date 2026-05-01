@@ -132,6 +132,17 @@ class QuizController extends Controller
             );
         }
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'create',
+            'quiz',
+            $quiz->title,
+            "{$request->user()->name} created quiz '{$quiz->title}' for class " . ($quiz->classRoom?->name ?? '') . ".",
+            $quiz->id,
+            ['class_id' => $quiz->class_id, 'questions_count' => $quiz->questions()->count()],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Kuis berhasil dibuat.',
             'data'    => new QuizResource($quiz),
@@ -231,6 +242,17 @@ class QuizController extends Controller
 
         $quiz->load(['questions', 'classRoom', 'teacher:id,name']);
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'update',
+            'quiz',
+            $quiz->title,
+            "{$request->user()->name} updated quiz '{$quiz->title}'.",
+            $quiz->id,
+            null,
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Kuis berhasil diperbarui.',
             'data'    => new QuizResource($quiz->fresh(['questions', 'classRoom', 'teacher'])),
@@ -250,6 +272,17 @@ class QuizController extends Controller
         if (! $user->isAdmin() && $quiz->teacher_id !== $user->id) {
             return response()->json(['message' => 'Forbidden.'], 403);
         }
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'delete',
+            'quiz',
+            $quiz->title,
+            "{$request->user()->name} deleted quiz '{$quiz->title}'.",
+            $quiz->id,
+            null,
+            $request->ip()
+        );
 
         $quiz->delete();
 
@@ -467,6 +500,17 @@ class QuizController extends Controller
                 'data'    => ['quiz_id' => $quiz->id, 'student_id' => $user->id, 'student_name' => $user->name ?? '', 'quiz_title' => $quiz->title],
             ]);
         }
+
+        \App\Models\ActivityLog::log(
+            $user,
+            'submit',
+            'quiz',
+            $quiz->title,
+            "{$user->name} submitted quiz '{$quiz->title}' with score {$attempt->score}/{$attempt->total_points}.",
+            $quiz->id,
+            ['score' => $attempt->score, 'total_points' => $attempt->total_points, 'attempt_id' => $attempt->id],
+            $request->ip()
+        );
 
         return response()->json([
             'message' => 'Kuis berhasil dikumpulkan.',

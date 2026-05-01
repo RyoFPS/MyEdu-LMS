@@ -95,6 +95,17 @@ class LibraryController extends Controller
 
         $material->load(['subject', 'uploader:id,name,role']);
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'upload',
+            'library',
+            $material->title,
+            "{$request->user()->name} uploaded library material '{$material->title}' for Grade {$material->grade_level}.",
+            $material->id,
+            ['grade_level' => $material->grade_level, 'subject_id' => $material->subject_id, 'file_name' => $material->file_name],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Materi perpustakaan berhasil diunggah.',
             'data'    => new SubjectMatterResource($material),
@@ -157,13 +168,24 @@ class LibraryController extends Controller
      *
      * Delete a library material (admin only).
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse
     {
         $material = SubjectMatter::where('type', 'main')->whereNull('class_id')->findOrFail($id);
 
         if ($material->file_path && Storage::disk('public')->exists($material->file_path)) {
             Storage::disk('public')->delete($material->file_path);
         }
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'delete',
+            'library',
+            $material->title,
+            "{$request->user()->name} deleted library material '{$material->title}'.",
+            $material->id,
+            null,
+            $request->ip()
+        );
 
         $material->delete();
 

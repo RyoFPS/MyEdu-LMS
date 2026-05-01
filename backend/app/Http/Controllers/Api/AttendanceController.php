@@ -151,6 +151,18 @@ class AttendanceController extends Controller
             ]);
         }
 
+        $class = \App\Models\ClassRoom::find($classId);
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'record',
+            'attendance',
+            $class->name ?? "Class #{$classId}",
+            "{$request->user()->name} recorded attendance for " . count($records) . " members in class " . ($class->name ?? "#{$classId}") . " on {$date}.",
+            (int) $classId,
+            ['date' => $date, 'count' => count($records)],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Kehadiran massal berhasil dicatat.',
             'data'    => AttendanceResource::collection($attendances),

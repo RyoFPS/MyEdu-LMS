@@ -31,6 +31,17 @@ class AuthController extends Controller
         $user  = Auth::user();
         $token = $user->createToken('auth-token')->plainTextToken;
 
+        \App\Models\ActivityLog::log(
+            $user,
+            'login',
+            'auth',
+            $user->name,
+            "{$user->name} ({$user->role}) logged in.",
+            $user->id,
+            null,
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Login berhasil.',
             'data'    => [
@@ -47,6 +58,17 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'logout',
+            'auth',
+            $request->user()->name,
+            "{$request->user()->name} logged out.",
+            $request->user()->id,
+            null,
+            $request->ip()
+        );
+
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([

@@ -22,6 +22,7 @@ import TeacherList from './pages/users/TeacherList';
 import StudentList from './pages/users/StudentList';
 import SubjectList from './pages/subjects/SubjectList';
 import Library from './pages/library/Library';
+import ActivityLog from './pages/admin/ActivityLog';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -114,6 +115,16 @@ function App() {
 
         {/* Library */}
         <Route path="/library" element={<Library />} />
+
+        {/* Activity Log */}
+        <Route
+          path="/activity-log"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <ActivityLog />
+            </ProtectedRoute>
+          }
+        />
       </Route>
 
       {/* Redirect */}

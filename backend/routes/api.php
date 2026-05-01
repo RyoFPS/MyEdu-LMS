@@ -87,6 +87,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markRead']);
 
+    // ── Activity Logs (admin only) ────────────────────────────────────────
+    Route::get('/activity-logs', [\App\Http\Controllers\Api\ActivityLogController::class, 'index'])->middleware('role:admin');
+    Route::get('/activity-logs/export', [\App\Http\Controllers\Api\ActivityLogController::class, 'export'])->middleware('role:admin');
+    Route::get('/activity-logs/stats', [\App\Http\Controllers\Api\ActivityLogController::class, 'stats'])->middleware('role:admin');
+
     // ── Subjects ─────────────────────────────────────────────────────────
     Route::get('/subjects', [\App\Http\Controllers\Api\SubjectController::class, 'index']);
     Route::get('/subjects/categories', [\App\Http\Controllers\Api\SubjectController::class, 'categories']);

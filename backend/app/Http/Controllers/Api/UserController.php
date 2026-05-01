@@ -89,6 +89,17 @@ class UserController extends Controller
 
         $user->load('subjects');
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'create',
+            'user',
+            $user->name,
+            "{$request->user()->name} created user '{$user->name}' with role {$user->role}.",
+            $user->id,
+            ['role' => $user->role, 'email' => $user->email],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'User berhasil dibuat.',
             'data'    => new UserResource($user),
@@ -135,6 +146,17 @@ class UserController extends Controller
 
         $user->load('subjects');
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'update',
+            'user',
+            $user->name,
+            "{$request->user()->name} updated user '{$user->name}'.",
+            $user->id,
+            null,
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'User berhasil diperbarui.',
             'data'    => new UserResource($user->fresh(['subjects'])),
@@ -160,6 +182,17 @@ class UserController extends Controller
                 'message' => 'Tidak dapat menghapus akun sendiri.',
             ], 422);
         }
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'delete',
+            'user',
+            $user->name,
+            "{$request->user()->name} deleted user '{$user->name}' ({$user->role}).",
+            $user->id,
+            ['role' => $user->role, 'email' => $user->email],
+            $request->ip()
+        );
 
         $user->delete();
 

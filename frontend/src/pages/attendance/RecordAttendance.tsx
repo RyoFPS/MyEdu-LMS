@@ -13,6 +13,7 @@ import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useAuth } from '../../hooks/useAuth';
 import type { ClassRoom, User, AttendanceRecord } from '../../types';
 import {
   ClipboardCheck,
@@ -79,6 +80,7 @@ const AttendanceRow: React.FC<{
 const RecordAttendance: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { user, isAdmin } = useAuth();
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [students, setStudents] = useState<User[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
@@ -123,12 +125,15 @@ const RecordAttendance: React.FC = () => {
       const classData = response.data.data;
       const studentList: User[] = classData.students || [];
       const teacherList: User[] = classData.teachers || [];
+      const filteredTeacherList = isAdmin
+        ? teacherList
+        : teacherList.filter((teacher) => teacher.id === user?.id);
       setStudents(studentList);
-      setTeachers(teacherList);
+      setTeachers(filteredTeacherList);
 
       // Initialize records for both students and teachers
       const initialRecords: Record<number, AttendanceRecord> = {};
-      teacherList.forEach((teacher: User) => {
+      filteredTeacherList.forEach((teacher: User) => {
         initialRecords[teacher.id] = {
           user_id: teacher.id,
           status: 'present',
@@ -365,30 +370,32 @@ const RecordAttendance: React.FC = () => {
 
         {/* Submit */}
         {(teachers.length + students.length) > 0 && (
-          <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
-            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                {statusCounts.present || 0}
+          <div className="flex flex-col items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
+            {/* Status badges — centered row */}
+            <div className="flex items-center justify-center gap-2">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {statusCounts.present || 0} {t.attendance.present}
               </span>
-              <span className="flex items-center gap-1">
-                <XCircle className="h-4 w-4 text-red-500" />
-                {statusCounts.absent || 0}
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                <XCircle className="h-3.5 w-3.5" />
+                {statusCounts.absent || 0} {t.attendance.absent}
               </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4 text-yellow-500" />
-                {statusCounts.late || 0}
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                <Clock className="h-3.5 w-3.5" />
+                {statusCounts.late || 0} {t.attendance.late}
               </span>
-              <span className="flex items-center gap-1">
-                <AlertCircle className="h-4 w-4 text-blue-500" />
-                {statusCounts.excused || 0}
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                <AlertCircle className="h-3.5 w-3.5" />
+                {statusCounts.excused || 0} {t.attendance.excused}
               </span>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => navigate('/attendance')}>
+            {/* Action buttons — full width below */}
+            <div className="flex gap-2 w-full">
+              <Button variant="outline" onClick={() => navigate('/attendance')} className="flex-1">
                 {t.common.cancel}
               </Button>
-              <Button onClick={handleSubmit} isLoading={submitting}>
+              <Button onClick={handleSubmit} isLoading={submitting} className="flex-1">
                 <Save className="h-4 w-4" />
                 {t.attendance.submitAttendance}
               </Button>

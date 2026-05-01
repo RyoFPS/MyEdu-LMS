@@ -62,6 +62,7 @@ const en = {
     quizzes: 'Quizzes',
     teachers: 'Teachers',
     students: 'Students',
+    activity_log: 'Activity Log',
   },
 
   // Dashboard
@@ -377,6 +378,39 @@ const en = {
     status_absent: 'Absent',
     status_late: 'Late',
     status_excused: 'Excused',
+  },
+
+  // Activity Log
+  activityLog: {
+    title: 'Activity Log',
+    subtitle: 'Track all actions performed on the platform',
+    today: 'Today',
+    thisWeek: 'This Week',
+    total: 'Total (90 days)',
+    searchPlaceholder: 'Search by user, target, or description...',
+    allActions: 'All Actions',
+    allTypes: 'All Types',
+    noLogs: 'No activity logs found',
+    noLogsHint: 'Try adjusting your filters',
+    exportCsv: 'Export CSV',
+    actionCreate: 'Create',
+    actionUpdate: 'Update',
+    actionDelete: 'Delete',
+    actionLogin: 'Login',
+    actionLogout: 'Logout',
+    actionAssign: 'Assign',
+    actionRemove: 'Remove',
+    actionUpload: 'Upload',
+    actionSubmit: 'Submit',
+    actionRecord: 'Record',
+    typeUser: 'Users',
+    typeClass: 'Classes',
+    typeQuiz: 'Quizzes',
+    typeAttendance: 'Attendance',
+    typeMaterial: 'Materials',
+    typeLibrary: 'Library',
+    typeSubject: 'Subjects',
+    typeAuth: 'Auth',
   },
 
   // Language

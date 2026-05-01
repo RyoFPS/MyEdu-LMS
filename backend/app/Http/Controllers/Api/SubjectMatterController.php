@@ -126,6 +126,17 @@ class SubjectMatterController extends Controller
             );
         }
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'upload',
+            'material',
+            $material->title,
+            "{$request->user()->name} uploaded class material '{$material->title}' to class {$class->name}.",
+            $material->id,
+            ['class_id' => $class->id, 'file_name' => $material->file_name, 'file_size' => $material->file_size],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Materi berhasil diunggah.',
             'data'    => new SubjectMatterResource($material),
@@ -258,6 +269,17 @@ class SubjectMatterController extends Controller
         if ($material->file_path && Storage::disk('public')->exists($material->file_path)) {
             Storage::disk('public')->delete($material->file_path);
         }
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'delete',
+            'material',
+            $material->title,
+            "{$request->user()->name} deleted class material '{$material->title}'.",
+            $material->id,
+            null,
+            $request->ip()
+        );
 
         $material->delete();
 

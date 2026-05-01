@@ -62,6 +62,17 @@ class SubjectController extends Controller
 
         $subject = Subject::create($validated);
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'create',
+            'subject',
+            $subject->name,
+            "{$request->user()->name} created subject '{$subject->name}' ({$subject->code}).",
+            $subject->id,
+            ['code' => $subject->code, 'category' => $subject->category],
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Mata pelajaran berhasil ditambahkan.',
             'data'    => [
@@ -93,6 +104,17 @@ class SubjectController extends Controller
 
         $subject->update($validated);
 
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'update',
+            'subject',
+            $subject->name,
+            "{$request->user()->name} updated subject '{$subject->name}'.",
+            $subject->id,
+            null,
+            $request->ip()
+        );
+
         return response()->json([
             'message' => 'Mata pelajaran berhasil diperbarui.',
             'data'    => [
@@ -111,7 +133,7 @@ class SubjectController extends Controller
      *
      * Delete a subject (admin only).
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse
     {
         $subject = Subject::findOrFail($id);
 
@@ -121,6 +143,17 @@ class SubjectController extends Controller
                 'message' => 'Tidak dapat menghapus mata pelajaran yang masih memiliki materi.',
             ], 422);
         }
+
+        \App\Models\ActivityLog::log(
+            $request->user(),
+            'delete',
+            'subject',
+            $subject->name,
+            "{$request->user()->name} deleted subject '{$subject->name}' ({$subject->code}).",
+            $subject->id,
+            ['code' => $subject->code],
+            $request->ip()
+        );
 
         $subject->delete();
 
