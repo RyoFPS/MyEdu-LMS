@@ -123,7 +123,7 @@ const StudentList: React.FC = () => {
                     <TableCell className="text-gray-400">{index + 1}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar name={student.name} size="sm" />
+                        <Avatar name={student.name} src={student.avatar} size="sm" previewable />
                         <span className="font-medium text-gray-900 dark:text-gray-100">{student.name}</span>
                       </div>
                     </TableCell>

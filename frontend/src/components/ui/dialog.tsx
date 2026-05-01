@@ -47,7 +47,7 @@ export const DialogContent: React.FC<{
 }> = ({ className, children, onClose }) => (
   <div
     className={cn(
-      'bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto',
+      'bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 w-full max-w-lg mx-3 sm:mx-4 max-h-[90vh] overflow-y-auto',
       className
     )}
   >

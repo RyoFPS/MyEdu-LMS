@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
     <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
         {/* Title */}
-        <div className="pl-10 lg:pl-0 min-w-0 flex-1 mr-3">
+        <div className="pl-11 lg:pl-0 min-w-0 flex-1 mr-2 sm:mr-3">
           <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{title}</h1>
           {description && (
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate hidden sm:block">{description}</p>

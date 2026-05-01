@@ -255,7 +255,7 @@ const QuizResults: React.FC = () => {
                       <TableRow key={attempt.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar name={attempt.student?.name || ''} size="sm" />
+                            <Avatar name={attempt.student?.name || ''} src={attempt.student?.avatar} size="sm" />
                             <div>
                               <p className="font-medium text-gray-900 dark:text-gray-100">
                                 {attempt.student?.name || 'N/A'}

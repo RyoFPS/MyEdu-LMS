@@ -408,7 +408,7 @@ const UserList: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <Avatar name={user.name} size="sm" />
+                          <Avatar name={user.name} src={user.avatar} size="sm" previewable />
                           <div className="min-w-0">
                             <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
                             <p className="text-xs text-gray-400 flex items-center gap-1 truncate">

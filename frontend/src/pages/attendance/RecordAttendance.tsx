@@ -47,7 +47,7 @@ const AttendanceRow: React.FC<{
   >
     <div className="flex items-center gap-3 min-w-0">
       <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
-      <Avatar name={user.name} size="sm" />
+      <Avatar name={user.name} src={user.avatar} size="sm" />
       <div className="min-w-0">
         <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
         <p className="text-xs text-gray-400 truncate">{user.email}</p>

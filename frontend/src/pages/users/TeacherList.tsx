@@ -84,7 +84,7 @@ const TeacherList: React.FC = () => {
               <Card key={teacher.id} className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <Avatar name={teacher.name} src={teacher.avatar} size="lg" />
+                    <Avatar name={teacher.name} src={teacher.avatar} size="lg" previewable />
                     <div className="min-w-0">
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{teacher.name}</h3>
                       <Badge variant="info" className="mt-1">Teacher</Badge>

@@ -139,7 +139,7 @@ const Profile: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               {/* Avatar with upload overlay */}
               <div className="relative group">
-                <Avatar name={user?.name || ''} src={user?.avatar} size="xl" />
+                <Avatar name={user?.name || ''} src={user?.avatar} size="xl" previewable />
 
                 {/* Upload overlay */}
                 <div

@@ -31,14 +31,14 @@ export const ThemeToggle: React.FC = () => {
       <button
         onClick={() => setOpen(!open)}
         className={cn(
-          'relative p-2 rounded-lg transition-colors',
+          'relative p-1.5 sm:p-2 rounded-lg transition-colors',
           'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
           'hover:bg-gray-100 dark:hover:bg-gray-700',
           open && 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
         )}
         title="Toggle theme"
       >
-        <ActiveIcon className="h-5 w-5" />
+        <ActiveIcon className="h-4 w-4 sm:h-5 sm:w-5" />
       </button>
 
       {open && (

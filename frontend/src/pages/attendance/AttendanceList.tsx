@@ -302,7 +302,7 @@ const AttendanceList: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <Avatar name={record.user?.name || ''} size="sm" />
+                          <Avatar name={record.user?.name || ''} src={record.user?.avatar} size="sm" />
                           <div className="min-w-0">
                             <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{record.user?.name || 'N/A'}</p>
                             <p className="text-xs text-gray-400 truncate">{record.user?.email}</p>

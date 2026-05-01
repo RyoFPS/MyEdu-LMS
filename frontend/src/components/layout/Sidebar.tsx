@@ -180,7 +180,7 @@ export const Sidebar: React.FC = () => {
       {/* Mobile Toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-sidebar text-white shadow-lg"
+        className="lg:hidden fixed top-3 left-3 z-50 p-2 rounded-lg bg-sidebar text-white shadow-lg"
       >
         <Menu className="h-5 w-5" />
       </button>

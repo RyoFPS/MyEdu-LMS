@@ -309,7 +309,7 @@ const ClassDetail: React.FC = () => {
                         <TableCell className="text-gray-400">{index + 1}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar name={student.name} size="sm" />
+                            <Avatar name={student.name} src={student.avatar} size="sm" previewable />
                             <span className="font-medium text-gray-900 dark:text-gray-100">{student.name}</span>
                           </div>
                         </TableCell>
@@ -361,7 +361,7 @@ const ClassDetail: React.FC = () => {
                       key={teacher.id}
                       className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
-                      <Avatar name={teacher.name} size="lg" />
+                      <Avatar name={teacher.name} src={teacher.avatar} size="lg" previewable />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 dark:text-gray-100">{teacher.name}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">{teacher.email}</p>
@@ -404,7 +404,7 @@ const ClassDetail: React.FC = () => {
                       <TableRow key={record.id}>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <Avatar name={record.user?.name || ''} size="sm" />
+                            <Avatar name={record.user?.name || ''} src={record.user?.avatar} size="sm" />
                             <span className="font-medium text-gray-900 dark:text-gray-100">{record.user?.name || 'N/A'}</span>
                           </div>
                         </TableCell>
