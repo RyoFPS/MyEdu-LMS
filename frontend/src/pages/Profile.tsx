@@ -8,6 +8,7 @@ import { Separator } from '../components/ui/separator';
 import { Avatar } from '../components/ui/avatar';
 import { Badge } from '../components/ui/badge';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from '../hooks/useTranslation';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
 import { User, Mail, Phone, Shield, Calendar, Lock, Save, Camera, Trash2, Loader2 } from 'lucide-react';
@@ -15,6 +16,7 @@ import { formatDate } from '../lib/utils';
 
 const Profile: React.FC = () => {
   const { user, setUser } = useAuth();
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,7 @@ const Profile: React.FC = () => {
       const updatedUser = response.data.data || response.data;
       setUser(updatedUser);
       setIsEditing(false);
-      toast.success('Profile updated successfully');
+      toast.success(t.profile.profileUpdated);
     } catch {
       toast.error('Failed to update profile');
     } finally {
@@ -64,7 +66,7 @@ const Profile: React.FC = () => {
       await api.put('/profile/password', passwordData);
       setPasswordData({ current_password: '', password: '', password_confirmation: '' });
       setIsChangingPassword(false);
-      toast.success('Password changed successfully');
+      toast.success(t.profile.passwordChanged);
     } catch {
       toast.error('Failed to change password');
     } finally {
@@ -97,7 +99,7 @@ const Profile: React.FC = () => {
 
       const updatedUser = response.data.data || response.data;
       setUser(updatedUser);
-      toast.success('Profile photo updated!');
+      toast.success(t.profile.photoUpdated);
     } catch (error: any) {
       if (!error.response || ![422].includes(error.response.status)) {
         toast.error('Failed to upload photo.');
@@ -119,7 +121,7 @@ const Profile: React.FC = () => {
       const response = await api.delete('/profile/avatar');
       const updatedUser = response.data.data || response.data;
       setUser(updatedUser);
-      toast.success('Profile photo removed.');
+      toast.success(t.profile.photoRemoved);
     } catch {
       toast.error('Failed to remove photo.');
     } finally {
@@ -131,7 +133,7 @@ const Profile: React.FC = () => {
 
   return (
     <>
-      <Header title="Profile" description="Manage your account settings" />
+      <Header title={t.profile.title} description={t.profile.subtitle} />
       <div className="page-container max-w-3xl mx-auto">
         {/* Profile Header with Avatar Upload */}
         <Card>
@@ -173,7 +175,7 @@ const Profile: React.FC = () => {
                   </Badge>
                   <Badge variant="secondary">
                     <Calendar className="h-3 w-3 mr-1" />
-                    Joined {user?.created_at ? formatDate(user.created_at) : 'N/A'}
+                    {t.users.joined} {user?.created_at ? formatDate(user.created_at) : 'N/A'}
                   </Badge>
                 </div>
 
@@ -190,7 +192,7 @@ const Profile: React.FC = () => {
                     ) : (
                       <Camera className="h-3.5 w-3.5" />
                     )}
-                    Change Photo
+                    {t.profile.changePhoto}
                   </Button>
                   {user?.avatar && (
                     <Button
@@ -200,7 +202,7 @@ const Profile: React.FC = () => {
                       disabled={uploadingAvatar}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                      Remove
+                      {t.profile.removePhoto}
                     </Button>
                   )}
                 </div>
@@ -214,11 +216,11 @@ const Profile: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-primary-500" />
-              Personal Information
+              {t.profile.personalInfo}
             </CardTitle>
             {!isEditing && (
               <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                Edit
+                {t.common.edit}
               </Button>
             )}
           </CardHeader>
@@ -226,7 +228,7 @@ const Profile: React.FC = () => {
             {isEditing ? (
               <form onSubmit={handleUpdateProfile} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" required>Full Name</Label>
+                  <Label htmlFor="name" required>{t.users.fullName}</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -239,7 +241,7 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email" required>Email</Label>
+                  <Label htmlFor="email" required>{t.common.email}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -253,7 +255,7 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t.common.phone}</Label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -261,29 +263,29 @@ const Profile: React.FC = () => {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="pl-10"
-                      placeholder="Enter phone number"
+                      placeholder={t.users.phoneOptional}
                     />
                   </div>
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button type="submit" isLoading={loading}>
                     <Save className="h-4 w-4" />
-                    Save Changes
+                    {t.common.save}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
-                    Cancel
+                    {t.common.cancel}
                   </Button>
                 </div>
               </form>
             ) : (
               <div className="space-y-4">
-                <InfoRow icon={<User className="h-4 w-4" />} label="Full Name" value={user?.name || ''} />
+                <InfoRow icon={<User className="h-4 w-4" />} label={t.users.fullName} value={user?.name || ''} />
                 <Separator />
-                <InfoRow icon={<Mail className="h-4 w-4" />} label="Email" value={user?.email || ''} />
+                <InfoRow icon={<Mail className="h-4 w-4" />} label={t.common.email} value={user?.email || ''} />
                 <Separator />
-                <InfoRow icon={<Phone className="h-4 w-4" />} label="Phone" value={user?.phone || 'Not set'} />
+                <InfoRow icon={<Phone className="h-4 w-4" />} label={t.common.phone} value={user?.phone || 'Not set'} />
                 <Separator />
-                <InfoRow icon={<Shield className="h-4 w-4" />} label="Role" value={user?.role || ''} className="capitalize" />
+                <InfoRow icon={<Shield className="h-4 w-4" />} label={t.common.role} value={user?.role || ''} className="capitalize" />
               </div>
             )}
           </CardContent>
@@ -294,11 +296,11 @@ const Profile: React.FC = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5 text-primary-500" />
-              Change Password
+              {t.profile.changePassword}
             </CardTitle>
             {!isChangingPassword && (
               <Button variant="outline" size="sm" onClick={() => setIsChangingPassword(true)}>
-                Change
+                {t.profile.changePassword}
               </Button>
             )}
           </CardHeader>
@@ -306,7 +308,7 @@ const Profile: React.FC = () => {
             <CardContent>
               <form onSubmit={handleChangePassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="current_password" required>Current Password</Label>
+                  <Label htmlFor="current_password" required>{t.profile.currentPassword}</Label>
                   <Input
                     id="current_password"
                     type="password"
@@ -316,7 +318,7 @@ const Profile: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="new_password" required>New Password</Label>
+                  <Label htmlFor="new_password" required>{t.profile.newPassword}</Label>
                   <Input
                     id="new_password"
                     type="password"
@@ -327,7 +329,7 @@ const Profile: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm_password" required>Confirm New Password</Label>
+                  <Label htmlFor="confirm_password" required>{t.profile.confirmPassword}</Label>
                   <Input
                     id="confirm_password"
                     type="password"
@@ -339,10 +341,10 @@ const Profile: React.FC = () => {
                 <div className="flex gap-2 pt-2">
                   <Button type="submit" isLoading={loading}>
                     <Lock className="h-4 w-4" />
-                    Update Password
+                    {t.profile.updatePassword}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setIsChangingPassword(false)}>
-                    Cancel
+                    {t.common.cancel}
                   </Button>
                 </div>
               </form>

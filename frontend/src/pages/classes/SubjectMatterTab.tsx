@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import toast from 'react-hot-toast';
 import type { SubjectMatter, Subject } from '../../types';
 import {
@@ -59,6 +60,7 @@ const getFileExtension = (fileName: string): string => {
 
 const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   const { isAdmin, isTeacher, user } = useAuth();
+  const { t } = useTranslation();
   const canUpload = isAdmin || isTeacher;
 
   const [materials, setMaterials] = useState<SubjectMatter[]>([]);
@@ -312,7 +314,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <CardTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5" />
-            Class Materials ({materials.length})
+            {t.materials.title} ({materials.length})
           </CardTitle>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {/* Search */}
@@ -321,7 +323,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search materials..."
+                placeholder={t.materials.searchMaterials}
                 className="pl-9 w-full sm:w-48"
               />
             </div>
@@ -329,7 +331,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {canUpload && (
               <Button size="sm" onClick={openUploadDialog}>
                 <Plus className="h-4 w-4" />
-                Upload
+                {t.materials.uploadMaterial}
               </Button>
             )}
           </div>
@@ -343,11 +345,11 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
           ) : materials.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <BookOpen className="h-10 w-10 mb-2 opacity-50" />
-              <p className="text-sm">No class materials yet</p>
+              <p className="text-sm">{t.materials.noMaterials}</p>
               {canUpload && (
                 <Button variant="outline" size="sm" className="mt-3" onClick={openUploadDialog}>
                   <Upload className="h-4 w-4" />
-                  Upload First Material
+                  {t.materials.uploadFirst}
                 </Button>
               )}
             </div>
@@ -402,7 +404,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                           onClick={() => handlePreview(material)}
                         >
                           <Eye className="h-3.5 w-3.5" />
-                          View
+                          {t.common.view}
                         </Button>
                       )}
                       <Button
@@ -411,7 +413,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                         onClick={() => handleDownload(material)}
                       >
                         <Download className="h-3.5 w-3.5" />
-                        Download
+                        {t.common.download}
                       </Button>
                       {canModify(material) && (
                         <>
@@ -444,13 +446,13 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       <Dialog open={showUploadDialog} onOpenChange={() => setShowUploadDialog(false)}>
         <DialogContent className="max-w-md" onClose={() => setShowUploadDialog(false)}>
           <DialogHeader>
-            <DialogTitle>Upload Class Material</DialogTitle>
+            <DialogTitle>{t.materials.uploadTitle}</DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             {/* Title */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Title <span className="text-red-500">*</span>
+                {t.common.title} <span className="text-red-500">*</span>
               </label>
               <Input
                 value={uploadForm.title}
@@ -462,7 +464,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Description */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
+                {t.common.description}
               </label>
               <Textarea
                 value={uploadForm.description}
@@ -475,7 +477,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Subject */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Subject (optional)
+                {t.quizzes.subject} (optional)
               </label>
               <Select
                 value={uploadForm.subject_id}
@@ -542,7 +544,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               onClick={handleUpload}
@@ -550,7 +552,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
               disabled={!uploadForm.title || !uploadForm.file}
             >
               <Upload className="h-4 w-4" />
-              Upload Material
+              {t.materials.uploadMaterial}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -560,13 +562,13 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       <Dialog open={showEditDialog} onOpenChange={() => setShowEditDialog(false)}>
         <DialogContent className="max-w-md" onClose={() => setShowEditDialog(false)}>
           <DialogHeader>
-            <DialogTitle>Edit Class Material</DialogTitle>
+            <DialogTitle>{t.materials.editMaterial}</DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             {/* Title */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Title <span className="text-red-500">*</span>
+                {t.common.title} <span className="text-red-500">*</span>
               </label>
               <Input
                 value={editForm.title}
@@ -578,7 +580,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Description */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
+                {t.common.description}
               </label>
               <Textarea
                 value={editForm.description}
@@ -591,7 +593,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Subject */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Subject (optional)
+                {t.quizzes.subject} (optional)
               </label>
               <Select
                 value={editForm.subject_id}
@@ -656,10 +658,10 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button onClick={handleEdit} isLoading={saving} disabled={!editForm.title}>
-              Save Changes
+              {t.common.save}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -678,7 +680,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {previewLoading ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader2 className="h-10 w-10 animate-spin text-primary-500 mb-3" />
-                <p className="text-sm text-gray-500">Loading preview...</p>
+                <p className="text-sm text-gray-500">{t.common.loading}</p>
               </div>
             ) : previewUrl && previewMaterial ? (
               <>
@@ -730,10 +732,10 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                   onClick={() => previewMaterial && handleDownload(previewMaterial)}
                 >
                   <Download className="h-4 w-4" />
-                  Download
+                  {t.common.download}
                 </Button>
                 <Button variant="outline" onClick={closePreview}>
-                  Close
+                  {t.common.close}
                 </Button>
               </div>
             </div>

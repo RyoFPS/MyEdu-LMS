@@ -10,6 +10,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../../hooks/useTranslation';
 import {
   Plus,
   Search,
@@ -35,6 +36,8 @@ interface Subject {
 }
 
 const SubjectList: React.FC = () => {
+  const { t } = useTranslation();
+
   // State
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -140,7 +143,7 @@ const SubjectList: React.FC = () => {
   // Delete
   const handleDelete = async (subject: Subject) => {
     if (subject.subject_matters_count > 0) {
-      toast.error(`Cannot delete "${subject.name}" — it has ${subject.subject_matters_count} material(s) linked.`);
+      toast.error(`${t.subjects.cannotDelete}: "${subject.name}" (${subject.subject_matters_count})`);
       return;
     }
     if (!confirm(`Delete subject "${subject.name}" (${subject.code})?`)) return;
@@ -175,7 +178,7 @@ const SubjectList: React.FC = () => {
 
   return (
     <>
-      <Header title="Subjects" description="Manage subjects and categories" />
+      <Header title={t.subjects.title} description={t.subjects.subtitle} />
       <div className="page-container">
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -186,7 +189,7 @@ const SubjectList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{subjects.length}</p>
-                <p className="text-xs text-gray-500">Total Subjects</p>
+                <p className="text-xs text-gray-500">{t.subjects.totalSubjects}</p>
               </div>
             </CardContent>
           </Card>
@@ -197,7 +200,7 @@ const SubjectList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{categories.length}</p>
-                <p className="text-xs text-gray-500">Categories</p>
+                <p className="text-xs text-gray-500">{t.subjects.categories}</p>
               </div>
             </CardContent>
           </Card>
@@ -210,7 +213,7 @@ const SubjectList: React.FC = () => {
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {subjects.reduce((sum, s) => sum + s.subject_matters_count, 0)}
                 </p>
-                <p className="text-xs text-gray-500">Total Materials</p>
+                <p className="text-xs text-gray-500">{t.subjects.totalMaterials}</p>
               </div>
             </CardContent>
           </Card>
@@ -225,7 +228,7 @@ const SubjectList: React.FC = () => {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search subjects..."
+                  placeholder={t.common.search + '...'}
                   className="pl-9"
                 />
               </div>
@@ -233,13 +236,13 @@ const SubjectList: React.FC = () => {
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 options={[
-                  { value: '', label: 'All Categories' },
+                  { value: '', label: t.subjects.allCategories },
                   ...categories.map((c) => ({ value: c, label: c })),
                 ]}
               />
               <Button onClick={openAddDialog}>
                 <Plus className="h-4 w-4" />
-                Add Subject
+                {t.subjects.addSubject}
               </Button>
             </div>
           </CardContent>
@@ -255,11 +258,11 @@ const SubjectList: React.FC = () => {
             <CardContent className="py-16">
               <div className="flex flex-col items-center justify-center text-gray-400">
                 <BookOpen className="h-12 w-12 mb-3 opacity-50" />
-                <p className="text-lg font-medium">No subjects found</p>
-                <p className="text-sm mt-1">Add your first subject to get started.</p>
+                <p className="text-lg font-medium">{t.subjects.noSubjects}</p>
+                <p className="text-sm mt-1">{t.subjects.addFirst}</p>
                 <Button className="mt-4" onClick={openAddDialog}>
                   <Plus className="h-4 w-4" />
-                  Add Subject
+                  {t.subjects.addSubject}
                 </Button>
               </div>
             </CardContent>
@@ -278,11 +281,11 @@ const SubjectList: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Code</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Materials</TableHead>
-                      <TableHead className="w-24">Actions</TableHead>
+                      <TableHead>{t.subjects.subjectName}</TableHead>
+                      <TableHead>{t.subjects.code}</TableHead>
+                      <TableHead>{t.common.description}</TableHead>
+                      <TableHead>{t.subjects.materials}</TableHead>
+                      <TableHead className="w-24">{t.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -301,7 +304,7 @@ const SubjectList: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Badge variant={subject.subject_matters_count > 0 ? 'default' : 'secondary'}>
-                            {subject.subject_matters_count} materials
+                            {subject.subject_matters_count} {t.subjects.materials}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -327,12 +330,12 @@ const SubjectList: React.FC = () => {
         <Dialog open={showDialog} onOpenChange={() => setShowDialog(false)}>
           <DialogContent onClose={() => setShowDialog(false)}>
             <DialogHeader>
-              <DialogTitle>{editingSubject ? 'Edit Subject' : 'Add New Subject'}</DialogTitle>
+              <DialogTitle>{editingSubject ? t.subjects.editSubject : t.subjects.addSubject}</DialogTitle>
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Name <span className="text-red-500">*</span>
+                  {t.subjects.subjectName} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={form.name}
@@ -342,7 +345,7 @@ const SubjectList: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Code <span className="text-red-500">*</span>
+                  {t.subjects.code} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={form.code}
@@ -350,10 +353,10 @@ const SubjectList: React.FC = () => {
                   placeholder="e.g., MTK"
                   maxLength={20}
                 />
-                <p className="text-xs text-gray-400">Unique short code for the subject</p>
+                <p className="text-xs text-gray-400">{t.subjects.codeHint}</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.common.category}</label>
                 <Input
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -365,10 +368,10 @@ const SubjectList: React.FC = () => {
                     <option key={c} value={c} />
                   ))}
                 </datalist>
-                <p className="text-xs text-gray-400">Type a new category or select existing one</p>
+                <p className="text-xs text-gray-400">{t.subjects.categoryHint}</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.common.description}</label>
                 <Textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -378,9 +381,9 @@ const SubjectList: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowDialog(false)}>{t.common.cancel}</Button>
               <Button onClick={handleSave} isLoading={saving} disabled={!form.name || !form.code}>
-                {editingSubject ? 'Save Changes' : 'Add Subject'}
+                {editingSubject ? t.common.save : t.subjects.addSubject}
               </Button>
             </DialogFooter>
           </DialogContent>

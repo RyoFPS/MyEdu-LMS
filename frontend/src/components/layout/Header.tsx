@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Avatar } from '../ui/avatar';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import { Bell, User, LogOut, Settings, CheckCheck, FileQuestion, ClipboardCheck, BookOpen, Users as UsersIcon } from 'lucide-react';
@@ -51,6 +52,7 @@ const timeAgo = (dateStr: string): string => {
 
 export const Header: React.FC<HeaderProps> = ({ title, description }) => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Notification state
@@ -166,14 +168,14 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
               <div className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[70vh] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl z-50 overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">Notifications</h3>
+                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">{t.notifications.title}</h3>
                   {unreadCount > 0 && (
                     <button
                       onClick={handleMarkAllRead}
                       className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
                     >
                       <CheckCheck className="h-3.5 w-3.5" />
-                      Mark all read
+                      {t.notifications.markAllRead}
                     </button>
                   )}
                 </div>
@@ -183,7 +185,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
                   {notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                       <Bell className="h-8 w-8 mb-2 opacity-50" />
-                      <p className="text-sm">No notifications yet</p>
+                      <p className="text-sm">{t.notifications.noNotifications}</p>
                     </div>
                   ) : (
                     notifications.map((notif) => (
@@ -246,7 +248,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
           >
             <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User className="h-4 w-4" />
-              Profile
+              {t.profile.title}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/profile')}>
               <Settings className="h-4 w-4" />
@@ -255,7 +257,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} destructive>
               <LogOut className="h-4 w-4" />
-              Logout
+              {t.auth.logout}
             </DropdownMenuItem>
           </DropdownMenu>
         </div>

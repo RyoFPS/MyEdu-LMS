@@ -7,6 +7,7 @@ import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { formatDateTime, cn } from '../../lib/utils';
@@ -51,6 +52,7 @@ interface PaginationMeta {
 
 const QuizList: React.FC = () => {
   const { isTeacher, isAdmin, isStudent } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [classes, setClasses] = useState<ClassRoom[]>([]);
@@ -192,8 +194,8 @@ const QuizList: React.FC = () => {
   return (
     <>
       <Header
-        title="Quizzes"
-        description={isStudent ? 'View and take available quizzes' : 'Manage your quizzes'}
+        title={t.quizzes.title}
+        description={isStudent ? t.quizzes.subtitleStudent : t.quizzes.subtitleTeacher}
       />
       <div className="page-container">
         {/* Filters */}
@@ -204,7 +206,7 @@ const QuizList: React.FC = () => {
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by title or description..."
+                  placeholder={t.common.search + '...'}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -215,14 +217,14 @@ const QuizList: React.FC = () => {
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
-                placeholder="All Classes"
+                placeholder={t.quizzes.allClasses}
               />
               {/* Subject filter */}
               <Select
                 value={selectedSubject}
                 onChange={(e) => setSelectedSubject(e.target.value)}
                 options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
-                placeholder="All Subjects"
+                placeholder={t.quizzes.allSubjects}
               />
               {/* Status filter + Create button */}
               <div className="flex gap-2">
@@ -230,16 +232,16 @@ const QuizList: React.FC = () => {
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
                   options={[
-                    { value: 'true', label: 'Active' },
-                    { value: 'false', label: 'Inactive' },
+                    { value: 'true', label: t.quizzes.active },
+                    { value: 'false', label: t.quizzes.inactive },
                   ]}
-                  placeholder="All Status"
+                  placeholder={t.quizzes.allStatus}
                   className="flex-1"
                 />
                 {(isTeacher || isAdmin) && (
                   <Button onClick={() => navigate('/quizzes/create')} className="flex-shrink-0">
                     <Plus className="h-4 w-4" />
-                    Create
+                    {t.common.create}
                   </Button>
                 )}
               </div>
@@ -248,7 +250,7 @@ const QuizList: React.FC = () => {
                 <div className="flex items-end lg:col-span-5">
                   <Button variant="outline" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
                     <Filter className="h-4 w-4" />
-                    Clear Filters
+                    {t.common.clearFilters}
                   </Button>
                 </div>
               )}
@@ -274,10 +276,10 @@ const QuizList: React.FC = () => {
         ) : quizzes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
-            <p className="text-lg font-medium">No quizzes found</p>
+            <p className="text-lg font-medium">{t.quizzes.noQuizzes}</p>
             <p className="text-sm mt-1">
               {hasActiveFilters
-                ? 'Try adjusting your filters'
+                ? t.library.adjustFilters
                 : isTeacher || isAdmin
                 ? 'Create your first quiz to get started'
                 : 'No quizzes available yet'}
@@ -294,7 +296,7 @@ const QuizList: React.FC = () => {
                         <FileQuestion className="h-5 w-5" />
                       </div>
                       <Badge variant={quiz.is_expired ? 'destructive' : quiz.is_active ? 'success' : 'secondary'}>
-                        {quiz.is_expired ? 'Expired' : quiz.is_active ? 'Active' : 'Inactive'}
+                        {quiz.is_expired ? t.quizzes.expired : quiz.is_active ? t.quizzes.active : t.quizzes.inactive}
                       </Badge>
                     </div>
 
@@ -316,27 +318,27 @@ const QuizList: React.FC = () => {
                       )}
                       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Clock className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span>{quiz.duration_minutes} minutes</span>
+                        <span>{quiz.duration_minutes} {t.quizzes.minutes}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span>{quiz.questions_count || 0} questions</span>
+                        <span>{quiz.questions_count || 0} {t.quizzes.questions}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         {quiz.max_attempts === 0 ? (
                           <>
                             <Repeat className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span>Unlimited attempts</span>
+                            <span>{t.quizzes.unlimited}</span>
                           </>
                         ) : quiz.max_attempts === 1 ? (
                           <>
                             <Shield className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span>Single attempt</span>
+                            <span>{t.quizzes.singleAttempt}</span>
                           </>
                         ) : (
                           <>
                             <Hash className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span>{quiz.max_attempts} attempts</span>
+                            <span>{quiz.max_attempts} {t.quizzes.attempts}</span>
                           </>
                         )}
                       </div>
@@ -350,7 +352,7 @@ const QuizList: React.FC = () => {
                           "text-xs",
                           quiz.is_expired ? "text-red-500 font-medium" : "text-gray-400"
                         )}>
-                          {quiz.is_expired ? '⚠️ Expired: ' : 'Deadline: '}{formatDateTime(quiz.end_time)}
+                          {quiz.is_expired ? `⚠️ ${t.quizzes.expired}: ` : `${t.quizzes.deadline}: `}{formatDateTime(quiz.end_time)}
                         </div>
                       )}
                     </div>
@@ -363,7 +365,7 @@ const QuizList: React.FC = () => {
                           onClick={() => navigate(`/quizzes/${quiz.id}/take`)}
                         >
                           <Play className="h-3.5 w-3.5" />
-                          Take Quiz
+                          {t.quizzes.takeQuiz}
                         </Button>
                       )}
                       <Button
@@ -373,7 +375,7 @@ const QuizList: React.FC = () => {
                         onClick={() => navigate(`/quizzes/${quiz.id}/results`)}
                       >
                         <BarChart3 className="h-3.5 w-3.5" />
-                        Results
+                        {t.quizzes.results}
                       </Button>
                       {(isTeacher || isAdmin) && (
                         <>
@@ -444,19 +446,18 @@ const QuizList: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                Delete Quiz
+                {t.quizzes.deleteQuiz}
               </DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this quiz? This action cannot be undone. All student
-                attempts and results will also be deleted.
+                {t.quizzes.deleteConfirm}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteId(null)}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button variant="destructive" onClick={handleDelete} isLoading={deleting}>
-                Delete Quiz
+                {t.quizzes.deleteQuiz}
               </Button>
             </DialogFooter>
           </DialogContent>

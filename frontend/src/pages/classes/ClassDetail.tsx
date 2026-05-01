@@ -13,6 +13,7 @@ import { Input } from '../../components/ui/input';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import toast from 'react-hot-toast';
 import SubjectMatterTab from './SubjectMatterTab';
 import type { ClassRoom, User, Attendance, Quiz } from '../../types';
@@ -36,6 +37,7 @@ const ClassDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const { t } = useTranslation();
   const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
   const [students, setStudents] = useState<User[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
@@ -200,7 +202,7 @@ const ClassDetail: React.FC = () => {
             <FileX className="h-12 w-12 mb-3 opacity-50" />
             <p className="text-lg font-medium">Class not found</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/classes')}>
-              Back to Classes
+              {t.common.back}
             </Button>
           </div>
         </div>
@@ -221,7 +223,7 @@ const ClassDetail: React.FC = () => {
       <div className="page-container">
         <Button variant="ghost" onClick={() => navigate('/classes')} className="mb-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Classes
+          {t.common.back}
         </Button>
 
         {/* Class Info Header */}
@@ -238,15 +240,15 @@ const ClassDetail: React.FC = () => {
               <div className="flex gap-3">
                 <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{students.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Students</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.classes.studentsCount}</p>
                 </div>
                 <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{teachers.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Teachers</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.classes.teachersCount}</p>
                 </div>
                 <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{quizzes.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Quizzes</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.sidebar.quizzes}</p>
                 </div>
               </div>
             </div>
@@ -258,23 +260,23 @@ const ClassDetail: React.FC = () => {
           <TabsList className="w-full sm:w-auto">
             <TabsTrigger value="students">
               <GraduationCap className="h-4 w-4 mr-1.5" />
-              Students
+              {t.sidebar.students}
             </TabsTrigger>
             <TabsTrigger value="teachers">
               <Users className="h-4 w-4 mr-1.5" />
-              Teachers
+              {t.sidebar.teachers}
             </TabsTrigger>
             <TabsTrigger value="attendance">
               <ClipboardCheck className="h-4 w-4 mr-1.5" />
-              Attendance
+              {t.sidebar.attendance}
             </TabsTrigger>
             <TabsTrigger value="quizzes">
               <FileQuestion className="h-4 w-4 mr-1.5" />
-              Quizzes
+              {t.sidebar.quizzes}
             </TabsTrigger>
             <TabsTrigger value="materials">
               <BookMarked className="h-4 w-4 mr-1.5" />
-              Materials
+              {t.materials.title}
             </TabsTrigger>
           </TabsList>
 
@@ -282,25 +284,25 @@ const ClassDetail: React.FC = () => {
           <TabsContent value="students">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Students ({students.length})</CardTitle>
+                <CardTitle>{t.sidebar.students} ({students.length})</CardTitle>
                 {isAdmin && (
                   <Button size="sm" onClick={openAssignStudent}>
                     <UserPlus className="h-4 w-4" />
-                    Add Student
+                    {t.classes.assignStudent}
                   </Button>
                 )}
               </CardHeader>
               {students.length === 0 ? (
-                <EmptyState icon={<GraduationCap />} message="No students enrolled" />
+                <EmptyState icon={<GraduationCap />} message={t.classes.noStudents} />
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>#</TableHead>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Joined</TableHead>
-                      {isAdmin && <TableHead className="w-16">Action</TableHead>}
+                      <TableHead>{t.sidebar.students}</TableHead>
+                      <TableHead>{t.common.email}</TableHead>
+                      <TableHead>{t.users.joined}</TableHead>
+                      {isAdmin && <TableHead className="w-16">{t.common.actions}</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -344,16 +346,16 @@ const ClassDetail: React.FC = () => {
           <TabsContent value="teachers">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Teachers ({teachers.length})</CardTitle>
+                <CardTitle>{t.sidebar.teachers} ({teachers.length})</CardTitle>
                 {isAdmin && (
                   <Button size="sm" onClick={openAssignTeacher}>
                     <UserPlus className="h-4 w-4" />
-                    Add Teacher
+                    {t.classes.assignTeacher}
                   </Button>
                 )}
               </CardHeader>
               {teachers.length === 0 ? (
-                <EmptyState icon={<Users />} message="No teachers assigned" />
+                <EmptyState icon={<Users />} message={t.classes.noTeachers} />
               ) : (
                 <div className="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {teachers.map((teacher) => (
@@ -385,18 +387,18 @@ const ClassDetail: React.FC = () => {
           <TabsContent value="attendance">
             <Card>
               <CardHeader>
-                <CardTitle>Recent Attendance</CardTitle>
+                <CardTitle>{t.sidebar.attendance}</CardTitle>
               </CardHeader>
               {attendance.length === 0 ? (
-                <EmptyState icon={<ClipboardCheck />} message="No attendance records" />
+                <EmptyState icon={<ClipboardCheck />} message={t.common.noData} />
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Notes</TableHead>
+                      <TableHead>{t.sidebar.students}</TableHead>
+                      <TableHead>{t.common.date}</TableHead>
+                      <TableHead>{t.common.status}</TableHead>
+                      <TableHead>{t.attendance.notes}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -427,10 +429,10 @@ const ClassDetail: React.FC = () => {
           <TabsContent value="quizzes">
             <Card>
               <CardHeader>
-                <CardTitle>Quizzes ({quizzes.length})</CardTitle>
+                <CardTitle>{t.sidebar.quizzes} ({quizzes.length})</CardTitle>
               </CardHeader>
               {quizzes.length === 0 ? (
-                <EmptyState icon={<FileQuestion />} message="No quizzes for this class" />
+                <EmptyState icon={<FileQuestion />} message={t.quizzes.noQuizzes} />
               ) : (
                 <div className="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-4">
                   {quizzes.map((quiz) => (
@@ -442,13 +444,13 @@ const ClassDetail: React.FC = () => {
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium text-gray-900 dark:text-gray-100">{quiz.title}</h4>
                         <Badge variant={quiz.is_active ? 'success' : 'secondary'}>
-                          {quiz.is_active ? 'Active' : 'Inactive'}
+                          {quiz.is_active ? t.quizzes.active : t.quizzes.inactive}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-1">{quiz.description}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-400">
                         <span>{quiz.duration_minutes} min</span>
-                        <span>{quiz.questions_count || 0} questions</span>
+                        <span>{quiz.questions_count || 0} {t.quizzes.questions}</span>
                       </div>
                     </div>
                   ))}
@@ -467,11 +469,11 @@ const ClassDetail: React.FC = () => {
         <Dialog open={showAssignTeacher} onOpenChange={() => setShowAssignTeacher(false)}>
           <DialogContent onClose={() => setShowAssignTeacher(false)}>
             <DialogHeader>
-              <DialogTitle>Assign Teacher to {classRoom.name}</DialogTitle>
+              <DialogTitle>{t.classes.assignTeacher} - {classRoom.name}</DialogTitle>
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Teacher</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.sidebar.teachers}</label>
                 {availableTeachers.length === 0 ? (
                   <p className="text-sm text-gray-400 py-2">All teachers are already assigned to this class.</p>
                 ) : (
@@ -480,13 +482,13 @@ const ClassDetail: React.FC = () => {
                     onChange={(val) => setSelectedTeacherId(val)}
                     options={availableTeachers.map((t) => ({ value: String(t.id), label: t.name, subtitle: t.email }))}
                     placeholder="Choose a teacher..."
-                    searchPlaceholder="Search by name or email..."
+                    searchPlaceholder={t.common.search + '...'}
                     emptyMessage="No teachers found."
                   />
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Subject (optional)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.quizzes.subject} (optional)</label>
                 <Input
                   value={teacherSubject}
                   onChange={(e) => setTeacherSubject(e.target.value)}
@@ -495,9 +497,9 @@ const ClassDetail: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAssignTeacher(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowAssignTeacher(false)}>{t.common.cancel}</Button>
               <Button onClick={handleAssignTeacher} isLoading={assigning} disabled={!selectedTeacherId}>
-                Assign Teacher
+                {t.classes.assignTeacher}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -507,29 +509,29 @@ const ClassDetail: React.FC = () => {
         <Dialog open={showAssignStudent} onOpenChange={() => setShowAssignStudent(false)}>
           <DialogContent onClose={() => setShowAssignStudent(false)}>
             <DialogHeader>
-              <DialogTitle>Add Student to {classRoom.name}</DialogTitle>
+              <DialogTitle>{t.classes.assignStudent} - {classRoom.name}</DialogTitle>
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Student</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.sidebar.students}</label>
                 {availableStudents.length === 0 ? (
-                  <p className="text-sm text-gray-400 py-2">Semua siswa sudah terdaftar di kelas. Hapus siswa dari kelas lain terlebih dahulu.</p>
+                  <p className="text-sm text-gray-400 py-2">{t.classes.allStudentsAssigned}</p>
                 ) : (
                   <SearchableSelect
                     value={selectedStudentId}
                     onChange={(val) => setSelectedStudentId(val)}
                     options={availableStudents.map((s) => ({ value: String(s.id), label: s.name, subtitle: s.email }))}
                     placeholder="Choose a student..."
-                    searchPlaceholder="Search by name or email..."
+                    searchPlaceholder={t.common.search + '...'}
                     emptyMessage="No students found."
                   />
                 )}
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAssignStudent(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setShowAssignStudent(false)}>{t.common.cancel}</Button>
               <Button onClick={handleAssignStudent} isLoading={assigning} disabled={!selectedStudentId}>
-                Add Student
+                {t.classes.assignStudent}
               </Button>
             </DialogFooter>
           </DialogContent>

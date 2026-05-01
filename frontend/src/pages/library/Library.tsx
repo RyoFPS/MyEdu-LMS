@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import toast from 'react-hot-toast';
 import type { SubjectMatter, Subject } from '../../types';
 import {
@@ -69,6 +70,7 @@ const isPreviewable = (fileType: string): boolean => {
 
 const Library: React.FC = () => {
   const { isAdmin, user } = useAuth();
+  const { t } = useTranslation();
 
   // Data
   const [materials, setMaterials] = useState<SubjectMatter[]>([]);
@@ -340,7 +342,7 @@ const Library: React.FC = () => {
 
   return (
     <>
-      <Header title="Library" description="Core curriculum materials" />
+      <Header title={t.library.title} description={t.library.subtitle} />
 
       <div className="page-container">
         {/* Filters Bar */}
@@ -353,7 +355,7 @@ const Library: React.FC = () => {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search materials..."
+                  placeholder={t.library.searchMaterials}
                   className="pl-10"
                 />
               </div>
@@ -363,8 +365,8 @@ const Library: React.FC = () => {
                 value={filterGradeLevel}
                 onChange={(e) => setFilterGradeLevel(e.target.value)}
                 options={[
-                  { value: '', label: 'All Grade Levels' },
-                  ...gradeLevels.map((gl) => ({ value: gl, label: `Grade ${gl}` })),
+                  { value: '', label: t.library.allGradeLevels },
+                  ...gradeLevels.map((gl) => ({ value: gl, label: `${t.library.grade} ${gl}` })),
                 ]}
               />
 
@@ -373,7 +375,7 @@ const Library: React.FC = () => {
                 value={filterSubjectId}
                 onChange={(e) => setFilterSubjectId(e.target.value)}
                 options={[
-                  { value: '', label: 'All Subjects' },
+                  { value: '', label: t.library.allSubjects },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -383,7 +385,7 @@ const Library: React.FC = () => {
                 <div className="flex items-end md:col-span-2 lg:col-span-4">
                   <Button onClick={openUploadDialog} className="w-full sm:w-auto">
                     <Plus className="h-4 w-4" />
-                    Upload Material
+                    {t.library.uploadMaterial}
                   </Button>
                 </div>
               )}
@@ -396,7 +398,7 @@ const Library: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
-              Materials ({materials.length})
+              {t.subjects.materials} ({materials.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -407,16 +409,16 @@ const Library: React.FC = () => {
             ) : materials.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                 <BookOpen className="h-12 w-12 mb-3 opacity-50" />
-                <p className="text-base font-medium mb-1">No materials found</p>
+                <p className="text-base font-medium mb-1">{t.library.noMaterials}</p>
                 <p className="text-sm">
                   {debouncedSearch || filterGradeLevel || filterSubjectId
-                    ? 'Try adjusting your filters or search query.'
-                    : 'No curriculum materials have been uploaded yet.'}
+                    ? t.library.adjustFilters
+                    : t.library.noMaterialsHint}
                 </p>
                 {isAdmin && !debouncedSearch && !filterGradeLevel && !filterSubjectId && (
                   <Button variant="outline" size="sm" className="mt-4" onClick={openUploadDialog}>
                     <Upload className="h-4 w-4" />
-                    Upload First Material
+                    {t.library.uploadFirst}
                   </Button>
                 )}
               </div>
@@ -456,7 +458,7 @@ const Library: React.FC = () => {
                         {material.grade_level && (
                           <Badge variant="default" className="text-xs py-0">
                             <GraduationCap className="h-3 w-3 mr-1" />
-                            Grade {material.grade_level}
+                            {t.library.grade} {material.grade_level}
                           </Badge>
                         )}
                         {material.subject && (
@@ -478,7 +480,7 @@ const Library: React.FC = () => {
                             onClick={() => handlePreview(material)}
                           >
                             <Eye className="h-3.5 w-3.5" />
-                            View
+                            {t.common.view}
                           </Button>
                         )}
                         <Button
@@ -487,7 +489,7 @@ const Library: React.FC = () => {
                           onClick={() => handleDownload(material)}
                         >
                           <Download className="h-3.5 w-3.5" />
-                          Download
+                          {t.common.download}
                         </Button>
                         {canModify(material) && (
                           <>
@@ -521,13 +523,13 @@ const Library: React.FC = () => {
       <Dialog open={showUploadDialog} onOpenChange={() => setShowUploadDialog(false)}>
         <DialogContent className="max-w-md" onClose={() => setShowUploadDialog(false)}>
           <DialogHeader>
-            <DialogTitle>Upload Library Material</DialogTitle>
+            <DialogTitle>{t.library.uploadMaterial}</DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             {/* Title */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Title <span className="text-red-500">*</span>
+                {t.common.title} <span className="text-red-500">*</span>
               </label>
               <Input
                 value={uploadForm.title}
@@ -539,7 +541,7 @@ const Library: React.FC = () => {
             {/* Description */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
+                {t.common.description}
               </label>
               <Textarea
                 value={uploadForm.description}
@@ -552,7 +554,7 @@ const Library: React.FC = () => {
             {/* Grade Level */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Grade Level <span className="text-red-500">*</span>
+                {t.library.grade} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Input
@@ -572,13 +574,13 @@ const Library: React.FC = () => {
             {/* Subject */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Subject <span className="text-red-500">*</span>
+                {t.quizzes.subject} <span className="text-red-500">*</span>
               </label>
               <Select
                 value={uploadForm.subject_id}
                 onChange={(e) => setUploadForm({ ...uploadForm, subject_id: e.target.value })}
                 options={[
-                  { value: '', label: 'Select a subject' },
+                  { value: '', label: t.attendance.selectAClass },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -639,7 +641,7 @@ const Library: React.FC = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowUploadDialog(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               onClick={handleUpload}
@@ -647,7 +649,7 @@ const Library: React.FC = () => {
               disabled={!uploadForm.title || !uploadForm.file || !uploadForm.grade_level || !uploadForm.subject_id}
             >
               <Upload className="h-4 w-4" />
-              Upload Material
+              {t.library.uploadMaterial}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -657,13 +659,13 @@ const Library: React.FC = () => {
       <Dialog open={showEditDialog} onOpenChange={() => setShowEditDialog(false)}>
         <DialogContent className="max-w-md" onClose={() => setShowEditDialog(false)}>
           <DialogHeader>
-            <DialogTitle>Edit Library Material</DialogTitle>
+            <DialogTitle>{t.common.edit} {t.library.title}</DialogTitle>
           </DialogHeader>
           <div className="p-6 space-y-4">
             {/* Title */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Title <span className="text-red-500">*</span>
+                {t.common.title} <span className="text-red-500">*</span>
               </label>
               <Input
                 value={editForm.title}
@@ -675,7 +677,7 @@ const Library: React.FC = () => {
             {/* Description */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Description
+                {t.common.description}
               </label>
               <Textarea
                 value={editForm.description}
@@ -688,7 +690,7 @@ const Library: React.FC = () => {
             {/* Grade Level */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Grade Level <span className="text-red-500">*</span>
+                {t.library.grade} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Input
@@ -708,13 +710,13 @@ const Library: React.FC = () => {
             {/* Subject */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Subject <span className="text-red-500">*</span>
+                {t.quizzes.subject} <span className="text-red-500">*</span>
               </label>
               <Select
                 value={editForm.subject_id}
                 onChange={(e) => setEditForm({ ...editForm, subject_id: e.target.value })}
                 options={[
-                  { value: '', label: 'Select a subject' },
+                  { value: '', label: t.attendance.selectAClass },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -773,14 +775,14 @@ const Library: React.FC = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               onClick={handleEdit}
               isLoading={saving}
               disabled={!editForm.title || !editForm.grade_level || !editForm.subject_id}
             >
-              Save Changes
+              {t.common.save}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -795,7 +797,7 @@ const Library: React.FC = () => {
               <span className="truncate">{previewMaterial?.title}</span>
               {previewMaterial?.grade_level && (
                 <Badge variant="default" className="ml-2 shrink-0">
-                  Grade {previewMaterial.grade_level}
+                  {t.library.grade} {previewMaterial.grade_level}
                 </Badge>
               )}
               {previewMaterial?.subject && (
@@ -809,7 +811,7 @@ const Library: React.FC = () => {
             {previewLoading ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader2 className="h-10 w-10 animate-spin text-primary-500 mb-3" />
-                <p className="text-sm text-gray-500">Loading preview...</p>
+                <p className="text-sm text-gray-500">{t.common.loading}</p>
               </div>
             ) : previewUrl && previewMaterial ? (
               <>
@@ -861,10 +863,10 @@ const Library: React.FC = () => {
                   onClick={() => previewMaterial && handleDownload(previewMaterial)}
                 >
                   <Download className="h-4 w-4" />
-                  Download
+                  {t.common.download}
                 </Button>
                 <Button variant="outline" onClick={closePreview}>
-                  Close
+                  {t.common.close}
                 </Button>
               </div>
             </div>

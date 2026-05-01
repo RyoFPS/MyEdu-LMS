@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -9,6 +10,7 @@ import toast from 'react-hot-toast';
 
 const Login: React.FC = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,8 +68,8 @@ const Login: React.FC = () => {
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-4 shadow-lg shadow-blue-500/30">
               <GraduationCap className="h-8 w-8" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">MyEdu LMS</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Learning Management System</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.loginTitle}</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t.auth.loginSubtitle}</p>
           </div>
 
           {/* Error Message */}
@@ -80,13 +82,13 @@ const Login: React.FC = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">{t.auth.email}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t.auth.email}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
@@ -97,13 +99,13 @@ const Login: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.auth.password}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder={t.auth.password}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10"
@@ -120,7 +122,7 @@ const Login: React.FC = () => {
             </div>
 
             <Button type="submit" className="w-full h-11 text-base" isLoading={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? t.auth.loggingIn : t.auth.loginButton}
             </Button>
           </form>
 

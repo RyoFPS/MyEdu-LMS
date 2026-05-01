@@ -12,6 +12,7 @@ import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../../hooks/useTranslation';
 import type { ClassRoom, User, AttendanceRecord } from '../../types';
 import {
   ClipboardCheck,
@@ -34,7 +35,8 @@ const AttendanceRow: React.FC<{
   record: AttendanceRecord;
   onUpdateRecord: (userId: number, field: keyof AttendanceRecord, value: string) => void;
   bgVariant?: 'blue' | 'default';
-}> = ({ user, index, record, onUpdateRecord, bgVariant }) => (
+  t: any;
+}> = ({ user, index, record, onUpdateRecord, bgVariant, t }) => (
   <div
     className={cn(
       'grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-3 sm:gap-4 p-4 rounded-lg border transition-colors',
@@ -59,14 +61,14 @@ const AttendanceRow: React.FC<{
         onValueChange={(val) => onUpdateRecord(user.id, 'status', val)}
         className="grid grid-cols-4 gap-1"
       >
-        <RadioGroupItem value="present" label="Present" id={`present-${user.id}`} />
-        <RadioGroupItem value="absent" label="Absent" id={`absent-${user.id}`} />
-        <RadioGroupItem value="late" label="Late" id={`late-${user.id}`} />
-        <RadioGroupItem value="excused" label="Excused" id={`excused-${user.id}`} />
+        <RadioGroupItem value="present" label={t.attendance.present} id={`present-${user.id}`} />
+        <RadioGroupItem value="absent" label={t.attendance.absent} id={`absent-${user.id}`} />
+        <RadioGroupItem value="late" label={t.attendance.late} id={`late-${user.id}`} />
+        <RadioGroupItem value="excused" label={t.attendance.excused} id={`excused-${user.id}`} />
       </RadioGroup>
     </div>
     <Input
-      placeholder="Notes..."
+      placeholder={t.attendance.notes + '...'}
       value={record?.notes || ''}
       onChange={(e) => onUpdateRecord(user.id, 'notes', e.target.value)}
       className="w-full sm:w-[160px] text-xs"
@@ -76,6 +78,7 @@ const AttendanceRow: React.FC<{
 
 const RecordAttendance: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [students, setStudents] = useState<User[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
@@ -207,14 +210,14 @@ const RecordAttendance: React.FC = () => {
 
   return (
     <>
-      <Header title="Record Attendance" description="Mark attendance for your class" />
+      <Header title={t.attendance.recordAttendance} description="Mark attendance for your class" />
       <div className="page-container max-w-4xl mx-auto">
         {/* Class & Date Selection */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5 text-primary-500" />
-              Select Class & Date
+              {t.attendance.selectClass}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -225,11 +228,11 @@ const RecordAttendance: React.FC = () => {
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}
                   options={classes.map((c) => ({ value: String(c.id), label: `${c.name} - ${c.grade_level}` }))}
-                  placeholder="Select a class"
+                  placeholder={t.attendance.selectAClass}
                 />
               </div>
               <div className="space-y-2">
-                <Label required>Date</Label>
+                <Label required>{t.common.date}</Label>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
@@ -251,28 +254,28 @@ const RecordAttendance: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-primary-500" />
-                  Attendance ({teachers.length + students.length})
+                  {t.attendance.title} ({teachers.length + students.length})
                 </CardTitle>
                 {(teachers.length + students.length) > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Set all:</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{t.attendance.setAll}:</span>
                     <Button variant="outline" size="sm" onClick={() => setAllStatus('present')}>
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                      Present
+                      {t.attendance.present}
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => setAllStatus('absent')}>
                       <XCircle className="h-3.5 w-3.5 text-red-500" />
-                      Absent
+                      {t.attendance.absent}
                     </Button>
                   </div>
                 )}
               </div>
               {(teachers.length + students.length) > 0 && (
                 <div className="flex gap-2 mt-2">
-                  <Badge variant="success">{statusCounts.present || 0} Present</Badge>
-                  <Badge variant="destructive">{statusCounts.absent || 0} Absent</Badge>
-                  <Badge variant="warning">{statusCounts.late || 0} Late</Badge>
-                  <Badge variant="info">{statusCounts.excused || 0} Excused</Badge>
+                  <Badge variant="success">{statusCounts.present || 0} {t.attendance.present}</Badge>
+                  <Badge variant="destructive">{statusCounts.absent || 0} {t.attendance.absent}</Badge>
+                  <Badge variant="warning">{statusCounts.late || 0} {t.attendance.late}</Badge>
+                  <Badge variant="info">{statusCounts.excused || 0} {t.attendance.excused}</Badge>
                 </div>
               )}
             </CardHeader>
@@ -284,8 +287,8 @@ const RecordAttendance: React.FC = () => {
               ) : (teachers.length + students.length) === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                   <UserX className="h-12 w-12 mb-3 opacity-50" />
-                  <p className="text-lg font-medium">No members found</p>
-                  <p className="text-sm mt-1">This class has no assigned teachers or enrolled students</p>
+                  <p className="text-lg font-medium">{t.attendance.noMembers}</p>
+                  <p className="text-sm mt-1">{t.attendance.noMembersHint}</p>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -296,14 +299,14 @@ const RecordAttendance: React.FC = () => {
                         <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30">
                           <Shield className="h-4 w-4 text-blue-600" />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Teachers ({teachers.length})</h3>
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t.sidebar.teachers} ({teachers.length})</h3>
                       </div>
                       <div className="space-y-3">
                         {/* Column headers */}
                         <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Teacher</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">Status</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Notes</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t.sidebar.teachers}</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">{t.common.status}</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">{t.attendance.notes}</span>
                         </div>
                         {teachers.map((teacher, index) => (
                           <AttendanceRow
@@ -313,6 +316,7 @@ const RecordAttendance: React.FC = () => {
                             record={records[teacher.id]}
                             onUpdateRecord={updateRecord}
                             bgVariant="blue"
+                            t={t}
                           />
                         ))}
                       </div>
@@ -331,14 +335,14 @@ const RecordAttendance: React.FC = () => {
                         <div className="p-1 rounded bg-green-100 dark:bg-green-900/30">
                           <GraduationCap className="h-4 w-4 text-green-600" />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Students ({students.length})</h3>
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t.sidebar.students} ({students.length})</h3>
                       </div>
                       <div className="space-y-3">
                         {/* Column headers */}
                         <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Student</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">Status</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Notes</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t.sidebar.students}</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">{t.common.status}</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">{t.attendance.notes}</span>
                         </div>
                         {students.map((student, index) => (
                           <AttendanceRow
@@ -347,6 +351,7 @@ const RecordAttendance: React.FC = () => {
                             index={index}
                             record={records[student.id]}
                             onUpdateRecord={updateRecord}
+                            t={t}
                           />
                         ))}
                       </div>
@@ -381,11 +386,11 @@ const RecordAttendance: React.FC = () => {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate('/attendance')}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button onClick={handleSubmit} isLoading={submitting}>
                 <Save className="h-4 w-4" />
-                Submit Attendance
+                {t.attendance.submitAttendance}
               </Button>
             </div>
           </div>

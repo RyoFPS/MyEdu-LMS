@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
+import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { formatDate } from '../../lib/utils';
@@ -60,6 +61,7 @@ interface RoleCounts {
 }
 
 const UserList: React.FC = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
@@ -254,7 +256,7 @@ const UserList: React.FC = () => {
 
   return (
     <>
-      <Header title="Users" description="Manage all system users" />
+      <Header title={t.users.title} description={t.users.subtitle} />
       <div className="page-container">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -265,7 +267,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.total}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Total Users</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t.users.totalUsers}</p>
               </div>
             </CardContent>
           </Card>
@@ -276,7 +278,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.admin}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Admins</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t.users.admins}</p>
               </div>
             </CardContent>
           </Card>
@@ -287,7 +289,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.teacher}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Teachers</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t.sidebar.teachers}</p>
               </div>
             </CardContent>
           </Card>
@@ -298,7 +300,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.student}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Students</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t.sidebar.students}</p>
               </div>
             </CardContent>
           </Card>
@@ -312,7 +314,7 @@ const UserList: React.FC = () => {
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by name or email..."
+                  placeholder={`${t.common.search}...`}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -323,29 +325,29 @@ const UserList: React.FC = () => {
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
                 options={[
-                  { value: 'admin', label: 'Admin' },
-                  { value: 'teacher', label: 'Teacher' },
-                  { value: 'student', label: 'Student' },
+                  { value: 'admin', label: t.users.admin },
+                  { value: 'teacher', label: t.users.teacher },
+                  { value: 'student', label: t.users.student },
                 ]}
-                placeholder="All Roles"
+                placeholder={t.users.allRoles}
               />
               {/* Subject filter */}
               <Select
                 value={subjectFilter}
                 onChange={(e) => setSubjectFilter(e.target.value)}
                 options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
-                placeholder="All Subjects"
+                placeholder={t.users.allSubjects}
               />
               {/* Add User button */}
               <div className="flex items-end">
                 <Button onClick={() => setShowCreate(true)} className="w-full">
                   <Plus className="h-4 w-4" />
-                  Add User
+                  {t.users.addUser}
                 </Button>
               </div>
               {/* Date From */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Joined From</label>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t.users.joinedFrom}</label>
                 <Input
                   type="date"
                   value={joinedFrom}
@@ -354,7 +356,7 @@ const UserList: React.FC = () => {
               </div>
               {/* Date To */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Joined To</label>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t.users.joinedTo}</label>
                 <Input
                   type="date"
                   value={joinedTo}
@@ -366,7 +368,7 @@ const UserList: React.FC = () => {
                 <div className="flex items-end md:col-span-2">
                   <Button variant="outline" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
                     <Filter className="h-4 w-4" />
-                    Clear Filters
+                    {t.common.clearFilters}
                   </Button>
                 </div>
               )}
@@ -383,7 +385,7 @@ const UserList: React.FC = () => {
           ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
-              <p className="text-lg font-medium">No users found</p>
+              <p className="text-lg font-medium">{t.common.noData}</p>
               <p className="text-sm mt-1">Try adjusting your filters</p>
             </div>
           ) : (
@@ -392,12 +394,12 @@ const UserList: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12 hidden sm:table-cell">#</TableHead>
-                    <TableHead>User</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead className="hidden lg:table-cell">Subject</TableHead>
-                    <TableHead className="hidden md:table-cell">Phone</TableHead>
-                    <TableHead className="hidden md:table-cell">Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t.common.name}</TableHead>
+                    <TableHead>{t.common.role}</TableHead>
+                    <TableHead className="hidden lg:table-cell">{t.users.subject}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t.common.phone}</TableHead>
+                    <TableHead className="hidden md:table-cell">{t.users.joined}</TableHead>
+                    <TableHead className="text-right">{t.common.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -517,60 +519,60 @@ const UserList: React.FC = () => {
         <Dialog open={showCreate} onOpenChange={resetForm}>
           <DialogContent onClose={resetForm}>
             <DialogHeader>
-              <DialogTitle>{editingUser ? 'Edit User' : 'Create New User'}</DialogTitle>
+              <DialogTitle>{editingUser ? t.users.editUser : t.users.createUser}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="p-6 space-y-4">
                 <div className="space-y-2">
-                  <Label required>Full Name</Label>
+                  <Label required>{t.users.fullName}</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter full name"
+                    placeholder={t.users.fullName}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label required>Email</Label>
+                  <Label required>{t.common.email}</Label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="Enter email address"
+                    placeholder={t.common.email}
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label required={!editingUser}>
-                    Password {editingUser && '(leave blank to keep current)'}
+                    {t.users.password} {editingUser && `(${t.users.passwordHint})`}
                   </Label>
                   <Input
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder={editingUser ? 'Leave blank to keep current' : 'Enter password'}
+                    placeholder={editingUser ? t.users.passwordHint : t.users.password}
                     required={!editingUser}
                     minLength={8}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label required>Role</Label>
+                  <Label required>{t.common.role}</Label>
                   <Select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     options={[
-                      { value: 'admin', label: 'Admin' },
-                      { value: 'teacher', label: 'Teacher' },
-                      { value: 'student', label: 'Student' },
+                      { value: 'admin', label: t.users.admin },
+                      { value: 'teacher', label: t.users.teacher },
+                      { value: 'student', label: t.users.student },
                     ]}
                   />
                 </div>
                 {formData.role === 'teacher' && (
                   <div className="space-y-2">
-                    <Label>Subjects</Label>
+                    <Label>{t.users.subjects}</Label>
                     <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
                       {subjects.length === 0 ? (
-                        <p className="text-sm text-gray-400">No subjects available. Add subjects first.</p>
+                        <p className="text-sm text-gray-400">{t.users.noSubjectsAvailable}</p>
                       ) : (
                         subjects.map((subject) => (
                           <label key={subject.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
@@ -595,24 +597,24 @@ const UserList: React.FC = () => {
                         ))
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">Select the subjects this teacher will teach</p>
+                    <p className="text-xs text-gray-400">{t.users.selectSubjects}</p>
                   </div>
                 )}
                 <div className="space-y-2">
-                  <Label>Phone</Label>
+                  <Label>{t.common.phone}</Label>
                   <Input
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="Enter phone number (optional)"
+                    placeholder={t.users.phoneOptional}
                   />
                 </div>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
+                  {t.common.cancel}
                 </Button>
                 <Button type="submit" isLoading={submitting}>
-                  {editingUser ? 'Update User' : 'Create User'}
+                  {editingUser ? t.users.editUser : t.users.createUser}
                 </Button>
               </DialogFooter>
             </form>
@@ -625,20 +627,20 @@ const UserList: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                Delete User
+                {t.users.deleteUser}
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-2">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Are you sure you want to delete this user? This action cannot be undone.
+                {t.users.deleteConfirm}
               </p>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteId(null)}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button variant="destructive" onClick={handleDelete} isLoading={submitting}>
-                Delete User
+                {t.common.delete}
               </Button>
             </DialogFooter>
           </DialogContent>

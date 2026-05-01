@@ -9,6 +9,7 @@ import { Select } from '../../components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Avatar } from '../../components/ui/avatar';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import type { Attendance, ClassRoom } from '../../types';
@@ -42,6 +43,7 @@ interface PaginationMeta {
 
 const AttendanceList: React.FC = () => {
   const { isTeacher, isAdmin } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [classes, setClasses] = useState<ClassRoom[]>([]);
@@ -133,7 +135,7 @@ const AttendanceList: React.FC = () => {
 
   const handleExportAttendance = async () => {
     if (!selectedClass) {
-      toast.error('Please select a class to export.');
+      toast.error(t.attendance.exportRequiresClass);
       return;
     }
     try {
@@ -178,15 +180,15 @@ const AttendanceList: React.FC = () => {
   return (
     <>
       <Header
-        title="Attendance"
-        description={isTeacher || isAdmin ? 'Manage and view attendance records' : 'View your attendance history'}
+        title={t.attendance.title}
+        description={isTeacher || isAdmin ? t.attendance.subtitleAdmin : t.attendance.subtitleStudent}
       />
       <div className="page-container">
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <ClipboardCheck className="h-6 w-6 text-primary-500" />
-            <h2 className="text-lg font-semibold">Attendance Records</h2>
+            <h2 className="text-lg font-semibold">{t.attendance.title}</h2>
             {meta.total > 0 && (
               <Badge variant="secondary" className="ml-1">{meta.total} records</Badge>
             )}
@@ -195,11 +197,11 @@ const AttendanceList: React.FC = () => {
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm" onClick={handleExportAttendance} disabled={!selectedClass}>
                 <Download className="h-4 w-4" />
-                Export CSV
+                {t.common.exportCsv}
               </Button>
               <Button onClick={() => navigate('/attendance/record')}>
                 <Plus className="h-4 w-4" />
-                Record Attendance
+                {t.attendance.recordAttendance}
               </Button>
             </div>
           )}
@@ -213,7 +215,7 @@ const AttendanceList: React.FC = () => {
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by student name or email..."
+                  placeholder={t.common.search + '...'}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -224,19 +226,19 @@ const AttendanceList: React.FC = () => {
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
                 options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
-                placeholder="All Classes"
+                placeholder={t.quizzes.allClasses}
               />
               {/* Status filter */}
               <Select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
                 options={[
-                  { value: 'present', label: 'Present' },
-                  { value: 'absent', label: 'Absent' },
-                  { value: 'late', label: 'Late' },
-                  { value: 'excused', label: 'Excused' },
+                  { value: 'present', label: t.attendance.present },
+                  { value: 'absent', label: t.attendance.absent },
+                  { value: 'late', label: t.attendance.late },
+                  { value: 'excused', label: t.attendance.excused },
                 ]}
-                placeholder="All Status"
+                placeholder={t.quizzes.allStatus}
               />
               {/* Date From */}
               <div className="space-y-1">
@@ -261,7 +263,7 @@ const AttendanceList: React.FC = () => {
                 <div className="flex items-end md:col-span-2">
                   <Button variant="outline" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
                     <Filter className="h-4 w-4" />
-                    Clear Filters
+                    {t.common.clearFilters}
                   </Button>
                 </div>
               )}
@@ -278,8 +280,8 @@ const AttendanceList: React.FC = () => {
           ) : attendance.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
-              <p className="text-lg font-medium">No attendance records found</p>
-              <p className="text-sm mt-1">Try adjusting your filters</p>
+              <p className="text-lg font-medium">{t.common.noData}</p>
+              <p className="text-sm mt-1">{t.library.adjustFilters}</p>
             </div>
           ) : (
             <>
@@ -287,11 +289,11 @@ const AttendanceList: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12">#</TableHead>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Class</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Notes</TableHead>
+                    <TableHead>{t.sidebar.students}</TableHead>
+                    <TableHead>{t.sidebar.classes}</TableHead>
+                    <TableHead>{t.common.date}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
+                    <TableHead>{t.attendance.notes}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

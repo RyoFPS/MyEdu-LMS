@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from '../hooks/useTranslation';
 import api from '../lib/axios';
 import { formatDate, formatDateTime } from '../lib/utils';
 import {
@@ -79,20 +80,22 @@ const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon
 
 // ─── Attendance Status Helpers ───────────────────────────────────────────────
 
-const attendanceConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' | 'info'; icon: React.ReactNode }> = {
-  present: { label: 'Present', variant: 'success', icon: <CheckCircle2 className="h-5 w-5" /> },
-  late: { label: 'Late', variant: 'warning', icon: <AlertTriangle className="h-5 w-5" /> },
-  absent: { label: 'Absent', variant: 'destructive', icon: <XCircle className="h-5 w-5" /> },
-  excused: { label: 'Excused', variant: 'info', icon: <AlertCircle className="h-5 w-5" /> },
-};
+const getAttendanceConfig = (t: any): Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' | 'info'; icon: React.ReactNode }> => ({
+  present: { label: t.dashboard.present, variant: 'success', icon: <CheckCircle2 className="h-5 w-5" /> },
+  late: { label: t.dashboard.late, variant: 'warning', icon: <AlertTriangle className="h-5 w-5" /> },
+  absent: { label: t.dashboard.absent, variant: 'destructive', icon: <XCircle className="h-5 w-5" /> },
+  excused: { label: t.dashboard.excused, variant: 'info', icon: <AlertCircle className="h-5 w-5" /> },
+});
 
 // ─── Student Dashboard ───────────────────────────────────────────────────────
 
-const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate> }> = ({
+const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate>; t: any }> = ({
   stats,
   navigate,
+  t,
 }) => {
   const [markingAttendance, setMarkingAttendance] = useState(false);
+  const attendanceConfig = getAttendanceConfig(t);
 
   const handleSelfAttendance = async () => {
     setMarkingAttendance(true);
@@ -153,7 +156,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
               {statusConfig ? statusConfig.icon : <Clock className="h-5 w-5" />}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Today's Attendance</p>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t.dashboard.todayAttendance}</p>
               <div className="flex items-center gap-2 mt-1">
                 {statusConfig ? (
                   <Badge variant={statusConfig.variant} className="text-sm px-3 py-1">
@@ -162,7 +165,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 ) : (
                   <>
                     <Badge variant="secondary" className="text-sm px-3 py-1">
-                      Not recorded yet
+                      {t.dashboard.notRecorded}
                     </Badge>
                     <Button
                       size="sm"
@@ -174,7 +177,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       ) : (
                         <CheckCircle2 className="h-4 w-4" />
                       )}
-                      {markingAttendance ? 'Marking...' : 'Mark Present'}
+                      {markingAttendance ? t.common.loading : t.dashboard.markPresent}
                     </Button>
                   </>
                 )}
@@ -193,7 +196,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <School className="h-5 w-5 text-primary-500" />
-              My Class
+              {t.dashboard.myClassInfo}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -206,17 +209,17 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                   <Badge variant="info">Grade {classInfo.grade_level}</Badge>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {classInfo.students_count} students
+                  {classInfo.students_count} {t.sidebar.students.toLowerCase()}
                 </p>
               </div>
               {classInfo.teachers && classInfo.teachers.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {classInfo.teachers.map((t: any) => (
-                    <div key={t.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
+                  {classInfo.teachers.map((teacher: any) => (
+                    <div key={teacher.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
                       <GraduationCap className="h-4 w-4 text-primary-500" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.name}</p>
-                        <p className="text-xs text-gray-400">{t.subject}</p>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{teacher.name}</p>
+                        <p className="text-xs text-gray-400">{teacher.subject}</p>
                       </div>
                     </div>
                   ))}
@@ -230,27 +233,27 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
       {/* 3. Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Attendance Rate"
+          title={t.dashboard.attendanceRate}
           value={`${attendance?.rate ?? 0}%`}
           icon={<UserCheck className="h-5 w-5" />}
           color="emerald"
           subtitle={`${attendance?.present ?? 0}/${attendance?.total ?? 0} days present`}
         />
         <StatCard
-          title="Available Quizzes"
+          title={t.dashboard.availableQuizzes}
           value={availableQuizzes.length}
           icon={<FileQuestion className="h-5 w-5" />}
           color="amber"
           subtitle="Ready to take"
         />
         <StatCard
-          title="Total Classes"
+          title={t.dashboard.totalClasses}
           value={stats?.total_classes ?? 0}
           icon={<BookOpen className="h-5 w-5" />}
           color="blue"
         />
         <StatCard
-          title="Recent Score"
+          title={t.dashboard.recentScore}
           value={latestScore}
           icon={<Trophy className="h-5 w-5" />}
           color="purple"
@@ -265,7 +268,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileQuestion className="h-5 w-5 text-amber-500" />
-              Available Quizzes
+              {t.dashboard.availableQuizzes}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -296,7 +299,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
             ) : (
               <EmptyState
                 icon={<FileQuestion className="h-8 w-8" />}
-                message="No quizzes available right now"
+                message={t.dashboard.noQuizzes}
               />
             )}
           </CardContent>
@@ -307,7 +310,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-500" />
-              New Materials Today
+              {t.dashboard.newMaterialsToday}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -337,7 +340,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
             ) : (
               <EmptyState
                 icon={<FileText className="h-8 w-8" />}
-                message="No new materials today"
+                message={t.dashboard.noMaterials}
               />
             )}
           </CardContent>
@@ -350,7 +353,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
               <AlertTriangle className="h-5 w-5" />
-              Upcoming Deadlines
+              {t.dashboard.upcomingDeadlines}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -383,7 +386,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-purple-500" />
-              Recent Results
+              {t.dashboard.recentResults}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -425,10 +428,12 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
 
 // ─── Teacher Dashboard ───────────────────────────────────────────────────────
 
-const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate> }> = ({
+const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate>; t: any }> = ({
   stats,
   navigate,
+  t,
 }) => {
+  const attendanceConfig = getAttendanceConfig(t);
   const todayAttendance = stats?.today_attendance;
   const classes: any[] = stats?.classes ?? [];
   const activeQuizList: any[] = stats?.active_quiz_list ?? [];
@@ -440,27 +445,27 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
       {/* 1. Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="My Classes"
+          title={t.dashboard.myClasses}
           value={stats?.total_classes ?? 0}
           icon={<BookOpen className="h-5 w-5" />}
           color="blue"
         />
         <StatCard
-          title="Today's Attendance"
+          title={t.dashboard.todayAttendance}
           value={`${todayAttendance?.rate ?? 0}%`}
           icon={<UserCheck className="h-5 w-5" />}
           color="emerald"
-          subtitle={`${todayAttendance?.present ?? 0}/${todayAttendance?.total ?? 0} present`}
+          subtitle={`${todayAttendance?.present ?? 0}/${todayAttendance?.total ?? 0} ${t.dashboard.present.toLowerCase()}`}
         />
         <StatCard
-          title="Active Quizzes"
+          title={t.dashboard.activeQuizzes}
           value={stats?.active_quizzes ?? 0}
           icon={<FileQuestion className="h-5 w-5" />}
           color="indigo"
           subtitle={`${stats?.total_quizzes ?? 0} total`}
         />
         <StatCard
-          title="Total Students"
+          title={t.dashboard.totalStudents}
           value={stats?.total_students ?? 0}
           icon={<GraduationCap className="h-5 w-5" />}
           color="amber"
@@ -472,7 +477,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary-500" />
-            My Classes Today
+            {t.dashboard.classesToday}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -489,21 +494,21 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       <h4 className="font-semibold text-gray-900 dark:text-gray-100">{cls.name}</h4>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{cls.subject}</p>
                     </div>
-                    <Badge variant="secondary">{cls.students_count} students</Badge>
+                    <Badge variant="secondary">{cls.students_count} {t.sidebar.students.toLowerCase()}</Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     {cls.attendance_recorded ? (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-green-500" />
                         <span className="text-sm text-green-600 dark:text-green-400">
-                          Recorded ({cls.attendance_count} students)
+                          {t.dashboard.recorded} ({cls.attendance_count} {t.sidebar.students.toLowerCase()})
                         </span>
                       </>
                     ) : (
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-2">
                           <AlertTriangle className="h-4 w-4 text-amber-500" />
-                          <span className="text-sm text-amber-600 dark:text-amber-400">Not recorded</span>
+                          <span className="text-sm text-amber-600 dark:text-amber-400">{t.dashboard.notRecorded}</span>
                         </div>
                         <Button
                           size="sm"
@@ -514,7 +519,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                             navigate(`/attendance/record?class=${cls.id}`);
                           }}
                         >
-                          Record Now
+                          {t.dashboard.recordNow}
                         </Button>
                       </div>
                     )}
@@ -538,7 +543,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileQuestion className="h-5 w-5 text-indigo-500" />
-              Active Quizzes
+              {t.dashboard.activeQuizzes}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -572,7 +577,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
             ) : (
               <EmptyState
                 icon={<FileQuestion className="h-8 w-8" />}
-                message="No active quizzes"
+                message={t.dashboard.noQuizzes}
               />
             )}
           </CardContent>
@@ -583,7 +588,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Trophy className="h-5 w-5 text-purple-500" />
-              Recent Quiz Results
+              {t.dashboard.recentResults}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -620,7 +625,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
             ) : (
               <EmptyState
                 icon={<Trophy className="h-8 w-8" />}
-                message="No recent submissions"
+                message={t.dashboard.noRecentActivity}
               />
             )}
           </CardContent>
@@ -633,7 +638,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-500" />
-              New Materials Today
+              {t.dashboard.newMaterialsToday}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -667,9 +672,10 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
 
 // ─── Admin Dashboard ─────────────────────────────────────────────────────────
 
-const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate> }> = ({
+const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate>; t: any }> = ({
   stats,
   navigate,
+  t,
 }) => {
   const todayAttendance = stats?.today_attendance;
   const recentUsers: any[] = stats?.recent_users ?? [];
@@ -680,27 +686,27 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
       {/* 1. Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Users"
+          title={t.dashboard.totalUsers}
           value={stats?.total_users ?? 0}
           icon={<Users className="h-5 w-5" />}
           color="blue"
-          subtitle={`${stats?.total_teachers ?? 0} teachers, ${stats?.total_students ?? 0} students`}
+          subtitle={`${stats?.total_teachers ?? 0} ${t.sidebar.teachers.toLowerCase()}, ${stats?.total_students ?? 0} ${t.sidebar.students.toLowerCase()}`}
         />
         <StatCard
-          title="Total Classes"
+          title={t.dashboard.totalClasses}
           value={stats?.total_classes ?? 0}
           icon={<BookOpen className="h-5 w-5" />}
           color="indigo"
         />
         <StatCard
-          title="Today's Attendance"
+          title={t.dashboard.todayAttendance}
           value={`${todayAttendance?.rate ?? 0}%`}
           icon={<ClipboardCheck className="h-5 w-5" />}
           color="emerald"
-          subtitle={`${todayAttendance?.present ?? 0}/${todayAttendance?.total ?? 0} present`}
+          subtitle={`${todayAttendance?.present ?? 0}/${todayAttendance?.total ?? 0} ${t.dashboard.present.toLowerCase()}`}
         />
         <StatCard
-          title="Active Quizzes"
+          title={t.dashboard.activeQuizzes}
           value={stats?.active_quizzes ?? 0}
           icon={<FileQuestion className="h-5 w-5" />}
           color="amber"
@@ -714,33 +720,33 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary-500" />
-              Quick Actions
+              {t.dashboard.quickActions}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/users')}>
               <Users className="h-4 w-4" />
-              Manage Users
+              {t.dashboard.manageUsers}
               <ArrowRight className="h-4 w-4 ml-auto" />
             </Button>
             <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/classes')}>
               <BookOpen className="h-4 w-4" />
-              Manage Classes
+              {t.dashboard.manageClasses}
               <ArrowRight className="h-4 w-4 ml-auto" />
             </Button>
             <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/attendance')}>
               <ClipboardCheck className="h-4 w-4" />
-              View Attendance
+              {t.dashboard.viewAttendance}
               <ArrowRight className="h-4 w-4 ml-auto" />
             </Button>
             <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/quizzes')}>
               <FileQuestion className="h-4 w-4" />
-              View Quizzes
+              {t.dashboard.viewQuizzes}
               <ArrowRight className="h-4 w-4 ml-auto" />
             </Button>
             <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/subjects')}>
               <Layers className="h-4 w-4" />
-              Manage Subjects
+              {t.dashboard.manageSubjects}
               <ArrowRight className="h-4 w-4 ml-auto" />
             </Button>
           </CardContent>
@@ -751,13 +757,13 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary-500" />
-              System Overview
+              {t.dashboard.systemOverview}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Students</span>
+                <span className="text-gray-600 dark:text-gray-400">{t.sidebar.students}</span>
                 <span className="font-semibold">{stats?.total_students ?? 0}</span>
               </div>
               <Progress
@@ -769,7 +775,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Teachers</span>
+                <span className="text-gray-600 dark:text-gray-400">{t.sidebar.teachers}</span>
                 <span className="font-semibold">{stats?.total_teachers ?? 0}</span>
               </div>
               <Progress
@@ -781,7 +787,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Attendance Rate</span>
+                <span className="text-gray-600 dark:text-gray-400">{t.dashboard.attendanceRate}</span>
                 <span className="font-semibold">{todayAttendance?.rate ?? 0}%</span>
               </div>
               <Progress
@@ -806,7 +812,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-blue-500" />
-              Recent Users
+              {t.dashboard.recentActivity}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -838,7 +844,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-blue-500" />
-              Today's Materials
+              {t.dashboard.newMaterialsToday}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -874,6 +880,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
 
 const Dashboard: React.FC = () => {
   const { user, isAdmin, isTeacher, isStudent } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -897,7 +904,7 @@ const Dashboard: React.FC = () => {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500 mx-auto" />
-          <p className="text-sm text-gray-400 mt-2">Loading dashboard...</p>
+          <p className="text-sm text-gray-400 mt-2">{t.common.loading}</p>
         </div>
       </div>
     );
@@ -906,13 +913,13 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <Header
-        title={`Welcome back, ${user?.name?.split(' ')[0] ?? 'User'}!`}
-        description="Here's what's happening today"
+        title={`${t.dashboard.welcomeBack}, ${user?.name?.split(' ')[0] ?? 'User'}!`}
+        description={t.dashboard.whatsHappening}
       />
       <div className="page-container space-y-6">
-        {isAdmin && <AdminDashboard stats={stats} navigate={navigate} />}
-        {isTeacher && <TeacherDashboard stats={stats} navigate={navigate} />}
-        {isStudent && <StudentDashboard stats={stats} navigate={navigate} />}
+        {isAdmin && <AdminDashboard stats={stats} navigate={navigate} t={t} />}
+        {isTeacher && <TeacherDashboard stats={stats} navigate={navigate} t={t} />}
+        {isStudent && <StudentDashboard stats={stats} navigate={navigate} t={t} />}
 
         {/* Fallback if no role matched */}
         {!isAdmin && !isTeacher && !isStudent && (
