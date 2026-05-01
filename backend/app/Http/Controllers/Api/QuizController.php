@@ -125,10 +125,10 @@ class QuizController extends Controller
             \App\Models\Notification::notifyMany(
                 $studentIds,
                 'quiz',
-                'Kuis Baru',
-                'Kuis baru "' . $quiz->title . '" telah dibuat di kelas ' . ($quiz->classRoom?->name ?? '') . '.',
+                'notif.quiz_created',
+                'notif.quiz_created',
                 '/quizzes',
-                ['quiz_id' => $quiz->id, 'class_id' => $quiz->class_id]
+                ['quiz_id' => $quiz->id, 'class_id' => $quiz->class_id, 'quiz_title' => $quiz->title, 'class_name' => $quiz->classRoom?->name ?? '']
             );
         }
 
@@ -461,10 +461,10 @@ class QuizController extends Controller
             \App\Models\Notification::create([
                 'user_id' => $quiz->teacher_id,
                 'type'    => 'quiz',
-                'title'   => 'Kuis Dikumpulkan',
-                'message' => ($user->name ?? 'Siswa') . ' telah mengumpulkan kuis "' . $quiz->title . '".',
+                'title'   => 'notif.quiz_submitted',
+                'message' => 'notif.quiz_submitted',
                 'link'    => '/quizzes/' . $quiz->id . '/results',
-                'data'    => ['quiz_id' => $quiz->id, 'student_id' => $user->id],
+                'data'    => ['quiz_id' => $quiz->id, 'student_id' => $user->id, 'student_name' => $user->name ?? '', 'quiz_title' => $quiz->title],
             ]);
         }
 

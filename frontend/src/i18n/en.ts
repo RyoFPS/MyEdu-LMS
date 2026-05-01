@@ -362,6 +362,21 @@ const en = {
     markAllRead: 'Mark all read',
     noNotifications: 'No notifications yet',
     justNow: 'Just now',
+    // Notification message templates
+    quiz_created_title: 'New Quiz',
+    quiz_created_msg: 'New quiz "{quiz_title}" has been created in class {class_name}.',
+    quiz_submitted_title: 'Quiz Submitted',
+    quiz_submitted_msg: '{student_name} has submitted quiz "{quiz_title}".',
+    attendance_recorded_title: 'Attendance Recorded',
+    attendance_recorded_msg: 'Your attendance on {date}: {status}.',
+    material_uploaded_title: 'New Material',
+    material_uploaded_msg: 'New material "{material_title}" has been uploaded in class {class_name}.',
+    added_to_class_title: 'Added to Class',
+    added_to_class_msg: 'You have been added to class {class_name}.',
+    status_present: 'Present',
+    status_absent: 'Absent',
+    status_late: 'Late',
+    status_excused: 'Excused',
   },
 
   // Language

@@ -219,10 +219,10 @@ class ClassController extends Controller
         \App\Models\Notification::create([
             'user_id' => $validated['student_id'],
             'type'    => 'class',
-            'title'   => 'Ditambahkan ke Kelas',
-            'message' => 'Anda telah ditambahkan ke kelas ' . $classRoom->name . '.',
+            'title'   => 'notif.added_to_class',
+            'message' => 'notif.added_to_class',
             'link'    => '/classes/' . $classRoom->slug,
-            'data'    => ['class_id' => $classRoom->id],
+            'data'    => ['class_id' => $classRoom->id, 'class_name' => $classRoom->name],
         ]);
 
         $classRoom->load('students');

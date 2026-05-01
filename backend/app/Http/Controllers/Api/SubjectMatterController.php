@@ -119,10 +119,10 @@ class SubjectMatterController extends Controller
             \App\Models\Notification::notifyMany(
                 $studentIds,
                 'material',
-                'Materi Baru',
-                'Materi baru "' . $material->title . '" telah diunggah di kelas ' . $class->name . '.',
+                'notif.material_uploaded',
+                'notif.material_uploaded',
                 '/classes/' . $class->slug,
-                ['material_id' => $material->id, 'class_id' => $class->id]
+                ['material_id' => $material->id, 'class_id' => $class->id, 'material_title' => $material->title, 'class_name' => $class->name]
             );
         }
 

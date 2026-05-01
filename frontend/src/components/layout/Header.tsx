@@ -55,6 +55,61 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  // Translate notification title and message
+  const translateNotif = (notif: NotificationItem): { title: string; message: string } => {
+    const data = notif.data || {};
+    const key = notif.title; // e.g., 'notif.quiz_created'
+
+    // Helper to interpolate {var} in template strings
+    const interpolate = (template: string, vars: Record<string, string>): string => {
+      return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] || k);
+    };
+
+    // Translate attendance status
+    const translateStatus = (status: string): string => {
+      const statusMap: Record<string, string> = {
+        present: (t.notifications as any).status_present || 'Present',
+        absent: (t.notifications as any).status_absent || 'Absent',
+        late: (t.notifications as any).status_late || 'Late',
+        excused: (t.notifications as any).status_excused || 'Excused',
+      };
+      return statusMap[status] || status;
+    };
+
+    const n = t.notifications as any;
+
+    switch (key) {
+      case 'notif.quiz_created':
+        return {
+          title: n.quiz_created_title || 'New Quiz',
+          message: interpolate(n.quiz_created_msg || notif.message, { quiz_title: data.quiz_title || '', class_name: data.class_name || '' }),
+        };
+      case 'notif.quiz_submitted':
+        return {
+          title: n.quiz_submitted_title || 'Quiz Submitted',
+          message: interpolate(n.quiz_submitted_msg || notif.message, { student_name: data.student_name || '', quiz_title: data.quiz_title || '' }),
+        };
+      case 'notif.attendance_recorded':
+        return {
+          title: n.attendance_recorded_title || 'Attendance Recorded',
+          message: interpolate(n.attendance_recorded_msg || notif.message, { date: data.date || '', status: translateStatus(data.status || '') }),
+        };
+      case 'notif.material_uploaded':
+        return {
+          title: n.material_uploaded_title || 'New Material',
+          message: interpolate(n.material_uploaded_msg || notif.message, { material_title: data.material_title || '', class_name: data.class_name || '' }),
+        };
+      case 'notif.added_to_class':
+        return {
+          title: n.added_to_class_title || 'Added to Class',
+          message: interpolate(n.added_to_class_msg || notif.message, { class_name: data.class_name || '' }),
+        };
+      default:
+        // Fallback: use raw title/message from backend (for old notifications)
+        return { title: notif.title, message: notif.message };
+    }
+  };
+
   // Notification state
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -213,14 +268,14 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
                                 ? 'text-gray-700 dark:text-gray-300'
                                 : 'font-semibold text-gray-900 dark:text-gray-100'
                             )}>
-                              {notif.title}
+                              {translateNotif(notif).title}
                             </p>
                             {!notif.is_read && (
                               <span className="shrink-0 h-2 w-2 rounded-full bg-primary-500" />
                             )}
                           </div>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
-                            {notif.message}
+                            {translateNotif(notif).message}
                           </p>
                           <p className="text-[10px] text-gray-400 mt-1">
                             {timeAgo(notif.created_at)}
