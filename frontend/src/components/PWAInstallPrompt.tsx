@@ -50,14 +50,14 @@ export const PWAInstallPrompt: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 animate-slide-up">
-      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-4">
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 dark:bg-gray-800 dark:border-gray-700 p-4">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-blue-50 text-blue-600 flex-shrink-0">
             <Smartphone className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 text-sm">Install Chikabu LMS</h3>
-            <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Install Chikabu LMS</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
               Add to your home screen for quick access, offline support, and a native app experience.
             </p>
             <div className="flex items-center gap-2 mt-3">
@@ -72,7 +72,7 @@ export const PWAInstallPrompt: React.FC = () => {
           </div>
           <button
             onClick={handleDismiss}
-            className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+            className="p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
           >
             <X className="h-4 w-4" />
           </button>

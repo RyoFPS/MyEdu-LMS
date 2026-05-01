@@ -96,19 +96,19 @@ const QuizResults: React.FC = () => {
                     <p className="text-2xl font-bold text-green-600">
                       {myAttempt.answers?.filter((a) => a.is_correct).length || 0}
                     </p>
-                    <p className="text-xs text-gray-500">Correct</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Correct</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-red-600">
                       {myAttempt.answers?.filter((a) => !a.is_correct).length || 0}
                     </p>
-                    <p className="text-xs text-gray-500">Wrong</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Wrong</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-600">
+                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {myAttempt.completed_at ? formatDateTime(myAttempt.completed_at) : 'N/A'}
                     </p>
-                    <p className="text-xs text-gray-500">Completed</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Completed</p>
                   </div>
                 </div>
               </CardContent>
@@ -148,11 +148,11 @@ const QuizResults: React.FC = () => {
                           )}
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 text-sm">
+                          <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">
                             Q{index + 1}. {answer.question?.question || 'Question'}
                           </p>
                           <div className="mt-2 space-y-1 text-sm">
-                            <p className="text-gray-600">
+                            <p className="text-gray-600 dark:text-gray-400">
                               Your answer:{' '}
                               <span className={cn('font-medium', answer.is_correct ? 'text-green-600' : 'text-red-600')}>
                                 {answer.selected_answer?.toUpperCase()}
@@ -232,7 +232,7 @@ const QuizResults: React.FC = () => {
                           <div className="flex items-center gap-3">
                             <Avatar name={attempt.student?.name || ''} size="sm" />
                             <div>
-                              <p className="font-medium text-gray-900">
+                              <p className="font-medium text-gray-900 dark:text-gray-100">
                                 {attempt.student?.name || 'N/A'}
                               </p>
                               <p className="text-xs text-gray-400">{attempt.student?.email}</p>
@@ -251,13 +251,13 @@ const QuizResults: React.FC = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-gray-500">
+                          <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                             <Clock className="h-3.5 w-3.5" />
                             {formatDateTime(attempt.started_at)}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
                             {attempt.completed_at ? formatDateTime(attempt.completed_at) : 'In progress'}
                           </span>
                         </TableCell>

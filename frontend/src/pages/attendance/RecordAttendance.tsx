@@ -194,7 +194,7 @@ const RecordAttendance: React.FC = () => {
                 </CardTitle>
                 {students.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Set all:</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Set all:</span>
                     <Button variant="outline" size="sm" onClick={() => setAllStatus('present')}>
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                       Present
@@ -239,8 +239,8 @@ const RecordAttendance: React.FC = () => {
                     <div
                       key={student.id}
                       className={cn(
-                        'grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-3 sm:gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50/50 transition-colors',
-                        index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30',
+                        'grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-3 sm:gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:bg-gray-800/50 transition-colors',
+                        index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/30 dark:bg-gray-800/30',
                       )}
                     >
                       {/* Student info */}
@@ -248,7 +248,7 @@ const RecordAttendance: React.FC = () => {
                         <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
                         <Avatar name={student.name} size="sm" />
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900 truncate">{student.name}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{student.name}</p>
                           <p className="text-xs text-gray-400 truncate">{student.email}</p>
                         </div>
                       </div>
@@ -284,8 +284,8 @@ const RecordAttendance: React.FC = () => {
 
         {/* Submit */}
         {students.length > 0 && (
-          <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm sticky bottom-4">
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
+            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                 {statusCounts.present || 0}

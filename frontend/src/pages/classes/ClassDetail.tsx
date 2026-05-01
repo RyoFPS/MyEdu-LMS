@@ -225,25 +225,25 @@ const ClassDetail: React.FC = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
+              <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                 <BookOpen className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-gray-900">{classRoom.name}</h2>
-                <p className="text-gray-500 mt-0.5">{classRoom.description || classRoom.grade_level}</p>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{classRoom.name}</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-0.5">{classRoom.description || classRoom.grade_level}</p>
               </div>
               <div className="flex gap-3">
-                <div className="text-center px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xl font-bold text-gray-900">{students.length}</p>
-                  <p className="text-xs text-gray-500">Students</p>
+                <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{students.length}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Students</p>
                 </div>
-                <div className="text-center px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xl font-bold text-gray-900">{teachers.length}</p>
-                  <p className="text-xs text-gray-500">Teachers</p>
+                <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{teachers.length}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Teachers</p>
                 </div>
-                <div className="text-center px-4 py-2 bg-gray-50 rounded-lg">
-                  <p className="text-xl font-bold text-gray-900">{quizzes.length}</p>
-                  <p className="text-xs text-gray-500">Quizzes</p>
+                <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{quizzes.length}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Quizzes</p>
                 </div>
               </div>
             </div>
@@ -303,17 +303,17 @@ const ClassDetail: React.FC = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar name={student.name} size="sm" />
-                            <span className="font-medium text-gray-900">{student.name}</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{student.name}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                             <Mail className="h-3.5 w-3.5" />
                             {student.email}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                             <Calendar className="h-3.5 w-3.5" />
                             {formatDate(student.created_at)}
                           </div>
@@ -352,12 +352,12 @@ const ClassDetail: React.FC = () => {
                   {teachers.map((teacher) => (
                     <div
                       key={teacher.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                      className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                     >
                       <Avatar name={teacher.name} size="lg" />
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900">{teacher.name}</p>
-                        <p className="text-sm text-gray-500">{teacher.email}</p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">{teacher.name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{teacher.email}</p>
                         {teacher.phone && (
                           <p className="text-xs text-gray-400 mt-0.5">{teacher.phone}</p>
                         )}
@@ -398,16 +398,16 @@ const ClassDetail: React.FC = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar name={record.user?.name || ''} size="sm" />
-                            <span className="font-medium text-gray-900">{record.user?.name || 'N/A'}</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{record.user?.name || 'N/A'}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-600">{formatDate(record.date)}</TableCell>
+                        <TableCell className="text-sm text-gray-600 dark:text-gray-400">{formatDate(record.date)}</TableCell>
                         <TableCell>
                           <Badge variant={statusBadgeVariant[record.status]} className="capitalize">
                             {record.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-500">{record.notes || '-'}</TableCell>
+                        <TableCell className="text-sm text-gray-500 dark:text-gray-400">{record.notes || '-'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -429,16 +429,16 @@ const ClassDetail: React.FC = () => {
                   {quizzes.map((quiz) => (
                     <div
                       key={quiz.id}
-                      className="p-4 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
                       onClick={() => navigate(`/quizzes/${quiz.id}/results`)}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">{quiz.title}</h4>
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100">{quiz.title}</h4>
                         <Badge variant={quiz.is_active ? 'success' : 'secondary'}>
                           {quiz.is_active ? 'Active' : 'Inactive'}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-500 mb-2 line-clamp-1">{quiz.description}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-1">{quiz.description}</p>
                       <div className="flex items-center gap-3 text-xs text-gray-400">
                         <span>{quiz.duration_minutes} min</span>
                         <span>{quiz.questions_count || 0} questions</span>
@@ -459,7 +459,7 @@ const ClassDetail: React.FC = () => {
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Select Teacher</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Teacher</label>
                 {availableTeachers.length === 0 ? (
                   <p className="text-sm text-gray-400 py-2">All teachers are already assigned to this class.</p>
                 ) : (
@@ -474,7 +474,7 @@ const ClassDetail: React.FC = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Subject (optional)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Subject (optional)</label>
                 <Input
                   value={teacherSubject}
                   onChange={(e) => setTeacherSubject(e.target.value)}
@@ -499,7 +499,7 @@ const ClassDetail: React.FC = () => {
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Select Student</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Student</label>
                 {availableStudents.length === 0 ? (
                   <p className="text-sm text-gray-400 py-2">All students are already enrolled in this class.</p>
                 ) : (

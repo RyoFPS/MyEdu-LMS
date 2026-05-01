@@ -157,21 +157,21 @@ const AdminDashboard: React.FC<{ stats: DashboardStats | null; navigate: ReturnT
         <CardContent className="space-y-6">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Students</span>
+              <span className="text-gray-600 dark:text-gray-400">Students</span>
               <span className="font-semibold">{stats?.total_students ?? 0}</span>
             </div>
             <Progress value={stats?.total_students ?? 0} max={Math.max(stats?.total_users ?? 1, 1)} variant="default" size="md" />
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Teachers</span>
+              <span className="text-gray-600 dark:text-gray-400">Teachers</span>
               <span className="font-semibold">{stats?.total_teachers ?? 0}</span>
             </div>
             <Progress value={stats?.total_teachers ?? 0} max={Math.max(stats?.total_users ?? 1, 1)} variant="success" size="md" />
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Attendance Rate</span>
+              <span className="text-gray-600 dark:text-gray-400">Attendance Rate</span>
               <span className="font-semibold">{stats?.today_attendance_rate ?? 0}%</span>
             </div>
             <Progress value={stats?.today_attendance_rate ?? 0} variant="warning" size="md" />
@@ -261,7 +261,7 @@ const TeacherDashboard: React.FC<{ stats: DashboardStats | null; navigate: Retur
                 <div key={activity.id} className="flex items-start gap-3 text-sm">
                   <div className="h-2 w-2 rounded-full bg-primary-500 mt-1.5 shrink-0" />
                   <div>
-                    <p className="text-gray-700">{activity.message}</p>
+                    <p className="text-gray-700 dark:text-gray-300">{activity.message}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{activity.created_at}</p>
                   </div>
                 </div>
@@ -323,7 +323,7 @@ const StudentDashboard: React.FC<{ stats: DashboardStats | null; navigate: Retur
         <CardContent className="space-y-6">
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Attendance Rate</span>
+              <span className="text-gray-600 dark:text-gray-400">Attendance Rate</span>
               <span className="font-semibold">{stats?.my_attendance_rate ?? 0}%</span>
             </div>
             <Progress
@@ -334,7 +334,7 @@ const StudentDashboard: React.FC<{ stats: DashboardStats | null; navigate: Retur
           </div>
           {stats?.recent_scores && stats.recent_scores.length > 0 && (
             <div>
-              <p className="text-sm text-gray-600 mb-3">Recent Quiz Scores</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Recent Quiz Scores</p>
               <div className="flex gap-2">
                 {stats.recent_scores.map((score, i) => (
                   <Badge key={i} variant={score >= 80 ? 'success' : score >= 60 ? 'warning' : 'destructive'}>
@@ -391,12 +391,12 @@ interface StatCardProps {
 }
 
 const colorMap = {
-  blue: 'bg-blue-50 text-blue-600',
-  indigo: 'bg-indigo-50 text-indigo-600',
-  emerald: 'bg-emerald-50 text-emerald-600',
-  amber: 'bg-amber-50 text-amber-600',
-  red: 'bg-red-50 text-red-600',
-  purple: 'bg-purple-50 text-purple-600',
+  blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-600',
+  indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600',
+  emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600',
+  amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600',
+  red: 'bg-red-50 dark:bg-red-900/30 text-red-600',
+  purple: 'bg-purple-50 dark:bg-purple-900/30 text-purple-600',
 };
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend }) => (
@@ -404,8 +404,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend })
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{value}</p>
           {trend && (
             <div className="flex items-center gap-1 mt-1">
               <TrendingUp className="h-3 w-3 text-emerald-500" />

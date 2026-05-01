@@ -124,20 +124,20 @@ const StudentList: React.FC = () => {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar name={student.name} size="sm" />
-                        <span className="font-medium text-gray-900">{student.name}</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{student.name}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                         <Mail className="h-3.5 w-3.5" />
                         {student.email}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-gray-500">{student.phone || '-'}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{student.phone || '-'}</span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                         <Calendar className="h-3.5 w-3.5" />
                         {formatDate(student.created_at)}
                       </div>

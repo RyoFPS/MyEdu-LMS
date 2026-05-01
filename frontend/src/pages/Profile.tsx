@@ -82,8 +82,8 @@ const Profile: React.FC = () => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <Avatar name={user?.name || ''} src={user?.avatar} size="xl" />
               <div className="text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-gray-900">{user?.name}</h2>
-                <p className="text-gray-500 mt-1">{user?.email}</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user?.name}</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">{user?.email}</p>
                 <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
                   <Badge variant={roleBadgeVariant} className="capitalize">
                     <Shield className="h-3 w-3 mr-1" />
@@ -254,7 +254,7 @@ const InfoRow: React.FC<{
     <div className="text-gray-400">{icon}</div>
     <div>
       <p className="text-xs text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className={`text-sm font-medium text-gray-900 ${className || ''}`}>{value}</p>
+      <p className={`text-sm font-medium text-gray-900 dark:text-gray-100 ${className || ''}`}>{value}</p>
     </div>
   </div>
 );

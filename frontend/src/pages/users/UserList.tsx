@@ -236,45 +236,45 @@ const UserList: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-100 text-gray-600">
+              <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
                 <Users className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.total}</p>
-                <p className="text-xs text-gray-500">Total Users</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Total Users</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-red-50 text-red-600">
+              <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-600">
                 <Shield className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.admin}</p>
-                <p className="text-xs text-gray-500">Admins</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Admins</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
+              <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                 <Users className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.teacher}</p>
-                <p className="text-xs text-gray-500">Teachers</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Teachers</p>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-50 text-green-600">
+              <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600">
                 <GraduationCap className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.student}</p>
-                <p className="text-xs text-gray-500">Students</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Students</p>
               </div>
             </CardContent>
           </Card>
@@ -314,7 +314,7 @@ const UserList: React.FC = () => {
               </div>
               {/* Date From */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500">Joined From</label>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Joined From</label>
                 <Input
                   type="date"
                   value={joinedFrom}
@@ -323,7 +323,7 @@ const UserList: React.FC = () => {
               </div>
               {/* Date To */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500">Joined To</label>
+                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Joined To</label>
                 <Input
                   type="date"
                   value={joinedTo}
@@ -378,7 +378,7 @@ const UserList: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <Avatar name={user.name} size="sm" />
                           <div className="min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{user.name}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
                             <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
                               <Mail className="h-3 w-3 flex-shrink-0" />
                               {user.email}
@@ -393,7 +393,7 @@ const UserList: React.FC = () => {
                       </TableCell>
                       <TableCell>
                         {user.phone ? (
-                          <span className="text-sm text-gray-600 flex items-center gap-1">
+                          <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <Phone className="h-3 w-3 flex-shrink-0" />
                             {user.phone}
                           </span>
@@ -402,7 +402,7 @@ const UserList: React.FC = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-gray-500 flex items-center gap-1">
+                        <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                           <Calendar className="h-3 w-3 flex-shrink-0" />
                           {formatDate(user.created_at)}
                         </span>
@@ -424,8 +424,8 @@ const UserList: React.FC = () => {
 
               {/* Pagination */}
               {meta.last_page > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100">
-                  <p className="text-sm text-gray-500">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100 dark:border-gray-700">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
                     {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} users
                   </p>
@@ -551,7 +551,7 @@ const UserList: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-2">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Are you sure you want to delete this user? This action cannot be undone.
               </p>
             </div>

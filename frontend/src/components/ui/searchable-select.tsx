@@ -208,11 +208,11 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     <div
       ref={dropdownRef}
       style={dropdownStyle}
-      className="rounded-lg border border-gray-200 bg-white shadow-xl"
+      className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-xl"
       onKeyDown={handleKeyDown}
     >
       {/* Search input */}
-      <div className="p-2 border-b border-gray-100">
+      <div className="p-2 border-b border-gray-100 dark:border-gray-700">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
           <input
@@ -222,7 +222,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={searchPlaceholder}
-            className="w-full h-8 pl-8 pr-3 text-sm rounded-md border border-gray-200 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white placeholder:text-gray-400 transition-colors"
+            className="w-full h-8 pl-8 pr-3 text-sm rounded-md border border-gray-200 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white dark:border-gray-600 dark:bg-gray-700 dark:focus:bg-gray-800 dark:text-gray-100 placeholder:text-gray-400 transition-colors"
           />
         </div>
       </div>
@@ -246,7 +246,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 index === highlightedIndex && 'bg-primary-50',
                 option.value === value
                   ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-700 hover:bg-gray-50',
+                  : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
               )}
             >
               <div
@@ -273,7 +273,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
       {/* Footer with count */}
       {filteredOptions.length > 0 && (
-        <div className="px-3 py-1.5 border-t border-gray-100 text-xs text-gray-400">
+        <div className="px-3 py-1.5 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400">
           {filteredOptions.length} of {options.length}{' '}
           {options.length === 1 ? 'result' : 'results'}
         </div>
@@ -290,7 +290,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         className={cn(
-          'flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm transition-colors',
+          'flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800 px-3 py-2 text-sm transition-colors',
           'hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
           'disabled:cursor-not-allowed disabled:opacity-50',
           isOpen && 'ring-2 ring-primary-500/20 border-primary-500',
@@ -306,7 +306,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
             >
               {getInitials(selectedOption.label)}
             </div>
-            <span className="truncate text-gray-900">{selectedOption.label}</span>
+            <span className="truncate text-gray-900 dark:text-gray-100">{selectedOption.label}</span>
             {selectedOption.subtitle && (
               <span className="text-xs text-gray-400 truncate hidden sm:inline">
                 ({selectedOption.subtitle})
@@ -322,7 +322,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               role="button"
               tabIndex={-1}
               onClick={handleClear}
-              className="p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </span>

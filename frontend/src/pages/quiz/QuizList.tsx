@@ -236,7 +236,7 @@ const QuizList: React.FC = () => {
         {/* Results info */}
         {!loading && meta.total > 0 && (
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
               {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} quizzes
             </p>
@@ -267,7 +267,7 @@ const QuizList: React.FC = () => {
                 <Card key={quiz.id} className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 group">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-3">
-                      <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600">
+                      <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600">
                         <FileQuestion className="h-5 w-5" />
                       </div>
                       <Badge variant={quiz.is_active ? 'success' : 'secondary'}>
@@ -275,25 +275,25 @@ const QuizList: React.FC = () => {
                       </Badge>
                     </div>
 
-                    <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">{quiz.title}</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-1">{quiz.title}</h3>
                     {quiz.description && (
-                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">{quiz.description}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">{quiz.description}</p>
                     )}
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
                         <span className="truncate">{quiz.class_room?.name || 'No class'}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{quiz.duration_minutes} minutes</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Users className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{quiz.questions_count || 0} questions</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         {quiz.max_attempts === 0 ? (
                           <>
                             <Repeat className="h-3.5 w-3.5 flex-shrink-0" />

@@ -86,23 +86,23 @@ const TeacherList: React.FC = () => {
                   <div className="flex items-center gap-4 mb-4">
                     <Avatar name={teacher.name} src={teacher.avatar} size="lg" />
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-gray-900 truncate">{teacher.name}</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">{teacher.name}</h3>
                       <Badge variant="info" className="mt-1">Teacher</Badge>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <Mail className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate">{teacher.email}</span>
                     </div>
                     {teacher.phone && (
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Phone className="h-3.5 w-3.5 shrink-0" />
                         <span>{teacher.phone}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                       <BookOpen className="h-3.5 w-3.5 shrink-0" />
                       <span>Teacher</span>
                     </div>

@@ -181,8 +181,8 @@ const QuizTake: React.FC = () => {
                 className={cn(
                   'flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono text-lg font-bold',
                   isTimeLow
-                    ? 'bg-red-50 text-red-600 animate-pulse'
-                    : 'bg-gray-100 text-gray-700'
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 animate-pulse'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
                 )}
               >
                 <Clock className="h-4 w-4" />
@@ -204,8 +204,8 @@ const QuizTake: React.FC = () => {
                 i === currentIndex
                   ? 'bg-primary-500 text-white shadow-md'
                   : answers[q.id!]
-                  ? 'bg-green-100 text-green-700 border border-green-200'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-green-100 dark:bg-green-900/40 text-green-700 border border-green-200'
+                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
               )}
             >
               {i + 1}
@@ -237,8 +237,8 @@ const QuizTake: React.FC = () => {
                   className={cn(
                     'w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200',
                     isSelected
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700'
+                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                   )}
                 >
                   <span
@@ -246,7 +246,7 @@ const QuizTake: React.FC = () => {
                       'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold shrink-0 transition-colors',
                       isSelected
                         ? 'bg-primary-500 text-white'
-                        : 'bg-gray-100 text-gray-600'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     )}
                   >
                     {option.toUpperCase()}

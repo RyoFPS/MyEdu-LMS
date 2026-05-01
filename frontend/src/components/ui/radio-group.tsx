@@ -62,12 +62,12 @@ export const RadioGroupItem: React.FC<RadioGroupItemProps> = ({
           'h-4 w-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center',
           isSelected
             ? 'border-primary-500 bg-primary-500'
-            : 'border-gray-300 hover:border-gray-400'
+            : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500'
         )}
       >
         {isSelected && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
       </button>
-      {label && <span className="text-sm text-gray-700">{label}</span>}
+      {label && <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>}
     </label>
   );
 };

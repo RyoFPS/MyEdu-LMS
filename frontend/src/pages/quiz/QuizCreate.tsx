@@ -330,13 +330,13 @@ const QuizCreate: React.FC = () => {
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
                         formData.max_attempts === '1'
-                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 shadow-sm'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
                       )}
                     >
                       <div className={cn(
                         'p-2.5 rounded-lg',
-                        formData.max_attempts === '1' ? 'bg-primary-100' : 'bg-gray-100'
+                        formData.max_attempts === '1' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700'
                       )}>
                         <Shield className="h-5 w-5" />
                       </div>
@@ -353,13 +353,13 @@ const QuizCreate: React.FC = () => {
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
                         formData.max_attempts === '0'
-                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 shadow-sm'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
                       )}
                     >
                       <div className={cn(
                         'p-2.5 rounded-lg',
-                        formData.max_attempts === '0' ? 'bg-primary-100' : 'bg-gray-100'
+                        formData.max_attempts === '0' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700'
                       )}>
                         <Repeat className="h-5 w-5" />
                       </div>
@@ -380,13 +380,13 @@ const QuizCreate: React.FC = () => {
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
                         Number(formData.max_attempts) > 1
-                          ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 shadow-sm'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
                       )}
                     >
                       <div className={cn(
                         'p-2.5 rounded-lg',
-                        Number(formData.max_attempts) > 1 ? 'bg-primary-100' : 'bg-gray-100'
+                        Number(formData.max_attempts) > 1 ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700'
                       )}>
                         <Hash className="h-5 w-5" />
                       </div>
@@ -419,8 +419,8 @@ const QuizCreate: React.FC = () => {
           {/* Questions */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Questions ({questions.length})</h3>
-              <p className="text-sm text-gray-500">Total points: {totalPoints}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Questions ({questions.length})</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total points: {totalPoints}</p>
             </div>
             <Button type="button" variant="outline" onClick={addQuestion}>
               <Plus className="h-4 w-4" />
@@ -452,12 +452,12 @@ const QuizCreate: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <div
-                      className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 transition-colors"
+                      className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                       title="Drag to reorder"
                     >
                       <GripVertical className="h-4 w-4 text-gray-400" />
                     </div>
-                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 text-primary-700 text-xs font-bold">
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 text-xs font-bold">
                       {index + 1}
                     </span>
                     Question {index + 1}
@@ -471,7 +471,7 @@ const QuizCreate: React.FC = () => {
                       size="icon"
                       onClick={() => moveQuestion(index, 'up')}
                       disabled={index === 0}
-                      className="h-8 w-8 text-gray-400 hover:text-gray-600"
+                      className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:text-gray-400"
                       title="Move up"
                     >
                       <ChevronUp className="h-4 w-4" />
@@ -483,7 +483,7 @@ const QuizCreate: React.FC = () => {
                       size="icon"
                       onClick={() => moveQuestion(index, 'down')}
                       disabled={index === questions.length - 1}
-                      className="h-8 w-8 text-gray-400 hover:text-gray-600"
+                      className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:text-gray-400"
                       title="Move down"
                     >
                       <ChevronDown className="h-4 w-4" />
@@ -494,7 +494,7 @@ const QuizCreate: React.FC = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => removeQuestion(index)}
-                      className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+                      className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50 dark:bg-red-900/30"
                       title="Delete question"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -518,7 +518,7 @@ const QuizCreate: React.FC = () => {
                   {(['a', 'b', 'c', 'd'] as const).map((option) => (
                     <div key={option} className="space-y-1">
                       <Label className="flex items-center gap-1">
-                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-gray-100 text-xs font-semibold text-gray-600 uppercase">
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
                           {option}
                         </span>
                         Option {option.toUpperCase()}
@@ -567,8 +567,8 @@ const QuizCreate: React.FC = () => {
           ))}
 
           {/* Submit */}
-          <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-sm sticky bottom-4">
-            <div className="text-sm text-gray-500">
+          <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {questions.length} question{questions.length !== 1 ? 's' : ''} &middot; {totalPoints} total points
             </div>
             <div className="flex gap-2">

@@ -179,18 +179,18 @@ const ClassList: React.FC = () => {
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                    <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <Badge variant="secondary">{cls.academic_year}</Badge>
                   </div>
 
-                  <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 group-hover:text-primary-600 transition-colors">
                     {cls.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4">{cls.grade_level}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{cls.grade_level}</p>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1.5">
                       <GraduationCap className="h-3.5 w-3.5" />
                       <span>{cls.students_count || 0} students</span>
@@ -201,7 +201,7 @@ const ClassList: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                     <span className="text-xs text-primary-500 font-medium group-hover:underline flex items-center gap-1">
                       View Details <ArrowRight className="h-3 w-3" />
                     </span>
@@ -288,7 +288,7 @@ const ClassList: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-2">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Are you sure you want to delete this class? This action cannot be undone.
               </p>
             </div>
