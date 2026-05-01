@@ -113,6 +113,19 @@ class SubjectMatterController extends Controller
 
         $material->load(['subject', 'uploader:id,name,role', 'classRoom']);
 
+        // Notify students in the class
+        $studentIds = $class->students()->pluck('users.id')->toArray();
+        if (!empty($studentIds)) {
+            \App\Models\Notification::notifyMany(
+                $studentIds,
+                'material',
+                'Materi Baru',
+                'Materi baru "' . $material->title . '" telah diunggah di kelas ' . $class->name . '.',
+                '/classes/' . $class->slug,
+                ['material_id' => $material->id, 'class_id' => $class->id]
+            );
+        }
+
         return response()->json([
             'message' => 'Materi berhasil diunggah.',
             'data'    => new SubjectMatterResource($material),

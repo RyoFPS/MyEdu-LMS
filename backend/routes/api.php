@@ -81,6 +81,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/quizzes/{id}/results', [QuizController::class, 'results']);
     Route::get('/quizzes/{id}/export', [QuizController::class, 'export'])->middleware('role:admin|teacher');
 
+    // ── Notifications ────────────────────────────────────────────────────
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllRead']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markRead']);
+
     // ── Subjects ─────────────────────────────────────────────────────────
     Route::get('/subjects', [\App\Http\Controllers\Api\SubjectController::class, 'index']);
     Route::get('/subjects/categories', [\App\Http\Controllers\Api\SubjectController::class, 'categories']);

@@ -119,6 +119,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Notifications for this user.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    /**
      * Subjects this teacher teaches.
      */
     public function subjects(): BelongsToMany

@@ -215,6 +215,16 @@ class ClassController extends Controller
         $classRoom = $this->findClass($id);
         $classRoom->students()->syncWithoutDetaching([$validated['student_id']]);
 
+        // Notify the student
+        \App\Models\Notification::create([
+            'user_id' => $validated['student_id'],
+            'type'    => 'class',
+            'title'   => 'Ditambahkan ke Kelas',
+            'message' => 'Anda telah ditambahkan ke kelas ' . $classRoom->name . '.',
+            'link'    => '/classes/' . $classRoom->slug,
+            'data'    => ['class_id' => $classRoom->id],
+        ]);
+
         $classRoom->load('students');
 
         return response()->json([

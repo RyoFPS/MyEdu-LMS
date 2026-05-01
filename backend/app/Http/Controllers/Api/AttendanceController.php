@@ -139,6 +139,25 @@ class AttendanceController extends Controller
         $ids = collect($created)->pluck('id');
         $attendances = Attendance::with(['user', 'classRoom'])->whereIn('id', $ids)->get();
 
+        // Notify each user about their attendance
+        foreach ($attendances as $att) {
+            $statusLabel = match($att->status) {
+                'present' => 'Hadir',
+                'absent'  => 'Tidak Hadir',
+                'late'    => 'Terlambat',
+                'excused' => 'Izin',
+                default   => $att->status,
+            };
+            \App\Models\Notification::create([
+                'user_id' => $att->user_id,
+                'type'    => 'attendance',
+                'title'   => 'Absensi Dicatat',
+                'message' => 'Kehadiran Anda pada ' . $att->date . ': ' . $statusLabel . '.',
+                'link'    => '/attendance',
+                'data'    => ['attendance_id' => $att->id, 'status' => $att->status],
+            ]);
+        }
+
         return response()->json([
             'message' => 'Kehadiran massal berhasil dicatat.',
             'data'    => AttendanceResource::collection($attendances),

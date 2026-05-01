@@ -115,6 +115,23 @@ class QuizController extends Controller
 
         $quiz->load(['questions', 'classRoom', 'teacher:id,name']);
 
+        // Notify students in the class
+        $studentIds = \App\Models\ClassRoom::find($quiz->class_id)
+            ?->students()
+            ->pluck('users.id')
+            ->toArray() ?? [];
+
+        if (!empty($studentIds)) {
+            \App\Models\Notification::notifyMany(
+                $studentIds,
+                'quiz',
+                'Kuis Baru',
+                'Kuis baru "' . $quiz->title . '" telah dibuat di kelas ' . ($quiz->classRoom?->name ?? '') . '.',
+                '/quizzes',
+                ['quiz_id' => $quiz->id, 'class_id' => $quiz->class_id]
+            );
+        }
+
         return response()->json([
             'message' => 'Kuis berhasil dibuat.',
             'data'    => new QuizResource($quiz),
@@ -438,6 +455,18 @@ class QuizController extends Controller
 
         $attempt->refresh();
         $attempt->load('answers.question');
+
+        // Notify the teacher
+        if ($quiz->teacher_id) {
+            \App\Models\Notification::create([
+                'user_id' => $quiz->teacher_id,
+                'type'    => 'quiz',
+                'title'   => 'Kuis Dikumpulkan',
+                'message' => ($user->name ?? 'Siswa') . ' telah mengumpulkan kuis "' . $quiz->title . '".',
+                'link'    => '/quizzes/' . $quiz->id . '/results',
+                'data'    => ['quiz_id' => $quiz->id, 'student_id' => $user->id],
+            ]);
+        }
 
         return response()->json([
             'message' => 'Kuis berhasil dikumpulkan.',
