@@ -4,7 +4,7 @@ import { Sidebar } from './Sidebar';
 
 export const DashboardLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
       <main className="lg:pl-64 min-h-screen transition-all duration-300">
         <Outlet />

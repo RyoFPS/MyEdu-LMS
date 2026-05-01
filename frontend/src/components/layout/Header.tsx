@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Avatar } from '../ui/avatar';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import { Bell, User, LogOut, Settings } from 'lucide-react';
+import { ThemeToggle } from '../ThemeToggle';
 
 interface HeaderProps {
   title: string;
@@ -20,16 +21,19 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100">
+    <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700">
       <div className="flex items-center justify-between h-16 px-6">
         <div className="pl-10 lg:pl-0">
-          <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-          {description && <p className="text-sm text-gray-500">{description}</p>}
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{title}</h1>
+          {description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Notifications */}
-          <button className="relative p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+          <button className="relative p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <Bell className="h-5 w-5" />
             <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
           </button>
@@ -37,10 +41,10 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
           {/* User Menu */}
           <DropdownMenu
             trigger={
-              <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+              <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                 <Avatar name={user?.name || ''} size="sm" />
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-700">{user?.name}</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{user?.name}</p>
                   <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
                 </div>
               </div>

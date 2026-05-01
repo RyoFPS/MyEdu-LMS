@@ -6,13 +6,13 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const badgeVariants = {
-  default: 'bg-primary-100 text-primary-700 border-primary-200',
-  secondary: 'bg-gray-100 text-gray-700 border-gray-200',
-  success: 'bg-green-100 text-green-700 border-green-200',
-  destructive: 'bg-red-100 text-red-700 border-red-200',
-  warning: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  info: 'bg-blue-100 text-blue-700 border-blue-200',
-  outline: 'bg-transparent text-gray-700 border-gray-300',
+  default: 'bg-primary-100 text-primary-700 border-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-700',
+  secondary: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600',
+  success: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700',
+  destructive: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700',
+  warning: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700',
+  info: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+  outline: 'bg-transparent text-gray-700 border-gray-300 dark:text-gray-300 dark:border-gray-600',
 };
 
 export const Badge: React.FC<BadgeProps> = ({ className, variant = 'default', ...props }) => {

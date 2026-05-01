@@ -60,14 +60,14 @@ const Login: React.FC = () => {
 
       <div className="relative z-10 w-full max-w-md mx-4">
         {/* Login Card */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 animate-slide-up">
+        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 animate-slide-up">
           {/* Logo & Title */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-4 shadow-lg shadow-blue-500/30">
               <GraduationCap className="h-8 w-8" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Chikabu LMS</h1>
-            <p className="text-gray-500 mt-1 text-sm">Learning Management System</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Chikabu LMS</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Learning Management System</p>
           </div>
 
           {/* Error Message */}
