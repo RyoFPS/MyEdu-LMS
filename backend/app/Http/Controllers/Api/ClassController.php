@@ -66,6 +66,30 @@ class ClassController extends Controller
     }
 
     /**
+     * GET /api/classes/grade-levels
+     *
+     * Return distinct grade levels (for the class creation dropdown).
+     * Admin only sees all; teachers/students see only their own.
+     */
+    public function gradeLevels(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $query = ClassRoom::query();
+
+        if ($user->isTeacher()) {
+            $query->whereHas('teachers', fn ($q) => $q->where('users.id', $user->id));
+        } elseif ($user->isStudent()) {
+            $query->whereHas('students', fn ($q) => $q->where('users.id', $user->id));
+        }
+
+        $levels = $query->distinct()
+            ->orderBy('grade_level')
+            ->pluck('grade_level');
+
+        return response()->json(['data' => $levels]);
+    }
+
+    /**
      * POST /api/classes
      *
      * Create a new class (admin only — enforced by StoreClassRequest).

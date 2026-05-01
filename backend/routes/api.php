@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Classes ──────────────────────────────────────────────────────────
     Route::get('/classes', [ClassController::class, 'index']);
+    Route::get('/classes/grade-levels', [ClassController::class, 'gradeLevels']);
     Route::get('/classes/{id}', [ClassController::class, 'show']);
     Route::post('/classes', [ClassController::class, 'store'])->middleware('role:admin');
     Route::put('/classes/{id}', [ClassController::class, 'update'])->middleware('role:admin');

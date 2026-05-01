@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { Select } from '../../components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,7 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
+import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import type { ClassRoom } from '../../types';
 import {
@@ -39,10 +41,13 @@ const ClassList: React.FC = () => {
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [filterGrade, setFilterGrade] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassRoom | null>(null);
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [gradeLevels, setGradeLevels] = useState<string[]>([]);
+  const [classesByGrade, setClassesByGrade] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState({
     name: '',
     grade_level: '',
@@ -52,7 +57,17 @@ const ClassList: React.FC = () => {
 
   useEffect(() => {
     fetchClasses();
+    fetchGradeLevels();
   }, []);
+
+  useEffect(() => {
+    const byGrade: Record<string, string[]> = {};
+    classes.forEach((cls) => {
+      if (!byGrade[cls.grade_level]) byGrade[cls.grade_level] = [];
+      byGrade[cls.grade_level].push(cls.name);
+    });
+    setClassesByGrade(byGrade);
+  }, [classes]);
 
   const fetchClasses = async () => {
     setLoading(true);
@@ -67,6 +82,13 @@ const ClassList: React.FC = () => {
     }
   };
 
+  const fetchGradeLevels = async () => {
+    try {
+      const res = await api.get('/classes/grade-levels');
+      setGradeLevels(res.data.data || []);
+    } catch { /* ignore */ }
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -79,9 +101,9 @@ const ClassList: React.FC = () => {
         toast.success('Class created successfully');
       }
       resetForm();
-      fetchClasses(); // Refresh to get fresh data with slugs
+      fetchClasses();
+      fetchGradeLevels();
     } catch (error: any) {
-      // Only show generic error if axios interceptor didn't already handle it
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error(`Failed to ${editingClass ? 'update' : 'create'} class`);
       }
@@ -98,7 +120,6 @@ const ClassList: React.FC = () => {
       setClasses((prev) => prev.filter((c) => c.slug !== deleteSlug));
       toast.success('Class deleted successfully');
     } catch (error: any) {
-      // Only show generic error if axios interceptor didn't already handle it
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error('Failed to delete class');
       }
@@ -126,13 +147,13 @@ const ClassList: React.FC = () => {
   };
 
   const filteredClasses = classes.filter((cls) => {
-    if (!search) return true;
-    const searchLower = search.toLowerCase();
-    return (
-      cls.name.toLowerCase().includes(searchLower) ||
-      cls.grade_level.toLowerCase().includes(searchLower) ||
-      cls.academic_year.toLowerCase().includes(searchLower)
+    const matchesSearch = !search || (
+      cls.name.toLowerCase().includes(search.toLowerCase()) ||
+      cls.grade_level.toLowerCase().includes(search.toLowerCase()) ||
+      cls.academic_year.toLowerCase().includes(search.toLowerCase())
     );
+    const matchesGrade = !filterGrade || cls.grade_level === filterGrade;
+    return matchesSearch && matchesGrade;
   });
 
   return (
@@ -140,23 +161,37 @@ const ClassList: React.FC = () => {
       <Header title={t.classes.title} description={t.classes.subtitle} />
       <div className="page-container">
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder={t.classes.searchClasses}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          {isAdmin && (
-            <Button onClick={() => setShowCreate(true)}>
-              <Plus className="h-4 w-4" />
-              {t.classes.createClass}
-            </Button>
-          )}
-        </div>
+        <Card>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="relative md:col-span-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder={t.classes.searchClasses}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select
+                value={filterGrade}
+                onChange={(e) => setFilterGrade(e.target.value)}
+                options={[
+                  { value: '', label: 'All Grades' },
+                  ...gradeLevels.map((gl) => ({ value: gl, label: `Grade ${gl}` })),
+                ]}
+              />
+              {isAdmin ? (
+                <Button onClick={() => setShowCreate(true)} className="w-full">
+                  <Plus className="h-4 w-4" />
+                  {t.classes.createClass}
+                </Button>
+              ) : (
+                <div />
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Class Grid */}
         {loading ? (
@@ -232,24 +267,59 @@ const ClassList: React.FC = () => {
             </DialogHeader>
             <form onSubmit={handleCreate}>
               <div className="p-6 space-y-4">
-                <div className="space-y-2">
-                  <Label required>{t.classes.className}</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Class 10A"
-                    required
-                  />
-                </div>
+                {/* Step 1: Grade Level — chips + input */}
                 <div className="space-y-2">
                   <Label required>{t.classes.gradeLevel}</Label>
+                  {gradeLevels.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {gradeLevels.map((gl) => (
+                        <button
+                          key={gl}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, grade_level: gl })}
+                          className={cn(
+                            'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
+                            formData.grade_level === gl
+                              ? 'bg-primary-500 text-white border-primary-500'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary-400 hover:text-primary-600'
+                          )}
+                        >
+                          {gl}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <Input
                     value={formData.grade_level}
                     onChange={(e) => setFormData({ ...formData, grade_level: e.target.value })}
-                    placeholder="e.g., Grade 10"
+                    placeholder="e.g., 7, 8, 9, 10"
+                    required
+                  />
+                  <p className="text-xs text-gray-400">Select an existing grade or type a new one</p>
+                </div>
+
+                {/* Step 2: Class Name — with suggestions based on selected grade */}
+                <div className="space-y-2">
+                  <Label required>{t.classes.className}</Label>
+                  {formData.grade_level && classesByGrade[formData.grade_level]?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-1">
+                      <span className="text-xs text-gray-400 w-full">Existing in Grade {formData.grade_level}:</span>
+                      {classesByGrade[formData.grade_level].map((name) => (
+                        <span key={name} className="px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                          {name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <Input
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder={formData.grade_level ? `e.g., ${formData.grade_level}A, ${formData.grade_level}B` : 'e.g., 7A, 8B'}
                     required
                   />
                 </div>
+
+                {/* Academic Year */}
                 <div className="space-y-2">
                   <Label required>{t.classes.academicYear}</Label>
                   <Input
@@ -259,6 +329,8 @@ const ClassList: React.FC = () => {
                     required
                   />
                 </div>
+
+                {/* Description */}
                 <div className="space-y-2">
                   <Label>{t.common.description}</Label>
                   <Input
