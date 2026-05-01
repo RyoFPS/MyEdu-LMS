@@ -12,6 +12,7 @@ import { Badge } from '../../components/ui/badge';
 import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
+import { useTranslation } from '../../hooks/useTranslation';
 import type { ClassRoom, QuizQuestion } from '../../types';
 import {
   FileQuestion,
@@ -54,6 +55,7 @@ const QuizCreate: React.FC = () => {
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
   const isEditing = !!editId;
+  const { t } = useTranslation();
 
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
@@ -146,7 +148,7 @@ const QuizCreate: React.FC = () => {
 
   const removeQuestion = (index: number) => {
     if (questions.length <= 1) {
-      toast.error('Quiz must have at least one question');
+      toast.error(t.quizzes.addQuestionFirst);
       return;
     }
     setQuestions(questions.filter((_, i) => i !== index));
@@ -213,7 +215,7 @@ const QuizCreate: React.FC = () => {
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       if (!q.question || !q.option_a || !q.option_b || !q.option_c || !q.option_d) {
-        toast.error(`Please fill in all fields for Question ${i + 1}`);
+        toast.error(`Please fill in all fields for ${t.quizzes.question} ${i + 1}`);
         return;
       }
     }
@@ -231,10 +233,10 @@ const QuizCreate: React.FC = () => {
 
       if (isEditing) {
         await api.put(`/quizzes/${editId}`, payload);
-        toast.success('Quiz updated successfully');
+        toast.success(t.quizzes.quizUpdated);
       } else {
         await api.post('/quizzes', payload);
-        toast.success('Quiz created successfully');
+        toast.success(t.quizzes.quizCreated);
       }
       navigate('/quizzes');
     } catch {
@@ -254,16 +256,23 @@ const QuizCreate: React.FC = () => {
 
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
 
+  const optionLabels: Record<string, string> = {
+    a: t.quizzes.optionA,
+    b: t.quizzes.optionB,
+    c: t.quizzes.optionC,
+    d: t.quizzes.optionD,
+  };
+
   return (
     <>
       <Header
-        title={isEditing ? 'Edit Quiz' : 'Create Quiz'}
+        title={isEditing ? t.quizzes.editQuiz : t.quizzes.createQuiz}
         description={isEditing ? 'Update quiz details and questions' : 'Create a new quiz for your class'}
       />
       <div className="page-container max-w-4xl mx-auto">
         <Button variant="ghost" onClick={() => navigate('/quizzes')} className="mb-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Quizzes
+          {t.quizzes.backToQuizzes}
         </Button>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -272,49 +281,49 @@ const QuizCreate: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileQuestion className="h-5 w-5 text-primary-500" />
-                Quiz Details
+                {t.quizzes.quizDetails}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 md:col-span-2">
-                  <Label required>Title</Label>
+                  <Label required>{t.common.title}</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Enter quiz title"
+                    placeholder={t.quizzes.quizTitle}
                     required
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Description</Label>
+                  <Label>{t.common.description}</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    placeholder="Enter quiz description (optional)"
+                    placeholder={t.common.description}
                     rows={3}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label required>Class</Label>
+                  <Label required>{t.sidebar.classes}</Label>
                   <Select
                     value={formData.class_id}
                     onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
                     options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
-                    placeholder="Select a class"
+                    placeholder={t.quizzes.selectClass}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Subject</Label>
+                  <Label>{t.quizzes.subject}</Label>
                   <Select
                     value={formData.subject_id}
                     onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
                     options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
-                    placeholder="Select subject (optional)"
+                    placeholder={t.quizzes.selectSubject}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label required>Duration (minutes)</Label>
+                  <Label required>{t.quizzes.durationMinutes}</Label>
                   <Input
                     type="number"
                     min="1"
@@ -325,7 +334,7 @@ const QuizCreate: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Start Time</Label>
+                  <Label>{t.quizzes.startTime}</Label>
                   <Input
                     type="datetime-local"
                     value={formData.start_time}
@@ -333,7 +342,7 @@ const QuizCreate: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Time</Label>
+                  <Label>{t.quizzes.endTime}</Label>
                   <Input
                     type="datetime-local"
                     value={formData.end_time}
@@ -342,7 +351,7 @@ const QuizCreate: React.FC = () => {
                 </div>
                 {/* Attempt Mode */}
                 <div className="space-y-3 md:col-span-2">
-                  <Label>Attempt Mode</Label>
+                  <Label>{t.quizzes.attemptsConfig}</Label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {/* Single Attempt */}
                     <button
@@ -361,7 +370,7 @@ const QuizCreate: React.FC = () => {
                       )}>
                         <Shield className="h-5 w-5" />
                       </div>
-                      <span className="font-semibold text-sm">Single Attempt</span>
+                      <span className="font-semibold text-sm">{t.quizzes.singleAttempt}</span>
                       <span className="text-xs text-center opacity-70 leading-relaxed">
                         Students can only take this quiz once
                       </span>
@@ -384,7 +393,7 @@ const QuizCreate: React.FC = () => {
                       )}>
                         <Repeat className="h-5 w-5" />
                       </div>
-                      <span className="font-semibold text-sm">Unlimited</span>
+                      <span className="font-semibold text-sm">{t.quizzes.unlimitedAttempts}</span>
                       <span className="text-xs text-center opacity-70 leading-relaxed">
                         Students can retake as many times as they want
                       </span>
@@ -411,7 +420,7 @@ const QuizCreate: React.FC = () => {
                       )}>
                         <Hash className="h-5 w-5" />
                       </div>
-                      <span className="font-semibold text-sm">Custom Limit</span>
+                      <span className="font-semibold text-sm">{t.quizzes.customAttempts}</span>
                       {Number(formData.max_attempts) > 1 ? (
                         <div className="flex items-center gap-2">
                           <Input
@@ -423,7 +432,7 @@ const QuizCreate: React.FC = () => {
                             onClick={(e) => e.stopPropagation()}
                             className="w-16 h-7 text-center text-xs"
                           />
-                          <span className="text-xs opacity-70">attempts</span>
+                          <span className="text-xs opacity-70">{t.quizzes.attempts}</span>
                         </div>
                       ) : (
                         <span className="text-xs text-center opacity-70 leading-relaxed">
@@ -440,12 +449,12 @@ const QuizCreate: React.FC = () => {
           {/* Questions */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Questions ({questions.length})</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Total points: {totalPoints}</p>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t.quizzes.questionsSection} ({questions.length})</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t.quizzes.points}: {totalPoints}</p>
             </div>
             <Button type="button" variant="outline" onClick={addQuestion}>
               <Plus className="h-4 w-4" />
-              Add Question
+              {t.quizzes.addQuestion}
             </Button>
           </div>
 
@@ -481,7 +490,7 @@ const QuizCreate: React.FC = () => {
                     <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 text-xs font-bold">
                       {index + 1}
                     </span>
-                    Question {index + 1}
+                    {t.quizzes.question} {index + 1}
                     <Badge variant="secondary">{question.points} pts</Badge>
                   </CardTitle>
                   <div className="flex items-center gap-1">
@@ -525,11 +534,11 @@ const QuizCreate: React.FC = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label required>Question</Label>
+                  <Label required>{t.quizzes.question}</Label>
                   <Textarea
                     value={question.question}
                     onChange={(e) => updateQuestion(index, 'question', e.target.value)}
-                    placeholder="Enter your question"
+                    placeholder={t.quizzes.question}
                     rows={2}
                     required
                   />
@@ -542,7 +551,7 @@ const QuizCreate: React.FC = () => {
                         <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
                           {option}
                         </span>
-                        Option {option.toUpperCase()}
+                        {optionLabels[option]}
                         {question.correct_answer === option && (
                           <CheckCircle2 className="h-3.5 w-3.5 text-green-500 ml-1" />
                         )}
@@ -550,7 +559,7 @@ const QuizCreate: React.FC = () => {
                       <Input
                         value={question[`option_${option}`]}
                         onChange={(e) => updateQuestion(index, `option_${option}`, e.target.value)}
-                        placeholder={`Option ${option.toUpperCase()}`}
+                        placeholder={optionLabels[option]}
                         required
                       />
                     </div>
@@ -559,7 +568,7 @@ const QuizCreate: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <div className="space-y-2">
-                    <Label required>Correct Answer</Label>
+                    <Label required>{t.quizzes.correctAnswer}</Label>
                     <RadioGroup
                       value={question.correct_answer}
                       onValueChange={(value) => updateQuestion(index, 'correct_answer', value)}
@@ -572,7 +581,7 @@ const QuizCreate: React.FC = () => {
                     </RadioGroup>
                   </div>
                   <div className="space-y-2">
-                    <Label>Points</Label>
+                    <Label>{t.quizzes.points}</Label>
                     <Input
                       type="number"
                       min="1"
@@ -590,15 +599,15 @@ const QuizCreate: React.FC = () => {
           {/* Submit */}
           <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
             <div className="text-sm text-gray-500 dark:text-gray-400">
-              {questions.length} question{questions.length !== 1 ? 's' : ''} &middot; {totalPoints} total points
+              {questions.length} {t.quizzes.questions} &middot; {totalPoints} {t.quizzes.points}
             </div>
             <div className="flex gap-2">
               <Button type="button" variant="outline" onClick={() => navigate('/quizzes')}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button type="submit" isLoading={submitting}>
                 <Save className="h-4 w-4" />
-                {isEditing ? 'Update Quiz' : 'Create Quiz'}
+                {isEditing ? t.quizzes.updateQuiz : t.quizzes.saveQuiz}
               </Button>
             </div>
           </div>

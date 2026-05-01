@@ -16,6 +16,7 @@ import {
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { cn } from '../../lib/utils';
+import { useTranslation } from '../../hooks/useTranslation';
 import type { Quiz, QuizQuestion } from '../../types';
 import {
   Clock,
@@ -31,6 +32,7 @@ import {
 const QuizTake: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -103,9 +105,9 @@ const QuizTake: React.FC = () => {
         });
 
         if (autoSubmit) {
-          toast('Time is up! Quiz submitted automatically.', { icon: '⏰' });
+          toast(t.quizzes.timeUp, { icon: '⏰' });
         } else {
-          toast.success('Quiz submitted successfully!');
+          toast.success(t.quizzes.quizSubmitted);
         }
         navigate(`/quizzes/${id}/results`);
       } catch {
@@ -113,7 +115,7 @@ const QuizTake: React.FC = () => {
         setSubmitting(false);
       }
     },
-    [answers, attemptId, id, navigate, submitting]
+    [answers, attemptId, id, navigate, submitting, t]
   );
 
   useEffect(() => {
@@ -143,13 +145,13 @@ const QuizTake: React.FC = () => {
   if (!quiz || questions.length === 0) {
     return (
       <>
-        <Header title="Quiz" />
+        <Header title={t.sidebar.quizzes} />
         <div className="page-container">
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
-            <p className="text-lg font-medium">Quiz not available</p>
+            <p className="text-lg font-medium">{t.quizzes.quizNotAvailable}</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/quizzes')}>
-              Back to Quizzes
+              {t.quizzes.backToQuizzes}
             </Button>
           </div>
         </div>
@@ -171,10 +173,10 @@ const QuizTake: React.FC = () => {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-4">
                 <Badge variant="secondary">
-                  Question {currentIndex + 1} of {questions.length}
+                  {t.quizzes.question} {currentIndex + 1} {t.quizzes.questionOf} {questions.length}
                 </Badge>
                 <Badge variant={answeredCount === questions.length ? 'success' : 'warning'}>
-                  {answeredCount}/{questions.length} answered
+                  {answeredCount}/{questions.length} {t.quizzes.answeredCount}
                 </Badge>
               </div>
               <div
@@ -217,11 +219,11 @@ const QuizTake: React.FC = () => {
         <Card className="animate-fade-in">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <Badge variant="secondary">{currentQuestion.points} points</Badge>
+              <Badge variant="secondary">{currentQuestion.points} {t.quizzes.points}</Badge>
               {answers[currentQuestion.id] && (
                 <Badge variant="success">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Answered
+                  {t.quizzes.answeredCount}
                 </Badge>
               )}
             </div>
@@ -268,19 +270,19 @@ const QuizTake: React.FC = () => {
             disabled={currentIndex === 0}
           >
             <ChevronLeft className="h-4 w-4" />
-            Previous
+            {t.quizzes.previous}
           </Button>
 
           {currentIndex === questions.length - 1 ? (
             <Button onClick={() => setShowConfirm(true)} disabled={submitting}>
               <Send className="h-4 w-4" />
-              Submit Quiz
+              {t.quizzes.submitQuiz}
             </Button>
           ) : (
             <Button
               onClick={() => setCurrentIndex(Math.min(questions.length - 1, currentIndex + 1))}
             >
-              Next
+              {t.quizzes.next}
               <ChevronRight className="h-4 w-4" />
             </Button>
           )}
@@ -292,29 +294,27 @@ const QuizTake: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
-                Submit Quiz?
+                {t.quizzes.submitConfirm}
               </DialogTitle>
               <DialogDescription>
                 {answeredCount < questions.length ? (
                   <span className="text-amber-600">
-                    You have only answered {answeredCount} out of {questions.length} questions.
-                    Unanswered questions will be marked as incorrect.
+                    {answeredCount}/{questions.length} {t.quizzes.answeredCount}. {questions.length - answeredCount} {t.quizzes.unanswered}.
                   </span>
                 ) : (
                   <span>
-                    You have answered all {questions.length} questions. Are you sure you want to
-                    submit?
+                    {t.quizzes.submitConfirmDesc}
                   </span>
                 )}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowConfirm(false)}>
-                Review Answers
+                {t.common.cancel}
               </Button>
               <Button onClick={() => handleSubmit(false)} isLoading={submitting}>
                 <Send className="h-4 w-4" />
-                Submit
+                {t.quizzes.submitQuiz}
               </Button>
             </DialogFooter>
           </DialogContent>

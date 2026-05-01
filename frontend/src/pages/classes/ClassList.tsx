@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from '../../components/ui/dialog';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import type { ClassRoom } from '../../types';
@@ -33,6 +34,7 @@ import {
 
 const ClassList: React.FC = () => {
   const { isAdmin } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,14 +137,14 @@ const ClassList: React.FC = () => {
 
   return (
     <>
-      <Header title="Classes" description="Manage and view classes" />
+      <Header title={t.classes.title} description={t.classes.subtitle} />
       <div className="page-container">
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search classes..."
+              placeholder={t.classes.searchClasses}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10"
@@ -151,7 +153,7 @@ const ClassList: React.FC = () => {
           {isAdmin && (
             <Button onClick={() => setShowCreate(true)}>
               <Plus className="h-4 w-4" />
-              Create Class
+              {t.classes.createClass}
             </Button>
           )}
         </div>
@@ -164,9 +166,9 @@ const ClassList: React.FC = () => {
         ) : filteredClasses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
-            <p className="text-lg font-medium">No classes found</p>
+            <p className="text-lg font-medium">{t.classes.noClasses}</p>
             <p className="text-sm mt-1">
-              {isAdmin ? 'Create your first class to get started' : 'No classes available'}
+              {isAdmin ? t.classes.noClassesHint : t.classes.noClassesAvailable}
             </p>
           </div>
         ) : (
@@ -193,17 +195,17 @@ const ClassList: React.FC = () => {
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1.5">
                       <GraduationCap className="h-3.5 w-3.5" />
-                      <span>{cls.students_count || 0} students</span>
+                      <span>{cls.students_count || 0} {t.classes.students}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Users className="h-3.5 w-3.5" />
-                      <span>{cls.teachers_count || 0} teachers</span>
+                      <span>{cls.teachers_count || 0} {t.classes.teachers}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                     <span className="text-xs text-primary-500 font-medium group-hover:underline flex items-center gap-1">
-                      View Details <ArrowRight className="h-3 w-3" />
+                      {t.classes.viewDetails} <ArrowRight className="h-3 w-3" />
                     </span>
                     {isAdmin && (
                       <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
@@ -226,12 +228,12 @@ const ClassList: React.FC = () => {
         <Dialog open={showCreate} onOpenChange={resetForm}>
           <DialogContent onClose={resetForm}>
             <DialogHeader>
-              <DialogTitle>{editingClass ? 'Edit Class' : 'Create New Class'}</DialogTitle>
+              <DialogTitle>{editingClass ? t.classes.editClass : t.classes.createClass}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleCreate}>
               <div className="p-6 space-y-4">
                 <div className="space-y-2">
-                  <Label required>Class Name</Label>
+                  <Label required>{t.classes.className}</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -240,7 +242,7 @@ const ClassList: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label required>Grade Level</Label>
+                  <Label required>{t.classes.gradeLevel}</Label>
                   <Input
                     value={formData.grade_level}
                     onChange={(e) => setFormData({ ...formData, grade_level: e.target.value })}
@@ -249,7 +251,7 @@ const ClassList: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label required>Academic Year</Label>
+                  <Label required>{t.classes.academicYear}</Label>
                   <Input
                     value={formData.academic_year}
                     onChange={(e) => setFormData({ ...formData, academic_year: e.target.value })}
@@ -258,7 +260,7 @@ const ClassList: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>{t.common.description}</Label>
                   <Input
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -268,10 +270,10 @@ const ClassList: React.FC = () => {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={resetForm}>
-                  Cancel
+                  {t.common.cancel}
                 </Button>
                 <Button type="submit" isLoading={submitting}>
-                  {editingClass ? 'Update' : 'Create'}
+                  {editingClass ? t.common.save : t.common.create}
                 </Button>
               </DialogFooter>
             </form>
@@ -284,20 +286,20 @@ const ClassList: React.FC = () => {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                Delete Class
+                {t.classes.deleteClass}
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-2">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Are you sure you want to delete this class? This action cannot be undone.
+                {t.classes.deleteConfirm}
               </p>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteSlug(null)}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button variant="destructive" onClick={handleDelete} isLoading={submitting}>
-                Delete
+                {t.common.delete}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -8,6 +8,7 @@ import { Progress } from '../../components/ui/progress';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Avatar } from '../../components/ui/avatar';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import { cn, formatDateTime } from '../../lib/utils';
 import type { Quiz, QuizAttempt } from '../../types';
@@ -29,6 +30,7 @@ const QuizResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isStudent, isTeacher, isAdmin } = useAuth();
+  const { t } = useTranslation();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [myAttempt, setMyAttempt] = useState<QuizAttempt | null>(null);
@@ -80,11 +82,11 @@ const QuizResults: React.FC = () => {
 
   return (
     <>
-      <Header title="Quiz Results" description={quiz?.title || 'View quiz results'} />
+      <Header title={t.quizzes.quizResults} description={quiz?.title || t.quizzes.quizResults} />
       <div className="page-container max-w-4xl mx-auto">
         <Button variant="ghost" onClick={() => navigate('/quizzes')} className="mb-2">
           <ArrowLeft className="h-4 w-4" />
-          Back to Quizzes
+          {t.quizzes.backToQuizzes}
         </Button>
 
         {/* Student View - My Results */}
@@ -98,7 +100,7 @@ const QuizResults: React.FC = () => {
                   {myAttempt.score}/{myAttempt.total_points}
                 </h2>
                 <p className="text-white/80 text-sm">
-                  {Math.round((myAttempt.score / Math.max(myAttempt.total_points, 1)) * 100)}% Score
+                  {Math.round((myAttempt.score / Math.max(myAttempt.total_points, 1)) * 100)}% {t.quizzes.score}
                 </p>
                 <div className="mt-4 max-w-xs mx-auto">
                   <Progress
@@ -115,19 +117,19 @@ const QuizResults: React.FC = () => {
                     <p className="text-2xl font-bold text-green-600">
                       {myAttempt.answers?.filter((a) => a.is_correct).length || 0}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Correct</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.quizzes.correct}</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-red-600">
                       {myAttempt.answers?.filter((a) => !a.is_correct).length || 0}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Wrong</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.quizzes.incorrect}</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {myAttempt.completed_at ? formatDateTime(myAttempt.completed_at) : 'N/A'}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Completed</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.quizzes.completed}</p>
                   </div>
                 </div>
               </CardContent>
@@ -139,7 +141,7 @@ const QuizResults: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5 text-primary-500" />
-                    Answer Review
+                    {t.quizzes.myResult}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -168,18 +170,18 @@ const QuizResults: React.FC = () => {
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">
-                            Q{index + 1}. {answer.question?.question || 'Question'}
+                            Q{index + 1}. {answer.question?.question || t.quizzes.question}
                           </p>
                           <div className="mt-2 space-y-1 text-sm">
                             <p className="text-gray-600 dark:text-gray-400">
-                              Your answer:{' '}
+                              {t.quizzes.yourAnswer}:{' '}
                               <span className={cn('font-medium', answer.is_correct ? 'text-green-600' : 'text-red-600')}>
                                 {answer.selected_answer?.toUpperCase()}
                               </span>
                             </p>
                             {!answer.is_correct && answer.question?.correct_answer && (
                               <p className="text-green-600">
-                                Correct answer: <span className="font-medium">{answer.question.correct_answer.toUpperCase()}</span>
+                                {t.quizzes.correctAnswerLabel}: <span className="font-medium">{answer.question.correct_answer.toUpperCase()}</span>
                               </p>
                             )}
                           </div>
@@ -201,10 +203,10 @@ const QuizResults: React.FC = () => {
           <Card>
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
-              <p className="text-lg font-medium">No results yet</p>
-              <p className="text-sm mt-1">You haven't taken this quiz yet</p>
+              <p className="text-lg font-medium">{t.quizzes.noResults}</p>
+              <p className="text-sm mt-1">{t.quizzes.noResultsHint}</p>
               <Button className="mt-4" onClick={() => navigate(`/quizzes/${id}/take`)}>
-                Take Quiz
+                {t.quizzes.takeQuiz}
               </Button>
             </div>
           </Card>
@@ -217,13 +219,13 @@ const QuizResults: React.FC = () => {
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5 text-primary-500" />
-                  Student Results
+                  {t.quizzes.studentResults}
                 </CardTitle>
-                <Badge variant="secondary">{attempts.length} attempts</Badge>
+                <Badge variant="secondary">{attempts.length} {t.quizzes.attempts}</Badge>
                 {(isAdmin || isTeacher) && (
                   <Button variant="outline" size="sm" onClick={handleExportQuiz}>
                     <Download className="h-4 w-4" />
-                    Export CSV
+                    {t.quizzes.exportCsv}
                   </Button>
                 )}
               </div>
@@ -231,19 +233,19 @@ const QuizResults: React.FC = () => {
             {attempts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                 <FileX className="h-12 w-12 mb-3 opacity-50" />
-                <p className="text-lg font-medium">No attempts yet</p>
-                <p className="text-sm mt-1">No students have taken this quiz</p>
+                <p className="text-lg font-medium">{t.quizzes.noResults}</p>
+                <p className="text-sm mt-1">{t.quizzes.noResultsHint}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Percentage</TableHead>
-                    <TableHead>Started</TableHead>
-                    <TableHead>Completed</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>{t.quizzes.student}</TableHead>
+                    <TableHead>{t.quizzes.score}</TableHead>
+                    <TableHead>{t.quizzes.percentage}</TableHead>
+                    <TableHead>{t.quizzes.startedAt}</TableHead>
+                    <TableHead>{t.quizzes.completedAt}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -283,7 +285,7 @@ const QuizResults: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {attempt.completed_at ? formatDateTime(attempt.completed_at) : 'In progress'}
+                            {attempt.completed_at ? formatDateTime(attempt.completed_at) : t.quizzes.notCompleted}
                           </span>
                         </TableCell>
                         <TableCell>
