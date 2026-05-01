@@ -20,6 +20,7 @@ import ClassDetail from './pages/classes/ClassDetail';
 import UserList from './pages/users/UserList';
 import TeacherList from './pages/users/TeacherList';
 import StudentList from './pages/users/StudentList';
+import SubjectList from './pages/subjects/SubjectList';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -96,6 +97,16 @@ function App() {
           element={
             <ProtectedRoute roles={['admin', 'teacher']}>
               <StudentList />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Subjects */}
+        <Route
+          path="/subjects"
+          element={
+            <ProtectedRoute roles={['admin']}>
+              <SubjectList />
             </ProtectedRoute>
           }
         />

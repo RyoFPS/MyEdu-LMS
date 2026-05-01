@@ -134,6 +134,11 @@ export interface Subject {
   id: number;
   name: string;
   code: string;
+  category?: string;
+  description?: string;
+  subject_matters_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface SubjectMatter {

@@ -10,21 +10,17 @@ class Subject extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected $fillable = [
         'name',
         'code',
+        'category',
+        'description',
     ];
 
     /* ------------------------------------------------------------------ */
     /*  Relationships                                                      */
     /* ------------------------------------------------------------------ */
 
-    /**
-     * Subject matters linked to this subject.
-     */
     public function subjectMatters(): HasMany
     {
         return $this->hasMany(SubjectMatter::class);

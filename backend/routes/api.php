@@ -78,6 +78,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Subjects ─────────────────────────────────────────────────────────
     Route::get('/subjects', [\App\Http\Controllers\Api\SubjectController::class, 'index']);
+    Route::get('/subjects/categories', [\App\Http\Controllers\Api\SubjectController::class, 'categories']);
+    Route::post('/subjects', [\App\Http\Controllers\Api\SubjectController::class, 'store'])->middleware('role:admin');
+    Route::put('/subjects/{id}', [\App\Http\Controllers\Api\SubjectController::class, 'update'])->middleware('role:admin');
+    Route::delete('/subjects/{id}', [\App\Http\Controllers\Api\SubjectController::class, 'destroy'])->middleware('role:admin');
 
     // ── Subject Matters (Materi Pelajaran) ───────────────────────────────
     Route::get('/classes/{classId}/subject-matters', [\App\Http\Controllers\Api\SubjectMatterController::class, 'index']);

@@ -7,26 +7,840 @@ import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
 import { useAuth } from '../hooks/useAuth';
 import api from '../lib/axios';
-import type { DashboardStats } from '../types';
+import { formatDate, formatDateTime } from '../lib/utils';
 import {
   Users,
   BookOpen,
   ClipboardCheck,
   FileQuestion,
   TrendingUp,
-  Calendar,
   Clock,
   ArrowRight,
   GraduationCap,
   UserCheck,
   BarChart3,
   Loader2,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  AlertCircle,
+  FileText,
+  Trophy,
+  Timer,
+  School,
+  Layers,
 } from 'lucide-react';
+
+// ─── Stat Card ───────────────────────────────────────────────────────────────
+
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  color: 'blue' | 'indigo' | 'emerald' | 'amber' | 'red' | 'purple';
+  subtitle?: string;
+}
+
+const colorMap: Record<string, string> = {
+  blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-600',
+  indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600',
+  emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600',
+  amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600',
+  red: 'bg-red-50 dark:bg-red-900/30 text-red-600',
+  purple: 'bg-purple-50 dark:bg-purple-900/30 text-purple-600',
+};
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle }) => (
+  <Card className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{value}</p>
+          {subtitle && (
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtitle}</p>
+          )}
+        </div>
+        <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+// ─── Empty State ─────────────────────────────────────────────────────────────
+
+const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon, message }) => (
+  <div className="text-center py-8 text-gray-400">
+    <div className="mx-auto mb-2 opacity-50 flex justify-center">{icon}</div>
+    <p className="text-sm">{message}</p>
+  </div>
+);
+
+// ─── Attendance Status Helpers ───────────────────────────────────────────────
+
+const attendanceConfig: Record<string, { label: string; variant: 'success' | 'warning' | 'destructive' | 'info'; icon: React.ReactNode }> = {
+  present: { label: 'Present', variant: 'success', icon: <CheckCircle2 className="h-5 w-5" /> },
+  late: { label: 'Late', variant: 'warning', icon: <AlertTriangle className="h-5 w-5" /> },
+  absent: { label: 'Absent', variant: 'destructive', icon: <XCircle className="h-5 w-5" /> },
+  excused: { label: 'Excused', variant: 'info', icon: <AlertCircle className="h-5 w-5" /> },
+};
+
+// ─── Student Dashboard ───────────────────────────────────────────────────────
+
+const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate> }> = ({
+  stats,
+  navigate,
+}) => {
+  const todayAttendance = stats?.today_attendance;
+  const classInfo = stats?.class_info;
+  const attendance = stats?.attendance;
+  const availableQuizzes: any[] = stats?.available_quizzes ?? [];
+  const upcomingDeadlines: any[] = stats?.upcoming_deadlines ?? [];
+  const recentResults: any[] = stats?.recent_results ?? [];
+  const todayMaterials: any[] = stats?.today_materials ?? [];
+  const latestScore = recentResults.length > 0 ? `${recentResults[0].percentage}%` : '-';
+
+  const statusConfig = todayAttendance?.status ? attendanceConfig[todayAttendance.status] : null;
+
+  return (
+    <>
+      {/* 1. Today's Status Banner */}
+      <Card className={
+        statusConfig
+          ? statusConfig.variant === 'success'
+            ? 'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20'
+            : statusConfig.variant === 'warning'
+              ? 'border-yellow-200 bg-yellow-50/50 dark:border-yellow-800 dark:bg-yellow-900/20'
+              : statusConfig.variant === 'destructive'
+                ? 'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/20'
+                : 'border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/20'
+          : 'border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-800/50'
+      }>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-full ${
+              statusConfig
+                ? statusConfig.variant === 'success'
+                  ? 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400'
+                  : statusConfig.variant === 'warning'
+                    ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400'
+                    : statusConfig.variant === 'destructive'
+                      ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
+                      : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+                : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+            }`}>
+              {statusConfig ? statusConfig.icon : <Clock className="h-5 w-5" />}
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Today's Attendance</p>
+              <div className="flex items-center gap-2 mt-1">
+                {statusConfig ? (
+                  <Badge variant={statusConfig.variant} className="text-sm px-3 py-1">
+                    {statusConfig.label}
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-sm px-3 py-1">
+                    Not recorded yet
+                  </Badge>
+                )}
+                {todayAttendance?.notes && (
+                  <span className="text-xs text-gray-400">- {todayAttendance.notes}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 2. My Class Info */}
+      {classInfo && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <School className="h-5 w-5 text-primary-500" />
+              My Class
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                    {classInfo.name}
+                  </h3>
+                  <Badge variant="info">Grade {classInfo.grade_level}</Badge>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {classInfo.students_count} students
+                </p>
+              </div>
+              {classInfo.teachers && classInfo.teachers.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {classInfo.teachers.map((t: any) => (
+                    <div key={t.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
+                      <GraduationCap className="h-4 w-4 text-primary-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.name}</p>
+                        <p className="text-xs text-gray-400">{t.subject}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 3. Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Attendance Rate"
+          value={`${attendance?.rate ?? 0}%`}
+          icon={<UserCheck className="h-5 w-5" />}
+          color="emerald"
+          subtitle={`${attendance?.present ?? 0}/${attendance?.total ?? 0} days present`}
+        />
+        <StatCard
+          title="Available Quizzes"
+          value={availableQuizzes.length}
+          icon={<FileQuestion className="h-5 w-5" />}
+          color="amber"
+          subtitle="Ready to take"
+        />
+        <StatCard
+          title="Total Classes"
+          value={stats?.total_classes ?? 0}
+          icon={<BookOpen className="h-5 w-5" />}
+          color="blue"
+        />
+        <StatCard
+          title="Recent Score"
+          value={latestScore}
+          icon={<Trophy className="h-5 w-5" />}
+          color="purple"
+          subtitle={recentResults.length > 0 ? recentResults[0].quiz_title : undefined}
+        />
+      </div>
+
+      {/* 4. Today's Activities (2 columns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Available Quizzes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileQuestion className="h-5 w-5 text-amber-500" />
+              Available Quizzes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {availableQuizzes.length > 0 ? (
+              <div className="space-y-3">
+                {availableQuizzes.map((quiz: any) => (
+                  <div
+                    key={quiz.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/quizzes/${quiz.id}`)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {quiz.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary">{quiz.class_name}</Badge>
+                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                          <Timer className="h-3 w-3" />
+                          {quiz.duration_minutes} min
+                        </span>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-400 shrink-0 ml-2" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<FileQuestion className="h-8 w-8" />}
+                message="No quizzes available right now"
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* New Materials Today */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-500" />
+              New Materials Today
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {todayMaterials.length > 0 ? (
+              <div className="space-y-3">
+                {todayMaterials.map((material: any) => (
+                  <div
+                    key={material.id}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  >
+                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {material.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary">{material.class_name}</Badge>
+                        <span className="text-xs text-gray-400">by {material.uploader}</span>
+                      </div>
+                    </div>
+                    <Badge variant="outline">{material.type}</Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<FileText className="h-8 w-8" />}
+                message="No new materials today"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 5. Upcoming Deadlines */}
+      {upcomingDeadlines.length > 0 && (
+        <Card className="border-amber-200 dark:border-amber-800">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="h-5 w-5" />
+              Upcoming Deadlines
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {upcomingDeadlines.map((deadline: any) => (
+                <div
+                  key={deadline.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 cursor-pointer hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                  onClick={() => navigate(`/quizzes/${deadline.id}`)}
+                >
+                  <Clock className="h-4 w-4 text-amber-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {deadline.title}
+                    </p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      Due: {formatDateTime(deadline.end_time)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 6. Recent Results */}
+      {recentResults.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-purple-500" />
+              Recent Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentResults.slice(0, 5).map((result: any, i: number) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {result.quiz_title}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {result.score}/{result.total_points} points &middot; {formatDate(result.completed_at)}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={
+                      result.percentage >= 80
+                        ? 'success'
+                        : result.percentage >= 60
+                          ? 'warning'
+                          : 'destructive'
+                    }
+                    className="ml-2 shrink-0"
+                  >
+                    {result.percentage}%
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+};
+
+// ─── Teacher Dashboard ───────────────────────────────────────────────────────
+
+const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate> }> = ({
+  stats,
+  navigate,
+}) => {
+  const todayAttendance = stats?.today_attendance;
+  const classes: any[] = stats?.classes ?? [];
+  const activeQuizList: any[] = stats?.active_quiz_list ?? [];
+  const recentAttempts: any[] = stats?.recent_attempts ?? [];
+  const todayMaterials: any[] = stats?.today_materials ?? [];
+
+  return (
+    <>
+      {/* 1. Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="My Classes"
+          value={stats?.total_classes ?? 0}
+          icon={<BookOpen className="h-5 w-5" />}
+          color="blue"
+        />
+        <StatCard
+          title="Today's Attendance"
+          value={`${todayAttendance?.rate ?? 0}%`}
+          icon={<UserCheck className="h-5 w-5" />}
+          color="emerald"
+          subtitle={`${todayAttendance?.present ?? 0}/${todayAttendance?.total ?? 0} present`}
+        />
+        <StatCard
+          title="Active Quizzes"
+          value={stats?.active_quizzes ?? 0}
+          icon={<FileQuestion className="h-5 w-5" />}
+          color="indigo"
+          subtitle={`${stats?.total_quizzes ?? 0} total`}
+        />
+        <StatCard
+          title="Total Students"
+          value={stats?.total_students ?? 0}
+          icon={<GraduationCap className="h-5 w-5" />}
+          color="amber"
+        />
+      </div>
+
+      {/* 2. My Classes Today */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Layers className="h-5 w-5 text-primary-500" />
+            My Classes Today
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {classes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {classes.map((cls: any) => (
+                <div
+                  key={cls.id}
+                  className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => navigate(`/classes/${cls.slug}`)}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{cls.name}</h4>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{cls.subject}</p>
+                    </div>
+                    <Badge variant="secondary">{cls.students_count} students</Badge>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {cls.attendance_recorded ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                        <span className="text-sm text-green-600 dark:text-green-400">
+                          Recorded ({cls.attendance_count} students)
+                        </span>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-amber-500" />
+                          <span className="text-sm text-amber-600 dark:text-amber-400">Not recorded</span>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/attendance/record?class=${cls.id}`);
+                          }}
+                        >
+                          Record Now
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<BookOpen className="h-8 w-8" />}
+              message="No classes assigned"
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 3. Today's Activities (2 columns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Active Quizzes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileQuestion className="h-5 w-5 text-indigo-500" />
+              Active Quizzes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {activeQuizList.length > 0 ? (
+              <div className="space-y-3">
+                {activeQuizList.map((quiz: any) => (
+                  <div
+                    key={quiz.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/quizzes/${quiz.id}`)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {quiz.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary">{quiz.class_name}</Badge>
+                        <span className="text-xs text-gray-400">
+                          {quiz.attempts_count} attempts
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <p className="text-xs text-gray-400">
+                        Ends {formatDateTime(quiz.end_time)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<FileQuestion className="h-8 w-8" />}
+                message="No active quizzes"
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent Quiz Results */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-purple-500" />
+              Recent Quiz Results
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {recentAttempts.length > 0 ? (
+              <div className="space-y-3">
+                {recentAttempts.map((attempt: any, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                        {attempt.student_name}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {attempt.quiz_title} &middot; {attempt.score}/{attempt.total_points}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={
+                        attempt.percentage >= 80
+                          ? 'success'
+                          : attempt.percentage >= 60
+                            ? 'warning'
+                            : 'destructive'
+                      }
+                      className="ml-2 shrink-0"
+                    >
+                      {attempt.percentage}%
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={<Trophy className="h-8 w-8" />}
+                message="No recent submissions"
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 4. New Materials Today */}
+      {todayMaterials.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-500" />
+              New Materials Today
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {todayMaterials.map((material: any) => (
+                <div
+                  key={material.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                >
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {material.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge variant="secondary">{material.class_name}</Badge>
+                      <Badge variant="outline">{material.type}</Badge>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+};
+
+// ─── Admin Dashboard ─────────────────────────────────────────────────────────
+
+const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavigate> }> = ({
+  stats,
+  navigate,
+}) => {
+  const todayAttendance = stats?.today_attendance;
+  const recentUsers: any[] = stats?.recent_users ?? [];
+  const todayMaterials: any[] = stats?.today_materials ?? [];
+
+  return (
+    <>
+      {/* 1. Stats Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Users"
+          value={stats?.total_users ?? 0}
+          icon={<Users className="h-5 w-5" />}
+          color="blue"
+          subtitle={`${stats?.total_teachers ?? 0} teachers, ${stats?.total_students ?? 0} students`}
+        />
+        <StatCard
+          title="Total Classes"
+          value={stats?.total_classes ?? 0}
+          icon={<BookOpen className="h-5 w-5" />}
+          color="indigo"
+        />
+        <StatCard
+          title="Today's Attendance"
+          value={`${todayAttendance?.rate ?? 0}%`}
+          icon={<ClipboardCheck className="h-5 w-5" />}
+          color="emerald"
+          subtitle={`${todayAttendance?.present ?? 0}/${todayAttendance?.total ?? 0} present`}
+        />
+        <StatCard
+          title="Active Quizzes"
+          value={stats?.active_quizzes ?? 0}
+          icon={<FileQuestion className="h-5 w-5" />}
+          color="amber"
+          subtitle={`${stats?.total_quizzes ?? 0} total`}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 3. Quick Actions */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary-500" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/users')}>
+              <Users className="h-4 w-4" />
+              Manage Users
+              <ArrowRight className="h-4 w-4 ml-auto" />
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/classes')}>
+              <BookOpen className="h-4 w-4" />
+              Manage Classes
+              <ArrowRight className="h-4 w-4 ml-auto" />
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/attendance')}>
+              <ClipboardCheck className="h-4 w-4" />
+              View Attendance
+              <ArrowRight className="h-4 w-4 ml-auto" />
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/quizzes')}>
+              <FileQuestion className="h-4 w-4" />
+              View Quizzes
+              <ArrowRight className="h-4 w-4 ml-auto" />
+            </Button>
+            <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/subjects')}>
+              <Layers className="h-4 w-4" />
+              Manage Subjects
+              <ArrowRight className="h-4 w-4 ml-auto" />
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 2. System Overview */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-primary-500" />
+              System Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Students</span>
+                <span className="font-semibold">{stats?.total_students ?? 0}</span>
+              </div>
+              <Progress
+                value={stats?.total_students ?? 0}
+                max={Math.max(stats?.total_users ?? 1, 1)}
+                variant="default"
+                size="md"
+              />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Teachers</span>
+                <span className="font-semibold">{stats?.total_teachers ?? 0}</span>
+              </div>
+              <Progress
+                value={stats?.total_teachers ?? 0}
+                max={Math.max(stats?.total_users ?? 1, 1)}
+                variant="success"
+                size="md"
+              />
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Attendance Rate</span>
+                <span className="font-semibold">{todayAttendance?.rate ?? 0}%</span>
+              </div>
+              <Progress
+                value={todayAttendance?.rate ?? 0}
+                variant={
+                  (todayAttendance?.rate ?? 0) >= 80
+                    ? 'success'
+                    : (todayAttendance?.rate ?? 0) >= 60
+                      ? 'warning'
+                      : 'destructive'
+                }
+                size="md"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Users */}
+      {recentUsers.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-500" />
+              Recent Users
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentUsers.map((u: any, i: number) => (
+                <div
+                  key={u.id ?? i}
+                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {u.name}
+                    </p>
+                    <p className="text-xs text-gray-400">{u.email}</p>
+                  </div>
+                  <Badge variant={u.role === 'admin' ? 'destructive' : u.role === 'teacher' ? 'info' : 'secondary'}>
+                    {u.role}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 4. Today's Materials */}
+      {todayMaterials.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-500" />
+              Today's Materials
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {todayMaterials.map((material: any) => (
+                <div
+                  key={material.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                >
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      {material.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <Badge variant="secondary">{material.class_name}</Badge>
+                      <Badge variant="outline">{material.type}</Badge>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </>
+  );
+};
+
+// ─── Main Dashboard ──────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
   const { user, isAdmin, isTeacher, isStudent } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,18 +849,7 @@ const Dashboard: React.FC = () => {
         const response = await api.get('/dashboard');
         setStats(response.data.data || response.data);
       } catch {
-        // Use fallback stats
-        setStats({
-          total_users: 0,
-          total_classes: 0,
-          total_students: 0,
-          total_teachers: 0,
-          today_attendance_rate: 0,
-          active_quizzes: 0,
-          my_classes: 0,
-          my_attendance_rate: 0,
-          upcoming_quizzes: 0,
-        });
+        setStats(null);
       } finally {
         setLoading(false);
       }
@@ -57,7 +860,10 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mx-auto" />
+          <p className="text-sm text-gray-400 mt-2">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
@@ -65,359 +871,31 @@ const Dashboard: React.FC = () => {
   return (
     <>
       <Header
-        title={`Welcome back, ${user?.name?.split(' ')[0]}!`}
-        description={`Here's what's happening today`}
+        title={`Welcome back, ${user?.name?.split(' ')[0] ?? 'User'}!`}
+        description="Here's what's happening today"
       />
-      <div className="page-container">
-        {/* Stats Cards */}
+      <div className="page-container space-y-6">
         {isAdmin && <AdminDashboard stats={stats} navigate={navigate} />}
         {isTeacher && <TeacherDashboard stats={stats} navigate={navigate} />}
         {isStudent && <StudentDashboard stats={stats} navigate={navigate} />}
+
+        {/* Fallback if no role matched */}
+        {!isAdmin && !isTeacher && !isStudent && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                Dashboard Unavailable
+              </h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Your role could not be determined. Please contact an administrator.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );
 };
-
-// Admin Dashboard
-const AdminDashboard: React.FC<{ stats: DashboardStats | null; navigate: ReturnType<typeof useNavigate> }> = ({
-  stats,
-  navigate,
-}) => (
-  <>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard
-        title="Total Users"
-        value={stats?.total_users ?? 0}
-        icon={<Users className="h-5 w-5" />}
-        color="blue"
-        trend="+12%"
-      />
-      <StatCard
-        title="Total Classes"
-        value={stats?.total_classes ?? 0}
-        icon={<BookOpen className="h-5 w-5" />}
-        color="indigo"
-      />
-      <StatCard
-        title="Today's Attendance"
-        value={`${stats?.today_attendance_rate ?? 0}%`}
-        icon={<ClipboardCheck className="h-5 w-5" />}
-        color="emerald"
-        trend="+5%"
-      />
-      <StatCard
-        title="Active Quizzes"
-        value={stats?.active_quizzes ?? 0}
-        icon={<FileQuestion className="h-5 w-5" />}
-        color="amber"
-      />
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Quick Actions */}
-      <Card className="lg:col-span-1">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary-500" />
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/users')}>
-            <Users className="h-4 w-4" />
-            Manage Users
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/classes')}>
-            <BookOpen className="h-4 w-4" />
-            Manage Classes
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/attendance')}>
-            <ClipboardCheck className="h-4 w-4" />
-            View Attendance
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/quizzes')}>
-            <FileQuestion className="h-4 w-4" />
-            View Quizzes
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Overview */}
-      <Card className="lg:col-span-2">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary-500" />
-            System Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Students</span>
-              <span className="font-semibold">{stats?.total_students ?? 0}</span>
-            </div>
-            <Progress value={stats?.total_students ?? 0} max={Math.max(stats?.total_users ?? 1, 1)} variant="default" size="md" />
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Teachers</span>
-              <span className="font-semibold">{stats?.total_teachers ?? 0}</span>
-            </div>
-            <Progress value={stats?.total_teachers ?? 0} max={Math.max(stats?.total_users ?? 1, 1)} variant="success" size="md" />
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Attendance Rate</span>
-              <span className="font-semibold">{stats?.today_attendance_rate ?? 0}%</span>
-            </div>
-            <Progress value={stats?.today_attendance_rate ?? 0} variant="warning" size="md" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </>
-);
-
-// Teacher Dashboard
-const TeacherDashboard: React.FC<{ stats: DashboardStats | null; navigate: ReturnType<typeof useNavigate> }> = ({
-  stats,
-  navigate,
-}) => (
-  <>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard
-        title="My Classes"
-        value={stats?.my_classes ?? 0}
-        icon={<BookOpen className="h-5 w-5" />}
-        color="blue"
-      />
-      <StatCard
-        title="Today's Attendance"
-        value={`${stats?.today_attendance_rate ?? 0}%`}
-        icon={<UserCheck className="h-5 w-5" />}
-        color="emerald"
-      />
-      <StatCard
-        title="My Quizzes"
-        value={stats?.active_quizzes ?? 0}
-        icon={<FileQuestion className="h-5 w-5" />}
-        color="indigo"
-      />
-      <StatCard
-        title="Total Students"
-        value={stats?.total_students ?? 0}
-        icon={<GraduationCap className="h-5 w-5" />}
-        color="amber"
-      />
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary-500" />
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/attendance/record')}>
-            <ClipboardCheck className="h-4 w-4" />
-            Record Attendance
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/quizzes/create')}>
-            <FileQuestion className="h-4 w-4" />
-            Create Quiz
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/classes')}>
-            <BookOpen className="h-4 w-4" />
-            View My Classes
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/students')}>
-            <GraduationCap className="h-4 w-4" />
-            View Students
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-primary-500" />
-            Recent Activity
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {stats?.recent_activity && stats.recent_activity.length > 0 ? (
-              stats.recent_activity.map((activity) => (
-                <div key={activity.id} className="flex items-start gap-3 text-sm">
-                  <div className="h-2 w-2 rounded-full bg-primary-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-gray-700 dark:text-gray-300">{activity.message}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{activity.created_at}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-400">
-                <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No recent activity</p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  </>
-);
-
-// Student Dashboard
-const StudentDashboard: React.FC<{ stats: DashboardStats | null; navigate: ReturnType<typeof useNavigate> }> = ({
-  stats,
-  navigate,
-}) => (
-  <>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard
-        title="My Classes"
-        value={stats?.my_classes ?? 0}
-        icon={<BookOpen className="h-5 w-5" />}
-        color="blue"
-      />
-      <StatCard
-        title="Attendance Rate"
-        value={`${stats?.my_attendance_rate ?? 0}%`}
-        icon={<UserCheck className="h-5 w-5" />}
-        color="emerald"
-      />
-      <StatCard
-        title="Upcoming Quizzes"
-        value={stats?.upcoming_quizzes ?? 0}
-        icon={<FileQuestion className="h-5 w-5" />}
-        color="amber"
-      />
-      <StatCard
-        title="Active Quizzes"
-        value={stats?.active_quizzes ?? 0}
-        icon={<Clock className="h-5 w-5" />}
-        color="indigo"
-      />
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary-500" />
-            My Progress
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600 dark:text-gray-400">Attendance Rate</span>
-              <span className="font-semibold">{stats?.my_attendance_rate ?? 0}%</span>
-            </div>
-            <Progress
-              value={stats?.my_attendance_rate ?? 0}
-              variant={(stats?.my_attendance_rate ?? 0) >= 80 ? 'success' : (stats?.my_attendance_rate ?? 0) >= 60 ? 'warning' : 'destructive'}
-              size="md"
-            />
-          </div>
-          {stats?.recent_scores && stats.recent_scores.length > 0 && (
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Recent Quiz Scores</p>
-              <div className="flex gap-2">
-                {stats.recent_scores.map((score, i) => (
-                  <Badge key={i} variant={score >= 80 ? 'success' : score >= 60 ? 'warning' : 'destructive'}>
-                    {score}%
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary-500" />
-            Quick Actions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/classes')}>
-            <BookOpen className="h-4 w-4" />
-            My Classes
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/attendance')}>
-            <ClipboardCheck className="h-4 w-4" />
-            My Attendance
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/quizzes')}>
-            <FileQuestion className="h-4 w-4" />
-            Available Quizzes
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-          <Button variant="outline" className="w-full justify-start gap-2" onClick={() => navigate('/teachers')}>
-            <Users className="h-4 w-4" />
-            My Teachers
-            <ArrowRight className="h-4 w-4 ml-auto" />
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  </>
-);
-
-// Stat Card Component
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: 'blue' | 'indigo' | 'emerald' | 'amber' | 'red' | 'purple';
-  trend?: string;
-}
-
-const colorMap = {
-  blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-600',
-  indigo: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600',
-  emerald: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600',
-  amber: 'bg-amber-50 dark:bg-amber-900/30 text-amber-600',
-  red: 'bg-red-50 dark:bg-red-900/30 text-red-600',
-  purple: 'bg-purple-50 dark:bg-purple-900/30 text-purple-600',
-};
-
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, trend }) => (
-  <Card className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-    <CardContent className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{value}</p>
-          {trend && (
-            <div className="flex items-center gap-1 mt-1">
-              <TrendingUp className="h-3 w-3 text-emerald-500" />
-              <span className="text-xs font-medium text-emerald-500">{trend}</span>
-              <span className="text-xs text-gray-400">vs last month</span>
-            </div>
-          )}
-        </div>
-        <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 export default Dashboard;

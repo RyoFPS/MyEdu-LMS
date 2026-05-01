@@ -11,6 +11,7 @@ import {
   FileQuestion,
   BookOpen,
   UserCircle,
+  Tag,
   LogOut,
   ChevronLeft,
   ChevronRight,
@@ -43,6 +44,12 @@ const navItems: NavItem[] = [
     path: '/classes',
     icon: <BookOpen className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
+  },
+  {
+    label: 'Subjects',
+    path: '/subjects',
+    icon: <Tag className="h-5 w-5" />,
+    roles: ['admin'],
   },
   {
     label: 'Attendance',
