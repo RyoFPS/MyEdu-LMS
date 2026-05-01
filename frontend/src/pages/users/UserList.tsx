@@ -36,6 +36,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
+  BookOpen,
 } from 'lucide-react';
 
 const roleBadgeVariant: Record<string, 'destructive' | 'info' | 'success'> = {
@@ -64,6 +65,10 @@ const UserList: React.FC = () => {
   const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
   const [counts, setCounts] = useState<RoleCounts>({ total: 0, admin: 0, teacher: 0, student: 0 });
 
+  // Subjects
+  const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
+  const [subjectFilter, setSubjectFilter] = useState('');
+
   // Filters
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
@@ -85,7 +90,17 @@ const UserList: React.FC = () => {
     password: '',
     role: 'student',
     phone: '',
+    subject_ids: [] as number[],
   });
+
+  const fetchSubjects = async () => {
+    try {
+      const res = await api.get('/subjects');
+      setSubjects(res.data.data || []);
+    } catch { /* ignore */ }
+  };
+
+  useEffect(() => { fetchSubjects(); }, []);
 
   const fetchUsers = useCallback(async (currentPage: number = 1) => {
     setLoading(true);
@@ -93,6 +108,7 @@ const UserList: React.FC = () => {
       const params: Record<string, string | number> = { page: currentPage, per_page: 15 };
       if (search.trim()) params.search = search.trim();
       if (roleFilter) params.role = roleFilter;
+      if (subjectFilter) params.subject_id = subjectFilter;
       if (joinedFrom) params.joined_from = joinedFrom;
       if (joinedTo) params.joined_to = joinedTo;
 
@@ -105,13 +121,13 @@ const UserList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, roleFilter, joinedFrom, joinedTo]);
+  }, [search, roleFilter, subjectFilter, joinedFrom, joinedTo]);
 
   // Fetch when filters change (except search which is debounced)
   useEffect(() => {
     setPage(1);
     fetchUsers(1);
-  }, [roleFilter, joinedFrom, joinedTo]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [roleFilter, subjectFilter, joinedFrom, joinedTo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debounced search
   useEffect(() => {
@@ -139,29 +155,36 @@ const UserList: React.FC = () => {
   const clearFilters = () => {
     setSearch('');
     setRoleFilter('');
+    setSubjectFilter('');
     setJoinedFrom('');
     setJoinedTo('');
     setPage(1);
   };
 
-  const hasActiveFilters = !!(search || roleFilter || joinedFrom || joinedTo);
+  const hasActiveFilters = !!(search || roleFilter || subjectFilter || joinedFrom || joinedTo);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
       if (editingUser) {
-        const payload: Record<string, string> = {
+        const payload: Record<string, any> = {
           name: formData.name,
           email: formData.email,
           role: formData.role,
           phone: formData.phone,
         };
         if (formData.password) payload.password = formData.password;
+        if (formData.role === 'teacher') {
+          payload.subject_ids = formData.subject_ids;
+        }
         await api.put(`/users/${editingUser.id}`, payload);
         toast.success('User updated successfully');
       } else {
-        await api.post('/users', formData);
+        await api.post('/users', {
+          ...formData,
+          subject_ids: formData.role === 'teacher' ? formData.subject_ids : undefined,
+        });
         toast.success('User created successfully');
       }
       resetForm();
@@ -200,6 +223,7 @@ const UserList: React.FC = () => {
       password: '',
       role: user.role,
       phone: user.phone || '',
+      subject_ids: (user as any).subjects?.map((s: any) => s.id) || [],
     });
     setShowCreate(true);
   };
@@ -207,7 +231,7 @@ const UserList: React.FC = () => {
   const resetForm = () => {
     setShowCreate(false);
     setEditingUser(null);
-    setFormData({ name: '', email: '', password: '', role: 'student', phone: '' });
+    setFormData({ name: '', email: '', password: '', role: 'student', phone: '', subject_ids: [] });
   };
 
   // Generate page numbers for pagination
@@ -305,6 +329,13 @@ const UserList: React.FC = () => {
                 ]}
                 placeholder="All Roles"
               />
+              {/* Subject filter */}
+              <Select
+                value={subjectFilter}
+                onChange={(e) => setSubjectFilter(e.target.value)}
+                options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
+                placeholder="All Subjects"
+              />
               {/* Add User button */}
               <div className="flex items-end">
                 <Button onClick={() => setShowCreate(true)} className="w-full">
@@ -363,6 +394,7 @@ const UserList: React.FC = () => {
                     <TableHead className="w-12">#</TableHead>
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>Subject</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -390,6 +422,19 @@ const UserList: React.FC = () => {
                         <Badge variant={roleBadgeVariant[user.role]} className="capitalize">
                           {user.role}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {user.role === 'teacher' && (user as any).subjects?.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {(user as any).subjects.map((s: any) => (
+                              <Badge key={s.id} variant="outline" className="text-xs">
+                                {s.code}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-400">-</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         {user.phone ? (
@@ -520,6 +565,39 @@ const UserList: React.FC = () => {
                     ]}
                   />
                 </div>
+                {formData.role === 'teacher' && (
+                  <div className="space-y-2">
+                    <Label>Subjects</Label>
+                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                      {subjects.length === 0 ? (
+                        <p className="text-sm text-gray-400">No subjects available. Add subjects first.</p>
+                      ) : (
+                        subjects.map((subject) => (
+                          <label key={subject.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
+                            <input
+                              type="checkbox"
+                              checked={formData.subject_ids.includes(subject.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setFormData({ ...formData, subject_ids: [...formData.subject_ids, subject.id] });
+                                } else {
+                                  setFormData({ ...formData, subject_ids: formData.subject_ids.filter((id) => id !== subject.id) });
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{subject.name}</span>
+                            <Badge variant="outline" className="text-xs ml-auto">{subject.code}</Badge>
+                            {subject.category && (
+                              <span className="text-xs text-gray-400">{subject.category}</span>
+                            )}
+                          </label>
+                        ))
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400">Select the subjects this teacher will teach</p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label>Phone</Label>
                   <Input

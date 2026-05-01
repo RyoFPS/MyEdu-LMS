@@ -27,7 +27,7 @@ class QuizController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user  = $request->user();
-        $query = Quiz::with(['teacher:id,name', 'classRoom'])
+        $query = Quiz::with(['teacher:id,name', 'classRoom', 'subject'])
                      ->withCount(['questions', 'attempts']);
 
         if ($user->isTeacher()) {
@@ -35,7 +35,11 @@ class QuizController extends Controller
         } elseif ($user->isStudent()) {
             $enrolledClassIds = $user->enrolledClasses()->pluck('classes.id');
             $query->whereIn('class_id', $enrolledClassIds)
-                  ->where('is_active', true);
+                  ->where('is_active', true)
+                  ->where(function ($q) {
+                      $q->whereNull('end_time')
+                        ->orWhere('end_time', '>', now());
+                  });
         }
 
         // Filters
@@ -44,6 +48,9 @@ class QuizController extends Controller
         }
         if ($request->filled('is_active')) {
             $query->where('is_active', filter_var($request->input('is_active'), FILTER_VALIDATE_BOOLEAN));
+        }
+        if ($request->filled('subject_id')) {
+            $query->where('subject_id', $request->input('subject_id'));
         }
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -79,6 +86,7 @@ class QuizController extends Controller
                 'title'            => $request->input('title'),
                 'description'      => $request->input('description'),
                 'class_id'         => $request->input('class_id'),
+                'subject_id'       => $request->input('subject_id'),
                 'teacher_id'       => $request->user()->id,
                 'duration_minutes' => $request->input('duration_minutes'),
                 'is_active'        => $request->boolean('is_active', false),
@@ -120,7 +128,7 @@ class QuizController extends Controller
      */
     public function show(Request $request, int $id): JsonResponse
     {
-        $quiz = Quiz::with(['questions', 'classRoom', 'teacher:id,name'])
+        $quiz = Quiz::with(['questions', 'classRoom', 'teacher:id,name', 'subject'])
                     ->withCount(['questions', 'attempts'])
                     ->findOrFail($id);
 
@@ -160,7 +168,7 @@ class QuizController extends Controller
 
         DB::transaction(function () use ($request, $quiz) {
             $quiz->update($request->only([
-                'title', 'description', 'class_id', 'duration_minutes',
+                'title', 'description', 'class_id', 'subject_id', 'duration_minutes',
                 'is_active', 'max_attempts', 'start_time', 'end_time',
             ]));
 
@@ -255,6 +263,10 @@ class QuizController extends Controller
             return response()->json(['message' => 'Kuis belum dimulai.'], 422);
         }
         if ($quiz->end_time && $now->gt($quiz->end_time)) {
+            // Auto-deactivate expired quiz
+            if ($quiz->is_active) {
+                $quiz->update(['is_active' => false]);
+            }
             return response()->json(['message' => 'Kuis sudah berakhir.'], 422);
         }
 

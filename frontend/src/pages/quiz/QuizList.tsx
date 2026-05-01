@@ -9,7 +9,7 @@ import { Select } from '../../components/ui/select';
 import { useAuth } from '../../hooks/useAuth';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
-import { formatDateTime } from '../../lib/utils';
+import { formatDateTime, cn } from '../../lib/utils';
 import type { Quiz, ClassRoom } from '../../types';
 import {
   Dialog,
@@ -39,6 +39,7 @@ import {
   Repeat,
   Shield,
   Hash,
+  Tag,
 } from 'lucide-react';
 
 interface PaginationMeta {
@@ -59,6 +60,8 @@ const QuizList: React.FC = () => {
   // Filters
   const [search, setSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
+  const [subjects, setSubjects] = useState<{id: number; name: string; code: string}[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [page, setPage] = useState(1);
 
@@ -75,6 +78,7 @@ const QuizList: React.FC = () => {
       const params: Record<string, string | number> = { page: currentPage, per_page: 12 };
       if (search.trim()) params.search = search.trim();
       if (selectedClass) params.class_id = selectedClass;
+      if (selectedSubject) params.subject_id = selectedSubject;
       if (selectedStatus) params.is_active = selectedStatus;
 
       const response = await api.get('/quizzes', { params });
@@ -85,7 +89,7 @@ const QuizList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedClass, selectedStatus]);
+  }, [search, selectedClass, selectedSubject, selectedStatus]);
 
   // Fetch classes for filter dropdown (once)
   useEffect(() => {
@@ -101,11 +105,22 @@ const QuizList: React.FC = () => {
     loadClasses();
   }, []);
 
+  // Fetch subjects for filter dropdown (once)
+  useEffect(() => {
+    const loadSubjects = async () => {
+      try {
+        const res = await api.get('/subjects');
+        setSubjects(res.data.data || []);
+      } catch { setSubjects([]); }
+    };
+    loadSubjects();
+  }, []);
+
   // Fetch when dropdown filters change
   useEffect(() => {
     setPage(1);
     fetchQuizzes(1);
-  }, [selectedClass, selectedStatus]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [selectedClass, selectedSubject, selectedStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Debounced search
   useEffect(() => {
@@ -133,11 +148,12 @@ const QuizList: React.FC = () => {
   const clearFilters = () => {
     setSearch('');
     setSelectedClass('');
+    setSelectedSubject('');
     setSelectedStatus('');
     setPage(1);
   };
 
-  const hasActiveFilters = !!(search || selectedClass || selectedStatus);
+  const hasActiveFilters = !!(search || selectedClass || selectedSubject || selectedStatus);
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -183,7 +199,7 @@ const QuizList: React.FC = () => {
         {/* Filters */}
         <Card>
           <CardContent className="p-5">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Search */}
               <div className="relative md:col-span-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -200,6 +216,13 @@ const QuizList: React.FC = () => {
                 onChange={(e) => setSelectedClass(e.target.value)}
                 options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
                 placeholder="All Classes"
+              />
+              {/* Subject filter */}
+              <Select
+                value={selectedSubject}
+                onChange={(e) => setSelectedSubject(e.target.value)}
+                options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
+                placeholder="All Subjects"
               />
               {/* Status filter + Create button */}
               <div className="flex gap-2">
@@ -222,7 +245,7 @@ const QuizList: React.FC = () => {
               </div>
               {/* Clear filters */}
               {hasActiveFilters && (
-                <div className="flex items-end lg:col-span-4">
+                <div className="flex items-end lg:col-span-5">
                   <Button variant="outline" size="sm" onClick={clearFilters} className="w-full sm:w-auto">
                     <Filter className="h-4 w-4" />
                     Clear Filters
@@ -270,8 +293,8 @@ const QuizList: React.FC = () => {
                       <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600">
                         <FileQuestion className="h-5 w-5" />
                       </div>
-                      <Badge variant={quiz.is_active ? 'success' : 'secondary'}>
-                        {quiz.is_active ? 'Active' : 'Inactive'}
+                      <Badge variant={quiz.is_expired ? 'destructive' : quiz.is_active ? 'success' : 'secondary'}>
+                        {quiz.is_expired ? 'Expired' : quiz.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
 
@@ -285,6 +308,12 @@ const QuizList: React.FC = () => {
                         <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
                         <span className="truncate">{quiz.class_room?.name || 'No class'}</span>
                       </div>
+                      {quiz.subject && (
+                        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                          <Tag className="h-3.5 w-3.5 flex-shrink-0" />
+                          <span className="truncate">{quiz.subject.name}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                         <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{quiz.duration_minutes} minutes</span>
@@ -316,10 +345,18 @@ const QuizList: React.FC = () => {
                           Starts: {formatDateTime(quiz.start_time)}
                         </div>
                       )}
+                      {quiz.end_time && (
+                        <div className={cn(
+                          "text-xs",
+                          quiz.is_expired ? "text-red-500 font-medium" : "text-gray-400"
+                        )}>
+                          {quiz.is_expired ? '⚠️ Expired: ' : 'Deadline: '}{formatDateTime(quiz.end_time)}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2">
-                      {isStudent && quiz.is_active && (
+                      {isStudent && quiz.is_active && !quiz.is_expired && (
                         <Button
                           size="sm"
                           className="flex-1"

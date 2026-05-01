@@ -23,12 +23,14 @@ class UpdateUserRequest extends FormRequest
         $userId = $this->route('id');
 
         return [
-            'name'     => ['sometimes', 'string', 'max:255'],
-            'email'    => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $userId],
-            'password' => ['sometimes', 'string', Password::min(8)],
-            'role'     => ['sometimes', 'in:admin,teacher,student'],
-            'avatar'   => ['nullable', 'string', 'max:255'],
-            'phone'    => ['nullable', 'string', 'max:20'],
+            'name'          => ['sometimes', 'string', 'max:255'],
+            'email'         => ['sometimes', 'string', 'email', 'max:255', 'unique:users,email,' . $userId],
+            'password'      => ['sometimes', 'string', Password::min(8)],
+            'role'          => ['sometimes', 'in:admin,teacher,student'],
+            'avatar'        => ['nullable', 'string', 'max:255'],
+            'phone'         => ['nullable', 'string', 'max:20'],
+            'subject_ids'   => ['nullable', 'array'],
+            'subject_ids.*' => ['exists:subjects,id'],
         ];
     }
 }

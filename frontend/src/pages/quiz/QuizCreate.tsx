@@ -56,6 +56,7 @@ const QuizCreate: React.FC = () => {
   const isEditing = !!editId;
 
   const [classes, setClasses] = useState<ClassRoom[]>([]);
+  const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -63,6 +64,7 @@ const QuizCreate: React.FC = () => {
     title: '',
     description: '',
     class_id: '',
+    subject_id: '',
     duration_minutes: '30',
     start_time: '',
     end_time: '',
@@ -86,6 +88,13 @@ const QuizCreate: React.FC = () => {
     }
   }, []);
 
+  const fetchSubjects = useCallback(async () => {
+    try {
+      const res = await api.get('/subjects');
+      setSubjects(res.data.data || []);
+    } catch { /* ignore */ }
+  }, []);
+
   const fetchQuiz = useCallback(async (id: string) => {
     setLoading(true);
     try {
@@ -95,6 +104,7 @@ const QuizCreate: React.FC = () => {
         title: quiz.title,
         description: quiz.description || '',
         class_id: String(quiz.class_id),
+        subject_id: quiz.subject_id ? String(quiz.subject_id) : '',
         duration_minutes: String(quiz.duration_minutes),
         start_time: quiz.start_time ? quiz.start_time.slice(0, 16) : '',
         end_time: quiz.end_time ? quiz.end_time.slice(0, 16) : '',
@@ -124,10 +134,11 @@ const QuizCreate: React.FC = () => {
 
   useEffect(() => {
     fetchClasses();
+    fetchSubjects();
     if (editId) {
       fetchQuiz(editId);
     }
-  }, [editId, fetchClasses, fetchQuiz]);
+  }, [editId, fetchClasses, fetchSubjects, fetchQuiz]);
 
   const addQuestion = () => {
     setQuestions([...questions, { ...emptyQuestion }]);
@@ -212,6 +223,7 @@ const QuizCreate: React.FC = () => {
       const payload = {
         ...formData,
         class_id: Number(formData.class_id),
+        subject_id: formData.subject_id ? Number(formData.subject_id) : null,
         duration_minutes: Number(formData.duration_minutes),
         max_attempts: Number(formData.max_attempts),
         questions,
@@ -290,6 +302,15 @@ const QuizCreate: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
                     options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
                     placeholder="Select a class"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Subject</Label>
+                  <Select
+                    value={formData.subject_id}
+                    onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
+                    options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
+                    placeholder="Select subject (optional)"
                   />
                 </div>
                 <div className="space-y-2">

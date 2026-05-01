@@ -20,7 +20,7 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = User::query();
+        $query = User::with(['subjects']);
 
         // Filter by role
         if ($request->filled('role')) {
@@ -42,6 +42,13 @@ class UserController extends Controller
         }
         if ($request->filled('joined_to')) {
             $query->whereDate('created_at', '<=', $request->input('joined_to'));
+        }
+
+        // Filter by subject (for teachers)
+        if ($request->filled('subject_id')) {
+            $query->whereHas('subjects', function ($q) use ($request) {
+                $q->where('subjects.id', $request->input('subject_id'));
+            });
         }
 
         $users = $query->orderBy('name')->paginate($request->input('per_page', 15));
@@ -75,6 +82,13 @@ class UserController extends Controller
     {
         $user = User::create($request->validated());
 
+        // Sync subjects for teachers
+        if ($user->isTeacher() && $request->has('subject_ids')) {
+            $user->subjects()->sync($request->input('subject_ids', []));
+        }
+
+        $user->load('subjects');
+
         return response()->json([
             'message' => 'User berhasil dibuat.',
             'data'    => new UserResource($user),
@@ -90,9 +104,8 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Load relationships based on role
         if ($user->isTeacher()) {
-            $user->load('teachingClasses');
+            $user->load(['teachingClasses', 'subjects']);
         } elseif ($user->isStudent()) {
             $user->load('enrolledClasses');
         }
@@ -112,9 +125,19 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->update($request->validated());
 
+        // Sync subjects for teachers
+        if ($user->isTeacher() && $request->has('subject_ids')) {
+            $user->subjects()->sync($request->input('subject_ids', []));
+        } elseif (!$user->isTeacher()) {
+            // If role changed away from teacher, detach all subjects
+            $user->subjects()->detach();
+        }
+
+        $user->load('subjects');
+
         return response()->json([
             'message' => 'User berhasil diperbarui.',
-            'data'    => new UserResource($user->fresh()),
+            'data'    => new UserResource($user->fresh(['subjects'])),
         ]);
     }
 
@@ -152,11 +175,17 @@ class UserController extends Controller
      */
     public function teachers(Request $request): JsonResponse
     {
-        $query = User::where('role', 'teacher');
+        $query = User::where('role', 'teacher')->with('subjects');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");
+        }
+
+        if ($request->filled('subject_id')) {
+            $query->whereHas('subjects', function ($q) use ($request) {
+                $q->where('subjects.id', $request->input('subject_id'));
+            });
         }
 
         $teachers = $query->orderBy('name')->paginate($request->input('per_page', 15));

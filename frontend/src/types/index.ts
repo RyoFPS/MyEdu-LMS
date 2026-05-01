@@ -46,10 +46,13 @@ export interface Quiz {
   max_attempts?: number;
   start_time?: string;
   end_time?: string;
+  subject_id?: number;
+  is_expired?: boolean;
   questions?: QuizQuestion[];
   questions_count?: number;
   class_room?: ClassRoom;
   teacher?: User;
+  subject?: Subject;
   created_at?: string;
 }
 

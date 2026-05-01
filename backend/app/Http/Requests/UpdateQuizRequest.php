@@ -23,6 +23,7 @@ class UpdateQuizRequest extends FormRequest
             'title'            => ['sometimes', 'string', 'max:255'],
             'description'      => ['nullable', 'string'],
             'class_id'         => ['sometimes', 'exists:classes,id'],
+            'subject_id'       => ['nullable', 'exists:subjects,id'],
             'duration_minutes' => ['sometimes', 'integer', 'min:1', 'max:300'],
             'is_active'        => ['sometimes', 'boolean'],
             'max_attempts'     => ['sometimes', 'integer', 'min:0', 'max:100'],

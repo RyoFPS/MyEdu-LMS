@@ -23,6 +23,7 @@ class StoreQuizRequest extends FormRequest
             'title'            => ['required', 'string', 'max:255'],
             'description'      => ['nullable', 'string'],
             'class_id'         => ['required', 'exists:classes,id'],
+            'subject_id'       => ['nullable', 'exists:subjects,id'],
             'duration_minutes' => ['required', 'integer', 'min:1', 'max:300'],
             'is_active'        => ['sometimes', 'boolean'],
             'max_attempts'     => ['sometimes', 'integer', 'min:0', 'max:100'],

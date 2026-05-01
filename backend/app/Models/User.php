@@ -117,4 +117,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(SubjectMatter::class, 'uploaded_by');
     }
+
+    /**
+     * Subjects this teacher teaches.
+     */
+    public function subjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'subject_teacher', 'teacher_id', 'subject_id')
+                    ->withTimestamps();
+    }
 }

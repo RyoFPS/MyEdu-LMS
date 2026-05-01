@@ -25,6 +25,12 @@ class UserResource extends JsonResource
             // Conditional relationships
             'teaching_classes' => ClassResource::collection($this->whenLoaded('teachingClasses')),
             'enrolled_classes' => ClassResource::collection($this->whenLoaded('enrolledClasses')),
+            'subjects'         => $this->whenLoaded('subjects', fn () => $this->subjects->map(fn ($s) => [
+                'id'       => $s->id,
+                'name'     => $s->name,
+                'code'     => $s->code,
+                'category' => $s->category,
+            ])),
         ];
     }
 }

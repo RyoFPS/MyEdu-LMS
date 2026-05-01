@@ -24,12 +24,61 @@ import {
   Clock,
   AlertCircle,
   UserX,
+  Shield,
+  GraduationCap,
 } from 'lucide-react';
+
+const AttendanceRow: React.FC<{
+  user: User;
+  index: number;
+  record: AttendanceRecord;
+  onUpdateRecord: (userId: number, field: keyof AttendanceRecord, value: string) => void;
+  bgVariant?: 'blue' | 'default';
+}> = ({ user, index, record, onUpdateRecord, bgVariant }) => (
+  <div
+    className={cn(
+      'grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-3 sm:gap-4 p-4 rounded-lg border transition-colors',
+      bgVariant === 'blue'
+        ? 'border-blue-100 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-900/10 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
+        : index % 2 === 0
+          ? 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50'
+          : 'border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30 hover:bg-gray-50/50 dark:hover:bg-gray-800/50'
+    )}
+  >
+    <div className="flex items-center gap-3 min-w-0">
+      <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
+      <Avatar name={user.name} size="sm" />
+      <div className="min-w-0">
+        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
+        <p className="text-xs text-gray-400 truncate">{user.email}</p>
+      </div>
+    </div>
+    <div className="w-full sm:w-[320px] flex-shrink-0">
+      <RadioGroup
+        value={record?.status || 'present'}
+        onValueChange={(val) => onUpdateRecord(user.id, 'status', val)}
+        className="grid grid-cols-4 gap-1"
+      >
+        <RadioGroupItem value="present" label="Present" id={`present-${user.id}`} />
+        <RadioGroupItem value="absent" label="Absent" id={`absent-${user.id}`} />
+        <RadioGroupItem value="late" label="Late" id={`late-${user.id}`} />
+        <RadioGroupItem value="excused" label="Excused" id={`excused-${user.id}`} />
+      </RadioGroup>
+    </div>
+    <Input
+      placeholder="Notes..."
+      value={record?.notes || ''}
+      onChange={(e) => onUpdateRecord(user.id, 'notes', e.target.value)}
+      className="w-full sm:w-[160px] text-xs"
+    />
+  </div>
+);
 
 const RecordAttendance: React.FC = () => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState<ClassRoom[]>([]);
   const [students, setStudents] = useState<User[]>([]);
+  const [teachers, setTeachers] = useState<User[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [records, setRecords] = useState<Record<number, AttendanceRecord>>({});
@@ -43,9 +92,10 @@ const RecordAttendance: React.FC = () => {
 
   useEffect(() => {
     if (selectedClass) {
-      fetchStudents(selectedClass);
+      fetchClassMembers(selectedClass);
     } else {
       setStudents([]);
+      setTeachers([]);
       setRecords({});
     }
   }, [selectedClass]);
@@ -63,15 +113,25 @@ const RecordAttendance: React.FC = () => {
     }
   };
 
-  const fetchStudents = async (classId: string) => {
+  const fetchClassMembers = async (classId: string) => {
     setLoadingStudents(true);
     try {
       const response = await api.get(`/classes/${classId}`);
       const classData = response.data.data;
       const studentList: User[] = classData.students || [];
+      const teacherList: User[] = classData.teachers || [];
       setStudents(studentList);
-      // Initialize records
+      setTeachers(teacherList);
+
+      // Initialize records for both students and teachers
       const initialRecords: Record<number, AttendanceRecord> = {};
+      teacherList.forEach((teacher: User) => {
+        initialRecords[teacher.id] = {
+          user_id: teacher.id,
+          status: 'present',
+          notes: '',
+        };
+      });
       studentList.forEach((student: User) => {
         initialRecords[student.id] = {
           user_id: student.id,
@@ -82,6 +142,7 @@ const RecordAttendance: React.FC = () => {
       setRecords(initialRecords);
     } catch {
       setStudents([]);
+      setTeachers([]);
     } finally {
       setLoadingStudents(false);
     }
@@ -113,8 +174,8 @@ const RecordAttendance: React.FC = () => {
       return;
     }
 
-    if (students.length === 0) {
-      toast.error('No students in this class');
+    if (students.length === 0 && teachers.length === 0) {
+      toast.error('No members in this class');
       return;
     }
 
@@ -183,16 +244,16 @@ const RecordAttendance: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Students List */}
+        {/* Attendance List */}
         {selectedClass && (
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5 text-primary-500" />
-                  Students ({students.length})
+                  Attendance ({teachers.length + students.length})
                 </CardTitle>
-                {students.length > 0 && (
+                {(teachers.length + students.length) > 0 && (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 dark:text-gray-400">Set all:</span>
                     <Button variant="outline" size="sm" onClick={() => setAllStatus('present')}>
@@ -206,7 +267,7 @@ const RecordAttendance: React.FC = () => {
                   </div>
                 )}
               </div>
-              {students.length > 0 && (
+              {(teachers.length + students.length) > 0 && (
                 <div className="flex gap-2 mt-2">
                   <Badge variant="success">{statusCounts.present || 0} Present</Badge>
                   <Badge variant="destructive">{statusCounts.absent || 0} Absent</Badge>
@@ -220,62 +281,77 @@ const RecordAttendance: React.FC = () => {
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
                 </div>
-              ) : students.length === 0 ? (
+              ) : (teachers.length + students.length) === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                   <UserX className="h-12 w-12 mb-3 opacity-50" />
-                  <p className="text-lg font-medium">No students found</p>
-                  <p className="text-sm mt-1">This class has no enrolled students</p>
+                  <p className="text-lg font-medium">No members found</p>
+                  <p className="text-sm mt-1">This class has no assigned teachers or enrolled students</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {/* Column headers */}
-                  <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
-                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Student</span>
-                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">Status</span>
-                    <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Notes</span>
-                  </div>
-
-                  {students.map((student, index) => (
-                    <div
-                      key={student.id}
-                      className={cn(
-                        'grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-3 sm:gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50/50 dark:bg-gray-800/50 transition-colors',
-                        index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/30 dark:bg-gray-800/30',
-                      )}
-                    >
-                      {/* Student info */}
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
-                        <Avatar name={student.name} size="sm" />
-                        <div className="min-w-0">
-                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{student.name}</p>
-                          <p className="text-xs text-gray-400 truncate">{student.email}</p>
+                <div className="space-y-6">
+                  {/* Teachers Section */}
+                  {teachers.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3 px-4">
+                        <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30">
+                          <Shield className="h-4 w-4 text-blue-600" />
                         </div>
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Teachers ({teachers.length})</h3>
                       </div>
-
-                      {/* Status radio buttons - fixed width for alignment */}
-                      <div className="w-full sm:w-[320px] flex-shrink-0">
-                        <RadioGroup
-                          value={records[student.id]?.status || 'present'}
-                          onValueChange={(val) => updateRecord(student.id, 'status', val)}
-                          className="grid grid-cols-4 gap-1"
-                        >
-                          <RadioGroupItem value="present" label="Present" id={`present-${student.id}`} />
-                          <RadioGroupItem value="absent" label="Absent" id={`absent-${student.id}`} />
-                          <RadioGroupItem value="late" label="Late" id={`late-${student.id}`} />
-                          <RadioGroupItem value="excused" label="Excused" id={`excused-${student.id}`} />
-                        </RadioGroup>
+                      <div className="space-y-3">
+                        {/* Column headers */}
+                        <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Teacher</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">Status</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Notes</span>
+                        </div>
+                        {teachers.map((teacher, index) => (
+                          <AttendanceRow
+                            key={teacher.id}
+                            user={teacher}
+                            index={index}
+                            record={records[teacher.id]}
+                            onUpdateRecord={updateRecord}
+                            bgVariant="blue"
+                          />
+                        ))}
                       </div>
-
-                      {/* Notes - fixed width, right aligned */}
-                      <Input
-                        placeholder="Notes..."
-                        value={records[student.id]?.notes || ''}
-                        onChange={(e) => updateRecord(student.id, 'notes', e.target.value)}
-                        className="w-full sm:w-[160px] text-xs"
-                      />
                     </div>
-                  ))}
+                  )}
+
+                  {/* Divider */}
+                  {teachers.length > 0 && students.length > 0 && (
+                    <div className="border-t border-gray-200 dark:border-gray-700" />
+                  )}
+
+                  {/* Students Section */}
+                  {students.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3 px-4">
+                        <div className="p-1 rounded bg-green-100 dark:bg-green-900/30">
+                          <GraduationCap className="h-4 w-4 text-green-600" />
+                        </div>
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Students ({students.length})</h3>
+                      </div>
+                      <div className="space-y-3">
+                        {/* Column headers */}
+                        <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Student</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">Status</span>
+                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">Notes</span>
+                        </div>
+                        {students.map((student, index) => (
+                          <AttendanceRow
+                            key={student.id}
+                            user={student}
+                            index={index}
+                            record={records[student.id]}
+                            onUpdateRecord={updateRecord}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -283,7 +359,7 @@ const RecordAttendance: React.FC = () => {
         )}
 
         {/* Submit */}
-        {students.length > 0 && (
+        {(teachers.length + students.length) > 0 && (
           <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
             <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
               <span className="flex items-center gap-1">

@@ -18,6 +18,7 @@ class Quiz extends Model
         'title',
         'description',
         'class_id',
+        'subject_id',
         'teacher_id',
         'duration_minutes',
         'is_active',
@@ -53,6 +54,14 @@ class Quiz extends Model
     }
 
     /**
+     * The subject this quiz belongs to.
+     */
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
+    /**
      * The teacher who created this quiz.
      */
     public function teacher(): BelongsTo
@@ -74,5 +83,17 @@ class Quiz extends Model
     public function attempts(): HasMany
     {
         return $this->hasMany(QuizAttempt::class);
+    }
+
+    /* ------------------------------------------------------------------ */
+    /*  Helpers                                                             */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Check if the quiz has expired (past end_time).
+     */
+    public function isExpired(): bool
+    {
+        return $this->end_time && now()->gt($this->end_time);
     }
 }
