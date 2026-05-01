@@ -391,19 +391,19 @@ const UserList: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">#</TableHead>
+                    <TableHead className="w-12 hidden sm:table-cell">#</TableHead>
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Joined</TableHead>
+                    <TableHead className="hidden lg:table-cell">Subject</TableHead>
+                    <TableHead className="hidden md:table-cell">Phone</TableHead>
+                    <TableHead className="hidden md:table-cell">Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {users.map((user, index) => (
                     <TableRow key={user.id}>
-                      <TableCell className="text-gray-400">
+                      <TableCell className="text-gray-400 hidden sm:table-cell">
                         {(meta.current_page - 1) * meta.per_page + index + 1}
                       </TableCell>
                       <TableCell>
@@ -423,7 +423,7 @@ const UserList: React.FC = () => {
                           {user.role}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         {user.role === 'teacher' && (user as any).subjects?.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {(user as any).subjects.map((s: any) => (
@@ -436,7 +436,7 @@ const UserList: React.FC = () => {
                           <span className="text-sm text-gray-400">-</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         {user.phone ? (
                           <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
                             <Phone className="h-3 w-3 flex-shrink-0" />
@@ -446,7 +446,7 @@ const UserList: React.FC = () => {
                           <span className="text-sm text-gray-400">-</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell">
                         <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                           <Calendar className="h-3 w-3 flex-shrink-0" />
                           {formatDate(user.created_at)}

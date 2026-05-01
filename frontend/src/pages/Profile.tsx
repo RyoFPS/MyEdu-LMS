@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Header } from '../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -10,7 +10,7 @@ import { Badge } from '../components/ui/badge';
 import { useAuth } from '../hooks/useAuth';
 import api from '../lib/axios';
 import toast from 'react-hot-toast';
-import { User, Mail, Phone, Shield, Calendar, Lock, Save } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar, Lock, Save, Camera, Trash2, Loader2 } from 'lucide-react';
 import { formatDate } from '../lib/utils';
 
 const Profile: React.FC = () => {
@@ -18,6 +18,8 @@ const Profile: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -70,21 +72,101 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate on client side
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('Only JPG, PNG, and WEBP images are allowed.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await api.post('/profile/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const updatedUser = response.data.data || response.data;
+      setUser(updatedUser);
+      toast.success('Profile photo updated!');
+    } catch (error: any) {
+      if (!error.response || ![422].includes(error.response.status)) {
+        toast.error('Failed to upload photo.');
+      }
+    } finally {
+      setUploadingAvatar(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!confirm('Remove your profile photo?')) return;
+
+    setUploadingAvatar(true);
+    try {
+      const response = await api.delete('/profile/avatar');
+      const updatedUser = response.data.data || response.data;
+      setUser(updatedUser);
+      toast.success('Profile photo removed.');
+    } catch {
+      toast.error('Failed to remove photo.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const roleBadgeVariant = user?.role === 'admin' ? 'destructive' : user?.role === 'teacher' ? 'info' : 'success';
 
   return (
     <>
       <Header title="Profile" description="Manage your account settings" />
       <div className="page-container max-w-3xl mx-auto">
-        {/* Profile Header */}
+        {/* Profile Header with Avatar Upload */}
         <Card>
-          <CardContent className="p-8">
+          <CardContent className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <Avatar name={user?.name || ''} src={user?.avatar} size="xl" />
-              <div className="text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{user?.name}</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">{user?.email}</p>
-                <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
+              {/* Avatar with upload overlay */}
+              <div className="relative group">
+                <Avatar name={user?.name || ''} src={user?.avatar} size="xl" />
+
+                {/* Upload overlay */}
+                <div
+                  className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+                >
+                  {uploadingAvatar ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="h-6 w-6 text-white" />
+                  )}
+                </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+              </div>
+
+              <div className="text-center sm:text-left flex-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{user?.name}</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{user?.email}</p>
+                <div className="flex flex-wrap items-center gap-2 mt-2 justify-center sm:justify-start">
                   <Badge variant={roleBadgeVariant} className="capitalize">
                     <Shield className="h-3 w-3 mr-1" />
                     {user?.role}
@@ -93,6 +175,34 @@ const Profile: React.FC = () => {
                     <Calendar className="h-3 w-3 mr-1" />
                     Joined {user?.created_at ? formatDate(user.created_at) : 'N/A'}
                   </Badge>
+                </div>
+
+                {/* Photo action buttons */}
+                <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                  >
+                    {uploadingAvatar ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Camera className="h-3.5 w-3.5" />
+                    )}
+                    Change Photo
+                  </Button>
+                  {user?.avatar && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRemoveAvatar}
+                      disabled={uploadingAvatar}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                      Remove
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

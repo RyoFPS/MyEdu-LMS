@@ -560,4 +560,80 @@ class QuizController extends Controller
             ],
         ]);
     }
+
+    /**
+     * GET /api/quizzes/{id}/export
+     *
+     * Export quiz results as CSV (admin/teacher only).
+     */
+    public function export(Request $request, int $id)
+    {
+        $quiz = Quiz::with(['questions', 'classRoom', 'subject'])->findOrFail($id);
+        $user = $request->user();
+
+        // Authorization
+        if ($user->isTeacher() && $quiz->teacher_id !== $user->id) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        $attempts = QuizAttempt::with(['student:id,name,email'])
+            ->where('quiz_id', $quiz->id)
+            ->whereNotNull('completed_at')
+            ->orderByDesc('score')
+            ->get();
+
+        $totalPoints = $quiz->questions->sum('points');
+
+        // Build CSV
+        $csv = [];
+        $csv[] = ['Quiz Results: ' . $quiz->title];
+        $csv[] = ['Class: ' . ($quiz->classRoom?->name ?? '-')];
+        $csv[] = ['Subject: ' . ($quiz->subject?->name ?? '-')];
+        $csv[] = ['Total Points: ' . $totalPoints];
+        $csv[] = ['Exported: ' . now()->format('Y-m-d H:i:s')];
+        $csv[] = []; // empty row
+        $csv[] = ['#', 'Student Name', 'Email', 'Score', 'Total Points', 'Percentage (%)', 'Started At', 'Completed At'];
+
+        foreach ($attempts as $index => $attempt) {
+            $percentage = $attempt->total_points > 0
+                ? round($attempt->score / $attempt->total_points * 100, 1)
+                : 0;
+
+            $csv[] = [
+                $index + 1,
+                $attempt->student?->name ?? 'Unknown',
+                $attempt->student?->email ?? '-',
+                $attempt->score,
+                $attempt->total_points,
+                $percentage,
+                $attempt->started_at?->format('Y-m-d H:i:s') ?? '-',
+                $attempt->completed_at?->format('Y-m-d H:i:s') ?? '-',
+            ];
+        }
+
+        // Summary row
+        $csv[] = [];
+        $csv[] = ['Summary'];
+        $csv[] = ['Total Students', $attempts->count()];
+        $csv[] = ['Average Score', $attempts->count() > 0 ? round($attempts->avg('score'), 1) : 0];
+        $csv[] = ['Highest Score', $attempts->max('score') ?? 0];
+        $csv[] = ['Lowest Score', $attempts->min('score') ?? 0];
+
+        $filename = 'quiz-results-' . \Illuminate\Support\Str::slug($quiz->title) . '-' . now()->format('Y-m-d') . '.csv';
+
+        $callback = function () use ($csv) {
+            $file = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel compatibility
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            foreach ($csv as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 }

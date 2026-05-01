@@ -145,7 +145,7 @@ export const Sidebar: React.FC = () => {
             collapsed && 'justify-center px-2'
           )}
         >
-          <Avatar name={user?.name || ''} size="sm" />
+          <Avatar name={user?.name || ''} src={user?.avatar} size="sm" />
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{user?.name}</p>

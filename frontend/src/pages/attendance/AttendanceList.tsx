@@ -22,7 +22,9 @@ import {
   FileX,
   ChevronLeft,
   ChevronRight,
+  Download,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const statusBadgeVariant: Record<string, 'success' | 'destructive' | 'warning' | 'info'> = {
   present: 'success',
@@ -129,6 +131,31 @@ const AttendanceList: React.FC = () => {
     setPage(1);
   };
 
+  const handleExportAttendance = async () => {
+    if (!selectedClass) {
+      toast.error('Please select a class to export.');
+      return;
+    }
+    try {
+      const params: Record<string, string> = { class_id: selectedClass };
+      if (dateFrom) params.date_from = dateFrom;
+      if (dateTo) params.date_to = dateTo;
+
+      const response = await api.get('/attendances/export', { params, responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `attendance-export-${selectedClass}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Export downloaded!');
+    } catch {
+      toast.error('Failed to export.');
+    }
+  };
+
   const hasActiveFilters = !!(search || selectedClass || selectedStatus || dateFrom || dateTo);
 
   const getPageNumbers = (): (number | '...')[] => {
@@ -165,10 +192,16 @@ const AttendanceList: React.FC = () => {
             )}
           </div>
           {(isTeacher || isAdmin) && (
-            <Button onClick={() => navigate('/attendance/record')}>
-              <Plus className="h-4 w-4" />
-              Record Attendance
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleExportAttendance} disabled={!selectedClass}>
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+              <Button onClick={() => navigate('/attendance/record')}>
+                <Plus className="h-4 w-4" />
+                Record Attendance
+              </Button>
+            </div>
           )}
         </div>
 

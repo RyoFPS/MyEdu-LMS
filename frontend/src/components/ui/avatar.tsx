@@ -34,6 +34,21 @@ function getColorFromName(name: string): string {
   return colorPalette[Math.abs(hash) % colorPalette.length];
 }
 
+/**
+ * Resolve avatar URL — prepend backend host for /storage/ paths.
+ */
+function resolveAvatarUrl(src: string): string {
+  if (src.startsWith('/storage/')) {
+    // Use the same hostname as the current page, port 8000 (backend)
+    const backendHost = `http://${window.location.hostname}:8000`;
+    return `${backendHost}${src}`;
+  }
+  if (src.startsWith('http://') || src.startsWith('https://')) {
+    return src;
+  }
+  return src;
+}
+
 export const Avatar: React.FC<AvatarProps> = ({
   src,
   alt,
@@ -47,6 +62,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   const bgColor = getColorFromName(name);
 
   if (src && !imgError) {
+    const resolvedSrc = resolveAvatarUrl(src);
     return (
       <div
         className={cn(
@@ -57,7 +73,7 @@ export const Avatar: React.FC<AvatarProps> = ({
         {...props}
       >
         <img
-          src={src}
+          src={resolvedSrc}
           alt={alt || name}
           className="aspect-square h-full w-full object-cover"
           onError={() => setImgError(true)}

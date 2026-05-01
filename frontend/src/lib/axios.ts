@@ -1,8 +1,25 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+// Dynamically determine API URL based on current hostname
+// This allows the app to work on both localhost and network IP
+const getApiUrl = (): string => {
+  // If VITE_API_URL is explicitly set and not localhost, use it
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) {
+    // Replace localhost with current hostname so it works on network too
+    const currentHost = window.location.hostname;
+    if (currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+      return envUrl.replace('localhost', currentHost).replace('127.0.0.1', currentHost);
+    }
+    return envUrl;
+  }
+  // Default: use same hostname as the frontend, port 8000
+  return `http://${window.location.hostname}:8000/api`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

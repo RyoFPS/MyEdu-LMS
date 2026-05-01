@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -100,6 +101,72 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui.',
+            'data'    => new UserResource($user->fresh()),
+        ]);
+    }
+
+    /**
+     * POST /api/profile/avatar
+     *
+     * Upload or update the authenticated user's avatar.
+     */
+    public function updateAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'avatar.required' => 'Pilih foto terlebih dahulu.',
+            'avatar.image'    => 'File harus berupa gambar.',
+            'avatar.mimes'    => 'Format yang diizinkan: JPG, PNG, WEBP.',
+            'avatar.max'      => 'Ukuran foto maksimal 2 MB.',
+        ]);
+
+        $user = $request->user();
+
+        // Delete old avatar if exists
+        if ($user->avatar) {
+            $oldPath = str_replace('/storage/', '', $user->avatar);
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        // Store new avatar
+        $file = $request->file('avatar');
+        $path = $file->store('avatars/' . $user->id, 'public');
+
+        if (!$path) {
+            return response()->json(['message' => 'Gagal menyimpan foto.'], 500);
+        }
+
+        // Save the public URL path
+        $user->update(['avatar' => '/storage/' . $path]);
+
+        return response()->json([
+            'message' => 'Foto profil berhasil diperbarui.',
+            'data'    => new UserResource($user->fresh()),
+        ]);
+    }
+
+    /**
+     * DELETE /api/profile/avatar
+     *
+     * Remove the authenticated user's avatar.
+     */
+    public function removeAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($user->avatar) {
+            $oldPath = str_replace('/storage/', '', $user->avatar);
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+            $user->update(['avatar' => null]);
+        }
+
+        return response()->json([
+            'message' => 'Foto profil berhasil dihapus.',
             'data'    => new UserResource($user->fresh()),
         ]);
     }

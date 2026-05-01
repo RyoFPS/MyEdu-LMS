@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/profile/avatar', [AuthController::class, 'updateAvatar']);
+    Route::delete('/profile/avatar', [AuthController::class, 'removeAvatar']);
 
     // Dashboard (role-specific)
     Route::get('/dashboard', [DashboardController::class, 'index']);
@@ -58,9 +60,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // ── Attendance ───────────────────────────────────────────────────────
     Route::get('/attendances', [AttendanceController::class, 'index']);
     Route::get('/attendances/summary', [AttendanceController::class, 'summary']);
+    Route::get('/attendances/export', [AttendanceController::class, 'export'])->middleware('role:admin|teacher');
     Route::get('/attendances/{id}', [AttendanceController::class, 'show']);
     Route::post('/attendances', [AttendanceController::class, 'store'])->middleware('role:admin|teacher');
     Route::post('/attendances/bulk', [AttendanceController::class, 'bulk'])->middleware('role:admin|teacher');
+    Route::post('/attendances/self', [AttendanceController::class, 'selfAttendance'])->middleware('role:student');
 
     // ── Quizzes ──────────────────────────────────────────────────────────
     Route::get('/quizzes', [QuizController::class, 'index']);
@@ -75,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Quiz results (teacher sees all, student sees own)
     Route::get('/quizzes/{id}/results', [QuizController::class, 'results']);
+    Route::get('/quizzes/{id}/export', [QuizController::class, 'export'])->middleware('role:admin|teacher');
 
     // ── Subjects ─────────────────────────────────────────────────────────
     Route::get('/subjects', [\App\Http\Controllers\Api\SubjectController::class, 'index']);

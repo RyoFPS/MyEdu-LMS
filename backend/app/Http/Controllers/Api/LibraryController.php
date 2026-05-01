@@ -20,21 +20,13 @@ class LibraryController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
-
         $query = SubjectMatter::with(['subject', 'uploader:id,name,role'])
             ->where('type', 'main')
             ->whereNull('class_id');
 
-        // Filters
+        // Filters — all explicit, no auto-filtering
         if ($request->filled('grade_level')) {
             $query->where('grade_level', $request->input('grade_level'));
-        } elseif ($user->isStudent()) {
-            // Default: show student's grade level
-            $studentClass = $user->enrolledClasses()->first();
-            if ($studentClass) {
-                $query->where('grade_level', $studentClass->grade_level);
-            }
         }
 
         if ($request->filled('subject_id')) {

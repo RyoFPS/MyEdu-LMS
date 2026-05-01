@@ -21,7 +21,9 @@ import {
   Loader2,
   FileX,
   Target,
+  Download,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const QuizResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +33,23 @@ const QuizResults: React.FC = () => {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [myAttempt, setMyAttempt] = useState<QuizAttempt | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleExportQuiz = async () => {
+    try {
+      const response = await api.get(`/quizzes/${id}/export`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `quiz-results-${id}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Export downloaded!');
+    } catch {
+      toast.error('Failed to export.');
+    }
+  };
 
   const fetchResults = useCallback(async () => {
     setLoading(true);
@@ -201,6 +220,12 @@ const QuizResults: React.FC = () => {
                   Student Results
                 </CardTitle>
                 <Badge variant="secondary">{attempts.length} attempts</Badge>
+                {(isAdmin || isTeacher) && (
+                  <Button variant="outline" size="sm" onClick={handleExportQuiz}>
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </Button>
+                )}
               </div>
             </CardHeader>
             {attempts.length === 0 ? (

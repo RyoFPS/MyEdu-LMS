@@ -224,6 +224,145 @@ class AttendanceController extends Controller
     }
 
     /**
+     * POST /api/attendances/self
+     *
+     * Student marks their own attendance for today.
+     */
+    public function selfAttendance(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user->isStudent()) {
+            return response()->json(['message' => 'Hanya siswa yang dapat melakukan absensi mandiri.'], 403);
+        }
+
+        // Get student's enrolled class
+        $class = $user->enrolledClasses()->first();
+        if (!$class) {
+            return response()->json(['message' => 'Anda belum terdaftar di kelas manapun.'], 422);
+        }
+
+        $today = today()->toDateString();
+
+        // Check if already recorded today
+        $existing = Attendance::where('user_id', $user->id)
+            ->where('class_id', $class->id)
+            ->where('date', $today)
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'message' => 'Anda sudah melakukan absensi hari ini.',
+                'data'    => new AttendanceResource($existing->load(['user', 'classRoom'])),
+            ], 422);
+        }
+
+        $attendance = Attendance::create([
+            'user_id'  => $user->id,
+            'class_id' => $class->id,
+            'date'     => $today,
+            'status'   => 'present',
+            'notes'    => 'Self-attendance',
+        ]);
+
+        $attendance->load(['user', 'classRoom']);
+
+        return response()->json([
+            'message' => 'Absensi berhasil dicatat. Anda hadir hari ini!',
+            'data'    => new AttendanceResource($attendance),
+        ], 201);
+    }
+
+    /**
+     * GET /api/attendances/export
+     *
+     * Export attendance data as CSV (admin/teacher only).
+     * Requires class_id. Optionally filter by date range.
+     */
+    public function export(Request $request)
+    {
+        $request->validate([
+            'class_id'  => ['required', 'exists:classes,id'],
+            'date_from' => ['nullable', 'date'],
+            'date_to'   => ['nullable', 'date'],
+        ]);
+
+        $user = $request->user();
+        $classId = $request->input('class_id');
+
+        // Authorization for teachers
+        if ($user->isTeacher()) {
+            $teachesClass = $user->teachingClasses()->where('classes.id', $classId)->exists();
+            if (!$teachesClass) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        }
+
+        $class = \App\Models\ClassRoom::findOrFail($classId);
+
+        $query = Attendance::with(['user:id,name,email,role'])
+            ->where('class_id', $classId);
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('date', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('date', '<=', $request->input('date_to'));
+        }
+
+        $records = $query->orderBy('date')->orderBy('user_id')->get();
+
+        // Build CSV
+        $csv = [];
+        $csv[] = ['Attendance Report: ' . $class->name];
+        $csv[] = ['Grade Level: ' . $class->grade_level];
+        $csv[] = ['Academic Year: ' . $class->academic_year];
+        if ($request->filled('date_from') || $request->filled('date_to')) {
+            $csv[] = ['Period: ' . ($request->input('date_from', 'Start') . ' to ' . $request->input('date_to', 'Now'))];
+        }
+        $csv[] = ['Exported: ' . now()->format('Y-m-d H:i:s')];
+        $csv[] = []; // empty row
+        $csv[] = ['#', 'Name', 'Email', 'Role', 'Date', 'Status', 'Notes'];
+
+        foreach ($records as $index => $record) {
+            $csv[] = [
+                $index + 1,
+                $record->user?->name ?? 'Unknown',
+                $record->user?->email ?? '-',
+                ucfirst($record->user?->role ?? '-'),
+                $record->date,
+                ucfirst($record->status),
+                $record->notes ?? '',
+            ];
+        }
+
+        // Summary
+        $csv[] = [];
+        $csv[] = ['Summary'];
+        $csv[] = ['Total Records', $records->count()];
+        $csv[] = ['Present', $records->where('status', 'present')->count()];
+        $csv[] = ['Absent', $records->where('status', 'absent')->count()];
+        $csv[] = ['Late', $records->where('status', 'late')->count()];
+        $csv[] = ['Excused', $records->where('status', 'excused')->count()];
+
+        $filename = 'attendance-' . \Illuminate\Support\Str::slug($class->name) . '-' . now()->format('Y-m-d') . '.csv';
+
+        $callback = function () use ($csv) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            foreach ($csv as $row) {
+                fputcsv($file, $row);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
      * GET /api/attendances/{id}
      *
      * Show a single attendance record.

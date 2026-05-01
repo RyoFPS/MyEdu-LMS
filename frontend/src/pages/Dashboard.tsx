@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Header } from '../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -91,6 +92,26 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
   stats,
   navigate,
 }) => {
+  const [markingAttendance, setMarkingAttendance] = useState(false);
+
+  const handleSelfAttendance = async () => {
+    setMarkingAttendance(true);
+    try {
+      await api.post('/attendances/self');
+      toast.success('Attendance recorded! You are present today.');
+      // Reload dashboard
+      window.location.reload();
+    } catch (error: any) {
+      if (error.response?.status === 422 && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (!error.response || ![403].includes(error.response.status)) {
+        toast.error('Failed to record attendance.');
+      }
+    } finally {
+      setMarkingAttendance(false);
+    }
+  };
+
   const todayAttendance = stats?.today_attendance;
   const classInfo = stats?.class_info;
   const attendance = stats?.attendance;
@@ -139,9 +160,23 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                     {statusConfig.label}
                   </Badge>
                 ) : (
-                  <Badge variant="secondary" className="text-sm px-3 py-1">
-                    Not recorded yet
-                  </Badge>
+                  <>
+                    <Badge variant="secondary" className="text-sm px-3 py-1">
+                      Not recorded yet
+                    </Badge>
+                    <Button
+                      size="sm"
+                      onClick={handleSelfAttendance}
+                      disabled={markingAttendance}
+                    >
+                      {markingAttendance ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4" />
+                      )}
+                      {markingAttendance ? 'Marking...' : 'Mark Present'}
+                    </Button>
+                  </>
                 )}
                 {todayAttendance?.notes && (
                   <span className="text-xs text-gray-400">- {todayAttendance.notes}</span>
