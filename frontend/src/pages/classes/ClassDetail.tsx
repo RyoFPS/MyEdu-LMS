@@ -382,6 +382,16 @@ const ClassDetail: React.FC = () => {
                         {teacher.phone && (
                           <p className="text-xs text-gray-400 mt-0.5">{teacher.phone}</p>
                         )}
+                        {/* Teacher's subjects from their profile */}
+                        {(teacher as any).subjects?.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {(teacher as any).subjects.map((s: any) => (
+                              <Badge key={s.id} variant="outline" className="text-xs py-0">
+                                {s.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       {isAdmin && (
                         <Button variant="ghost" size="icon" onClick={() => handleRemoveTeacher(teacher.id)}>

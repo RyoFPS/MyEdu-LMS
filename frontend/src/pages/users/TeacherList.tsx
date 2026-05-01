@@ -104,10 +104,23 @@ const TeacherList: React.FC = () => {
                         <span>{teacher.phone}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      <BookOpen className="h-3.5 w-3.5 shrink-0" />
-                      <span>{t.users.teacher}</span>
-                    </div>
+                    {(teacher as any).subjects?.length > 0 ? (
+                      <div className="flex items-start gap-2">
+                        <BookOpen className="h-3.5 w-3.5 shrink-0 mt-0.5 text-gray-400" />
+                        <div className="flex flex-wrap gap-1">
+                          {(teacher as any).subjects.map((s: any) => (
+                            <Badge key={s.id} variant="outline" className="text-xs py-0">
+                              {s.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <BookOpen className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-gray-400 italic text-xs">No subjects assigned</span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

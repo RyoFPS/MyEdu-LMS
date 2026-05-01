@@ -33,6 +33,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [hasKeyboardFocus, setHasKeyboardFocus] = useState(false);
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -102,6 +103,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   // Focus search input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
+      setHasKeyboardFocus(false); // reset on open
       // Small delay to ensure portal is rendered
       requestAnimationFrame(() => inputRef.current?.focus());
     }
@@ -110,6 +112,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   // Reset highlight when filtered options change
   useEffect(() => {
     setHighlightedIndex(0);
+    setHasKeyboardFocus(false); // reset keyboard focus on search
   }, [searchQuery]);
 
   // Scroll highlighted item into view
@@ -154,10 +157,12 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
+          setHasKeyboardFocus(true);
           setHighlightedIndex((prev) => Math.min(prev + 1, filteredOptions.length - 1));
           break;
         case 'ArrowUp':
           e.preventDefault();
+          setHasKeyboardFocus(true);
           setHighlightedIndex((prev) => Math.max(prev - 1, 0));
           break;
         case 'Enter':
@@ -243,9 +248,9 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               onClick={() => handleSelect(option.value)}
               className={cn(
                 'flex items-center gap-3 w-full px-2.5 py-2 rounded-md text-left text-sm transition-colors',
-                index === highlightedIndex && 'bg-primary-50',
+                hasKeyboardFocus && index === highlightedIndex && 'bg-primary-50 dark:bg-primary-900/20',
                 option.value === value
-                  ? 'bg-primary-50 text-primary-700'
+                  ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
                   : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
               )}
             >

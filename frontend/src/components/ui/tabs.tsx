@@ -34,11 +34,15 @@ export const TabsList: React.FC<{ className?: string; children: React.ReactNode 
 }) => (
   <div
     className={cn(
-      'inline-flex h-10 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 p-1 text-gray-500',
+      'flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 p-1 text-gray-500',
+      'overflow-x-auto scrollbar-none',
+      'w-full',
       className
     )}
   >
-    {children}
+    <div className="flex items-center gap-0 min-w-max">
+      {children}
+    </div>
   </div>
 );
 
@@ -54,7 +58,7 @@ export const TabsTrigger: React.FC<{
     <button
       onClick={() => setActiveTab(value)}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none shrink-0',
         isActive
           ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
           : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',

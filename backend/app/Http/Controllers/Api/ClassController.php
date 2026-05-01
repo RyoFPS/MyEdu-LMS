@@ -88,7 +88,7 @@ class ClassController extends Controller
     public function show(string $id): JsonResponse
     {
         $classRoom = $this->findClass($id);
-        $classRoom->load(['teachers', 'students']);
+        $classRoom->load(['teachers.subjects', 'students']);
         $classRoom->loadCount(['students', 'teachers']);
 
         return response()->json([
