@@ -204,6 +204,14 @@ class ClassController extends Controller
             ], 422);
         }
 
+        // Check if student is already enrolled in a class
+        $currentClass = $student->enrolledClasses()->first();
+        if ($currentClass) {
+            return response()->json([
+                'message' => 'Siswa sudah terdaftar di kelas "' . $currentClass->name . '". Hapus siswa dari kelas tersebut terlebih dahulu.',
+            ], 422);
+        }
+
         $classRoom = $this->findClass($id);
         $classRoom->students()->syncWithoutDetaching([$validated['student_id']]);
 

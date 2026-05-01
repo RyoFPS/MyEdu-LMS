@@ -189,6 +189,11 @@ class UserController extends Controller
             });
         }
 
+        // Filter to only students not enrolled in any class
+        if ($request->boolean('unassigned')) {
+            $query->whereDoesntHave('enrolledClasses');
+        }
+
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where('name', 'like', "%{$search}%");

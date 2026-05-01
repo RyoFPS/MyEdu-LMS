@@ -86,4 +86,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subject-matters/{id}/update', [\App\Http\Controllers\Api\SubjectMatterController::class, 'update'])->middleware('role:admin|teacher');
     Route::delete('/subject-matters/{id}', [\App\Http\Controllers\Api\SubjectMatterController::class, 'destroy'])->middleware('role:admin|teacher');
     Route::get('/subject-matters/{id}/download', [\App\Http\Controllers\Api\SubjectMatterController::class, 'download']);
+    Route::get('/subject-matters/{id}/preview', [\App\Http\Controllers\Api\SubjectMatterController::class, 'preview']);
 });

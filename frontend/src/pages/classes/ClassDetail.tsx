@@ -106,10 +106,9 @@ const ClassDetail: React.FC = () => {
 
   const openAssignStudent = async () => {
     try {
-      const res = await api.get('/students', { params: { per_page: 200 } });
+      const res = await api.get('/students', { params: { per_page: 200, unassigned: true } });
       const allStudents = res.data.data || [];
-      const assignedIds = students.map((s) => s.id);
-      setAvailableStudents(allStudents.filter((s: User) => !assignedIds.includes(s.id)));
+      setAvailableStudents(allStudents);
     } catch {
       /* ignore */
     }
@@ -152,7 +151,9 @@ const ClassDetail: React.FC = () => {
       setSelectedStudentId('');
       fetchClassDetail();
     } catch (error: any) {
-      if (!error.response || ![403, 422, 500].includes(error.response.status)) {
+      if (error.response?.status === 422 && error.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else if (!error.response || ![403, 500].includes(error.response.status)) {
         toast.error('Failed to assign student');
       }
     } finally {
@@ -512,7 +513,7 @@ const ClassDetail: React.FC = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Student</label>
                 {availableStudents.length === 0 ? (
-                  <p className="text-sm text-gray-400 py-2">All students are already enrolled in this class.</p>
+                  <p className="text-sm text-gray-400 py-2">Semua siswa sudah terdaftar di kelas. Hapus siswa dari kelas lain terlebih dahulu.</p>
                 ) : (
                   <SearchableSelect
                     value={selectedStudentId}

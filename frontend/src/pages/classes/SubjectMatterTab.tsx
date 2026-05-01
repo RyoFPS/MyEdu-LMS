@@ -28,6 +28,7 @@ import {
   X,
   Shield,
   User as UserIcon,
+  Eye,
 } from 'lucide-react';
 
 interface SubjectMatterTabProps {
@@ -92,6 +93,12 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   });
   const [saving, setSaving] = useState(false);
 
+  // Preview dialog state
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [previewMaterial, setPreviewMaterial] = useState<SubjectMatter | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
     return () => clearTimeout(timer);
@@ -129,6 +136,15 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   useEffect(() => {
     fetchSubjects();
   }, [fetchSubjects]);
+
+  // Check if file type is previewable in browser
+  const isPreviewable = (fileType: string): boolean => {
+    return (
+      fileType.includes('pdf') ||
+      fileType.includes('image') ||
+      fileType.includes('video')
+    );
+  };
 
   // Upload handler
   const handleUpload = async () => {
@@ -254,6 +270,36 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       window.URL.revokeObjectURL(url);
     } catch {
       toast.error('Failed to download file.');
+    }
+  };
+
+  // Preview handler
+  const handlePreview = async (material: SubjectMatter) => {
+    setPreviewMaterial(material);
+    setShowPreviewDialog(true);
+    setPreviewLoading(true);
+
+    try {
+      const response = await api.get(`/subject-matters/${material.id}/preview`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([response.data], { type: material.file_type });
+      const url = window.URL.createObjectURL(blob);
+      setPreviewUrl(url);
+    } catch {
+      toast.error('Failed to load preview.');
+      setShowPreviewDialog(false);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const closePreview = () => {
+    setShowPreviewDialog(false);
+    setPreviewMaterial(null);
+    if (previewUrl) {
+      window.URL.revokeObjectURL(previewUrl);
+      setPreviewUrl('');
     }
   };
 
@@ -385,6 +431,16 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1 mt-3">
+                      {isPreviewable(material.file_type) && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handlePreview(material)}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          View
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -678,6 +734,85 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             <Button onClick={handleEdit} isLoading={saving} disabled={!editForm.title}>
               Save Changes
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={closePreview}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh]" onClose={closePreview}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 pr-8">
+              <Eye className="h-5 w-5 text-primary-500" />
+              <span className="truncate">{previewMaterial?.title}</span>
+              <Badge variant={previewMaterial?.type === 'main' ? 'default' : 'secondary'} className="ml-2 shrink-0">
+                {previewMaterial?.type === 'main' ? 'Main' : 'Optional'}
+              </Badge>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden p-6 pt-0" style={{ height: 'calc(90vh - 140px)' }}>
+            {previewLoading ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <Loader2 className="h-10 w-10 animate-spin text-primary-500 mb-3" />
+                <p className="text-sm text-gray-500">Loading preview...</p>
+              </div>
+            ) : previewUrl && previewMaterial ? (
+              <>
+                {previewMaterial.file_type.includes('pdf') && (
+                  <iframe
+                    src={previewUrl}
+                    className="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
+                    title={previewMaterial.title}
+                  />
+                )}
+                {previewMaterial.file_type.includes('image') && (
+                  <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-auto">
+                    <img
+                      src={previewUrl}
+                      alt={previewMaterial.title}
+                      className="max-w-full max-h-full object-contain"
+                    />
+                  </div>
+                )}
+                {previewMaterial.file_type.includes('video') && (
+                  <div className="flex items-center justify-center h-full bg-black rounded-lg">
+                    <video
+                      src={previewUrl}
+                      controls
+                      autoPlay
+                      className="max-w-full max-h-full"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <FileText className="h-12 w-12 mb-3 opacity-50" />
+                <p className="text-sm">Unable to load preview</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <div className="flex items-center gap-2 w-full justify-between">
+              <div className="text-xs text-gray-400">
+                {previewMaterial?.file_name} • {previewMaterial?.file_size_formatted}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => previewMaterial && handleDownload(previewMaterial)}
+                >
+                  <Download className="h-4 w-4" />
+                  Download
+                </Button>
+                <Button variant="outline" onClick={closePreview}>
+                  Close
+                </Button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

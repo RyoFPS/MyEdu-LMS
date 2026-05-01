@@ -286,4 +286,40 @@ class SubjectMatterController extends Controller
 
         return response()->download($filePath, $material->file_name);
     }
+
+    /**
+     * GET /api/subject-matters/{id}/preview
+     *
+     * Serve the file inline for in-browser viewing.
+     */
+    public function preview(Request $request, int $id)
+    {
+        $material = SubjectMatter::findOrFail($id);
+        $user = $request->user();
+
+        // Authorization
+        if ($user->isTeacher()) {
+            $teachesClass = $user->teachingClasses()->where('classes.id', $material->class_id)->exists();
+            if (!$teachesClass) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        } elseif ($user->isStudent()) {
+            $enrolledInClass = $user->enrolledClasses()->where('classes.id', $material->class_id)->exists();
+            if (!$enrolledInClass) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        }
+
+        if (!Storage::disk('public')->exists($material->file_path)) {
+            return response()->json(['message' => 'File tidak ditemukan.'], 404);
+        }
+
+        $filePath = Storage::disk('public')->path($material->file_path);
+        $mimeType = $material->file_type;
+
+        return response()->file($filePath, [
+            'Content-Type' => $mimeType,
+            'Content-Disposition' => 'inline; filename="' . $material->file_name . '"',
+        ]);
+    }
 }
