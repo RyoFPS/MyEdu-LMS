@@ -7,5 +7,5 @@
     <line x1="150" y1="-40" x2="150" y2="50" stroke="white" stroke-width="8" opacity="0.8"/>
     <circle cx="150" cy="58" r="10" fill="white" opacity="0.8"/>
   </g>
-  <text x="256" y="390" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="60" font-weight="700" fill="white" opacity="0.95">CHIKABU</text>
+  <text x="256" y="390" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="60" font-weight="700" fill="white" opacity="0.95">MYEDU</text>
 </svg>

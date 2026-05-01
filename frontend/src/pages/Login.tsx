@@ -66,7 +66,7 @@ const Login: React.FC = () => {
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-4 shadow-lg shadow-blue-500/30">
               <GraduationCap className="h-8 w-8" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Chikabu LMS</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">MyEdu LMS</h1>
             <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Learning Management System</p>
           </div>
 
@@ -127,14 +127,14 @@ const Login: React.FC = () => {
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-400">
-              Chikabu Learning Management System
+              MyEdu Learning Management System
             </p>
           </div>
         </div>
 
         {/* Bottom text */}
         <p className="text-center text-white/60 text-xs mt-6">
-          &copy; {new Date().getFullYear()} Chikabu LMS. All rights reserved.
+          &copy; {new Date().getFullYear()} MyEdu LMS. All rights reserved.
         </p>
       </div>
     </div>

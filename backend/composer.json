@@ -1,7 +1,7 @@
 {
-    "name": "chikabu/lms-backend",
+    "name": "myedu/lms-backend",
     "type": "project",
-    "description": "Chikabu LMS - Learning Management System Backend",
+    "description": "MyEdu LMS - Learning Management System Backend",
     "keywords": ["laravel", "lms", "education"],
     "license": "MIT",
     "require": {

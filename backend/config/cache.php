@@ -26,6 +26,6 @@ return [
 
     ],
 
-    'prefix' => env('CACHE_PREFIX', 'chikabu_lms_cache_'),
+    'prefix' => env('CACHE_PREFIX', 'myedu_lms_cache_'),
 
 ];

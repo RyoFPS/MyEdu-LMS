@@ -92,7 +92,7 @@ export const Sidebar: React.FC = () => {
         </div>
         {!collapsed && (
           <div className="animate-fade-in">
-            <h1 className="text-lg font-bold text-white tracking-tight">Chikabu</h1>
+            <h1 className="text-lg font-bold text-white tracking-tight">MyEdu</h1>
             <p className="text-[10px] text-gray-400 uppercase tracking-widest">Learning Management</p>
           </div>
         )}

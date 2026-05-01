@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chikabu-lms-v1';
+const CACHE_NAME = 'myedu-lms-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',

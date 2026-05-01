@@ -1,6 +1,6 @@
-# 🎓 Chikabu LMS - Learning Management System
+# 🎓 MyEdu LMS - Learning Management System
 
-A modern, full-featured **Learning Management System** built for **School Chikabu**. Powered by **Laravel 11** (Backend API) and **React + TypeScript** (Frontend SPA).
+A modern, full-featured **Learning Management System** built for **School MyEdu**. Powered by **Laravel 11** (Backend API) and **React + TypeScript** (Frontend SPA).
 
 ---
 
@@ -69,7 +69,7 @@ A modern, full-featured **Learning Management System** built for **School Chikab
 ## 📁 Project Structure
 
 ```
-Chikabu-LMS/
+MyEdu-LMS/
 ├── backend/                    # Laravel API
 │   ├── app/
 │   │   ├── Http/
@@ -128,7 +128,7 @@ composer install
 # Generate application key
 php artisan key:generate
 
-# Create a MySQL database named 'chikabu_lms', then run:
+# Create a MySQL database named 'myedu_lms', then run:
 php artisan migrate
 php artisan db:seed
 
@@ -160,10 +160,10 @@ npm run dev
 
 | Role | Email | Password |
 |---------|-------------------------------|----------|
-| Admin | `admin@chikabu.sch.id` | password |
-| Teacher | `budi@chikabu.sch.id` | password |
-| Teacher | `siti@chikabu.sch.id` | password |
-| Student | `andi.wijaya@chikabu.sch.id` | password |
+| Admin | `admin@myedu.sch.id` | password |
+| Teacher | `budi@myedu.sch.id` | password |
+| Teacher | `siti@myedu.sch.id` | password |
+| Student | `andi.wijaya@myedu.sch.id` | password |
 
 > ⚠️ **Note:** These credentials are seeded for development purposes. Change them in production.
 
@@ -247,7 +247,7 @@ All API endpoints are prefixed with `/api` and require authentication unless sta
 
 ## 📄 License
 
-This project is built for **School Chikabu**.
+This project is built for **School MyEdu**.
 
 ---
 

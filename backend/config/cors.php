@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Settings for cross-origin resource sharing. Configured to allow
-    | the Chikabu LMS frontend (Vite dev server) to communicate with this API.
+    | the MyEdu LMS frontend (Vite dev server) to communicate with this API.
     |
     */
 

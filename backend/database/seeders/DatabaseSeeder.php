@@ -16,14 +16,14 @@ use Illuminate\Support\Facades\Hash;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database with sample data for Chikabu LMS.
+     * Seed the application's database with sample data for MyEdu LMS.
      */
     public function run(): void
     {
         // ─── 1. Admin ────────────────────────────────────────────────────
         $admin = User::create([
             'name'     => 'Administrator',
-            'email'    => 'admin@chikabu.sch.id',
+            'email'    => 'admin@myedu.sch.id',
             'password' => Hash::make('password'),
             'role'     => 'admin',
             'phone'    => '081200000001',
@@ -31,11 +31,11 @@ class DatabaseSeeder extends Seeder
 
         // ─── 2. Teachers (5) ────────────────────────────────────────────
         $teacherData = [
-            ['name' => 'Budi Santoso',    'email' => 'budi@chikabu.sch.id',    'phone' => '081200000002'],
-            ['name' => 'Siti Rahayu',     'email' => 'siti@chikabu.sch.id',    'phone' => '081200000003'],
-            ['name' => 'Ahmad Fauzi',     'email' => 'ahmad@chikabu.sch.id',   'phone' => '081200000004'],
-            ['name' => 'Dewi Lestari',    'email' => 'dewi@chikabu.sch.id',    'phone' => '081200000005'],
-            ['name' => 'Eko Prasetyo',    'email' => 'eko@chikabu.sch.id',     'phone' => '081200000006'],
+            ['name' => 'Budi Santoso',    'email' => 'budi@myedu.sch.id',    'phone' => '081200000002'],
+            ['name' => 'Siti Rahayu',     'email' => 'siti@myedu.sch.id',    'phone' => '081200000003'],
+            ['name' => 'Ahmad Fauzi',     'email' => 'ahmad@myedu.sch.id',   'phone' => '081200000004'],
+            ['name' => 'Dewi Lestari',    'email' => 'dewi@myedu.sch.id',    'phone' => '081200000005'],
+            ['name' => 'Eko Prasetyo',    'email' => 'eko@myedu.sch.id',     'phone' => '081200000006'],
         ];
 
         $teachers = [];
@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
             $emailName  = strtolower(str_replace(' ', '.', $name));
             $students[] = User::create([
                 'name'     => $name,
-                'email'    => "{$emailName}@chikabu.sch.id",
+                'email'    => "{$emailName}@myedu.sch.id",
                 'password' => Hash::make('password'),
                 'role'     => 'student',
                 'phone'    => '08120000' . str_pad($i + 10, 4, '0', STR_PAD_LEFT),
@@ -290,7 +290,7 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Chikabu LMS database seeded successfully!');
-        $this->command->info('Admin login: admin@chikabu.sch.id / password');
+        $this->command->info('MyEdu LMS database seeded successfully!');
+        $this->command->info('Admin login: admin@myedu.sch.id / password');
     }
 }

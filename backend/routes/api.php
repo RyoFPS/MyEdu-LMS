@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes — Chikabu LMS
+| API Routes — MyEdu LMS
 |--------------------------------------------------------------------------
 |
 | All routes are prefixed with /api automatically.

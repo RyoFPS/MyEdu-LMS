@@ -56,7 +56,7 @@ export const PWAInstallPrompt: React.FC = () => {
             <Smartphone className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Install Chikabu LMS</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Install MyEdu LMS</h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
               Add to your home screen for quick access, offline support, and a native app experience.
             </p>

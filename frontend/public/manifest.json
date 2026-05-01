@@ -1,7 +1,7 @@
 {
-  "name": "Chikabu LMS",
-  "short_name": "Chikabu",
-  "description": "Learning Management System for School Chikabu",
+  "name": "MyEdu LMS",
+  "short_name": "MyEdu",
+  "description": "Learning Management System for School MyEdu",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
