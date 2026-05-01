@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './stores/authStore';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 // Pages
 import Login from './pages/Login';
@@ -28,6 +29,8 @@ function App() {
   }, [initialize]);
 
   return (
+    <>
+    <PWAInstallPrompt />
     <Routes>
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
@@ -102,6 +105,7 @@ function App() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </>
   );
 }
 
