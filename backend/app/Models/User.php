@@ -109,4 +109,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(QuizAttempt::class, 'student_id');
     }
+
+    /**
+     * Subject matters uploaded by this user.
+     */
+    public function subjectMatters(): HasMany
+    {
+        return $this->hasMany(SubjectMatter::class, 'uploaded_by');
+    }
 }

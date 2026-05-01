@@ -129,3 +129,28 @@ export interface AttendanceRecord {
   status: 'present' | 'absent' | 'late' | 'excused';
   notes?: string;
 }
+
+export interface Subject {
+  id: number;
+  name: string;
+  code: string;
+}
+
+export interface SubjectMatter {
+  id: number;
+  title: string;
+  description?: string;
+  file_name: string;
+  file_size: number;
+  file_size_formatted: string;
+  file_type: string;
+  type: 'main' | 'optional';
+  class_id: number;
+  subject_id?: number;
+  uploaded_by: number;
+  created_at?: string;
+  updated_at?: string;
+  class_room?: ClassRoom;
+  subject?: Subject;
+  uploader?: User;
+}

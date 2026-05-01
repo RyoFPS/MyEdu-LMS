@@ -75,4 +75,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Quiz results (teacher sees all, student sees own)
     Route::get('/quizzes/{id}/results', [QuizController::class, 'results']);
+
+    // ── Subjects ─────────────────────────────────────────────────────────
+    Route::get('/subjects', [\App\Http\Controllers\Api\SubjectController::class, 'index']);
+
+    // ── Subject Matters (Materi Pelajaran) ───────────────────────────────
+    Route::get('/classes/{classId}/subject-matters', [\App\Http\Controllers\Api\SubjectMatterController::class, 'index']);
+    Route::post('/classes/{classId}/subject-matters', [\App\Http\Controllers\Api\SubjectMatterController::class, 'store'])->middleware('role:admin|teacher');
+    Route::get('/subject-matters/{id}', [\App\Http\Controllers\Api\SubjectMatterController::class, 'show']);
+    Route::post('/subject-matters/{id}/update', [\App\Http\Controllers\Api\SubjectMatterController::class, 'update'])->middleware('role:admin|teacher');
+    Route::delete('/subject-matters/{id}', [\App\Http\Controllers\Api\SubjectMatterController::class, 'destroy'])->middleware('role:admin|teacher');
+    Route::get('/subject-matters/{id}/download', [\App\Http\Controllers\Api\SubjectMatterController::class, 'download']);
 });

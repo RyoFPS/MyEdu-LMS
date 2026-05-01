@@ -123,4 +123,12 @@ class ClassRoom extends Model
     {
         return $this->hasMany(Quiz::class, 'class_id');
     }
+
+    /**
+     * Subject matters for this class.
+     */
+    public function subjectMatters(): HasMany
+    {
+        return $this->hasMany(SubjectMatter::class, 'class_id');
+    }
 }

@@ -14,6 +14,7 @@ import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
+import SubjectMatterTab from './SubjectMatterTab';
 import type { ClassRoom, User, Attendance, Quiz } from '../../types';
 import {
   BookOpen,
@@ -28,6 +29,7 @@ import {
   FileX,
   Trash2,
   UserPlus,
+  BookMarked,
 } from 'lucide-react';
 
 const ClassDetail: React.FC = () => {
@@ -269,6 +271,10 @@ const ClassDetail: React.FC = () => {
               <FileQuestion className="h-4 w-4 mr-1.5" />
               Quizzes
             </TabsTrigger>
+            <TabsTrigger value="materials">
+              <BookMarked className="h-4 w-4 mr-1.5" />
+              Materials
+            </TabsTrigger>
           </TabsList>
 
           {/* Students Tab */}
@@ -448,6 +454,11 @@ const ClassDetail: React.FC = () => {
                 </div>
               )}
             </Card>
+          </TabsContent>
+
+          {/* Subject Matters Tab */}
+          <TabsContent value="materials">
+            <SubjectMatterTab classId={classRoom.id} />
           </TabsContent>
         </Tabs>
 
