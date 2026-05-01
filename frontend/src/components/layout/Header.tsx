@@ -5,6 +5,7 @@ import { Avatar } from '../ui/avatar';
 import { DropdownMenu, DropdownMenuItem, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import { Bell, User, LogOut, Settings, CheckCheck, FileQuestion, ClipboardCheck, BookOpen, Users as UsersIcon } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 
@@ -144,6 +145,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
         {/* Right side controls */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <ThemeToggle />
+          <LanguageSwitcher />
 
           {/* Notifications Dropdown */}
           <div ref={notifRef} className="relative">

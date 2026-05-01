@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from '../../hooks/useTranslation';
 import { Avatar } from '../ui/avatar';
 import {
   LayoutDashboard,
@@ -29,55 +30,55 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    label: 'Dashboard',
+    label: 'dashboard',
     path: '/dashboard',
     icon: <LayoutDashboard className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
   },
   {
-    label: 'Users',
+    label: 'users',
     path: '/users',
     icon: <Users className="h-5 w-5" />,
     roles: ['admin'],
   },
   {
-    label: 'Classes',
+    label: 'classes',
     path: '/classes',
     icon: <BookOpen className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
   },
   {
-    label: 'Subjects',
+    label: 'subjects',
     path: '/subjects',
     icon: <Tag className="h-5 w-5" />,
     roles: ['admin'],
   },
   {
-    label: 'Library',
+    label: 'library',
     path: '/library',
     icon: <BookMarked className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
   },
   {
-    label: 'Attendance',
+    label: 'attendance',
     path: '/attendance',
     icon: <ClipboardCheck className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
   },
   {
-    label: 'Quizzes',
+    label: 'quizzes',
     path: '/quizzes',
     icon: <FileQuestion className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
   },
   {
-    label: 'Teachers',
+    label: 'teachers',
     path: '/teachers',
     icon: <UserCircle className="h-5 w-5" />,
     roles: ['student'],
   },
   {
-    label: 'Students',
+    label: 'students',
     path: '/students',
     icon: <GraduationCap className="h-5 w-5" />,
     roles: ['teacher'],
@@ -86,6 +87,7 @@ const navItems: NavItem[] = [
 
 export const Sidebar: React.FC = () => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -130,7 +132,7 @@ export const Sidebar: React.FC = () => {
             }
           >
             <span className="shrink-0">{item.icon}</span>
-            {!collapsed && <span>{item.label}</span>}
+            {!collapsed && <span>{t.sidebar[item.label as keyof typeof t.sidebar] || item.label}</span>}
           </NavLink>
         ))}
       </nav>
@@ -161,7 +163,7 @@ export const Sidebar: React.FC = () => {
           )}
         >
           <LogOut className="h-5 w-5 shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>{t.auth.logout}</span>}
         </button>
       </div>
 
