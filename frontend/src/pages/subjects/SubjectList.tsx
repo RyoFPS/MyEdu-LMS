@@ -9,6 +9,7 @@ import { Select } from '../../components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import api from '../../lib/axios';
+import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
 import {
@@ -357,17 +358,30 @@ const SubjectList: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.common.category}</label>
+                {categories.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {categories.map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setForm({ ...form, category: c })}
+                        className={cn(
+                          'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
+                          form.category === c
+                            ? 'bg-primary-500 text-white border-primary-500'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary-400 hover:text-primary-600'
+                        )}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <Input
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
                   placeholder="e.g., Science, Language, Mathematics"
-                  list="category-suggestions"
                 />
-                <datalist id="category-suggestions">
-                  {categories.map((c) => (
-                    <option key={c} value={c} />
-                  ))}
-                </datalist>
                 <p className="text-xs text-gray-400">{t.subjects.categoryHint}</p>
               </div>
               <div className="space-y-2">

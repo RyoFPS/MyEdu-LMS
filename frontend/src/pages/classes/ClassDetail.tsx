@@ -10,6 +10,7 @@ import { Avatar } from '../../components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { SearchableSelect } from '../../components/ui/searchable-select';
 import { Input } from '../../components/ui/input';
+import { Select } from '../../components/ui/select';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
@@ -54,6 +55,7 @@ const ClassDetail: React.FC = () => {
   const [teacherSubject, setTeacherSubject] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [assigning, setAssigning] = useState(false);
+  const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
 
   const fetchClassDetail = useCallback(async () => {
     setLoading(true);
@@ -94,10 +96,20 @@ const ClassDetail: React.FC = () => {
   // --- Assign dialog openers ---
   const openAssignTeacher = async () => {
     try {
-      const res = await api.get('/teachers');
-      const allTeachers = res.data.data || [];
-      const assignedIds = teachers.map((t) => t.id);
-      setAvailableTeachers(allTeachers.filter((t: User) => !assignedIds.includes(t.id)));
+      const [teachersRes, subjectsRes] = await Promise.allSettled([
+        api.get('/teachers'),
+        api.get('/subjects'),
+      ]);
+
+      if (teachersRes.status === 'fulfilled') {
+        const allTeachers = teachersRes.value.data.data || [];
+        const assignedIds = teachers.map((t) => t.id);
+        setAvailableTeachers(allTeachers.filter((t: User) => !assignedIds.includes(t.id)));
+      }
+
+      if (subjectsRes.status === 'fulfilled') {
+        setSubjects(subjectsRes.value.data.data || []);
+      }
     } catch {
       /* ignore */
     }
@@ -488,12 +500,33 @@ const ClassDetail: React.FC = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.quizzes.subject} (optional)</label>
-                <Input
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {t.quizzes.subject} (optional)
+                </label>
+                <Select
                   value={teacherSubject}
                   onChange={(e) => setTeacherSubject(e.target.value)}
-                  placeholder="e.g., Matematika"
+                  options={[
+                    ...subjects.map((s) => ({
+                      value: s.name,
+                      label: `${s.name} (${s.code})${s.category ? ` — ${s.category}` : ''}`,
+                    })),
+                    { value: 'Other', label: 'Other (Versatile Teacher)' },
+                  ]}
+                  placeholder={`${t.quizzes.subject} (optional)`}
                 />
+                {selectedTeacherId && (() => {
+                  const selectedTeacher = availableTeachers.find(t => String(t.id) === selectedTeacherId);
+                  const teacherSubjects = (selectedTeacher as any)?.subjects;
+                  if (teacherSubjects && teacherSubjects.length > 0) {
+                    return (
+                      <p className="text-xs text-gray-400">
+                        This teacher teaches: {teacherSubjects.map((s: any) => s.name).join(', ')}
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
             </div>
             <DialogFooter>

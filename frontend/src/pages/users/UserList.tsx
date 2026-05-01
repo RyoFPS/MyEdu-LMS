@@ -178,14 +178,14 @@ const UserList: React.FC = () => {
         };
         if (formData.password) payload.password = formData.password;
         if (formData.role === 'teacher') {
-          payload.subject_ids = formData.subject_ids;
+          payload.subject_ids = formData.subject_ids.filter((id: number) => id !== 0);
         }
         await api.put(`/users/${editingUser.id}`, payload);
         toast.success('User updated successfully');
       } else {
         await api.post('/users', {
           ...formData,
-          subject_ids: formData.role === 'teacher' ? formData.subject_ids : undefined,
+          subject_ids: formData.role === 'teacher' ? formData.subject_ids.filter(id => id !== 0) : undefined,
         });
         toast.success('User created successfully');
       }
@@ -574,27 +574,46 @@ const UserList: React.FC = () => {
                       {subjects.length === 0 ? (
                         <p className="text-sm text-gray-400">{t.users.noSubjectsAvailable}</p>
                       ) : (
-                        subjects.map((subject) => (
-                          <label key={subject.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
+                        <>
+                          {subjects.map((subject) => (
+                            <label key={subject.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
+                              <input
+                                type="checkbox"
+                                checked={formData.subject_ids.includes(subject.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setFormData({ ...formData, subject_ids: [...formData.subject_ids.filter(id => id !== 0), subject.id] });
+                                  } else {
+                                    setFormData({ ...formData, subject_ids: formData.subject_ids.filter((id) => id !== subject.id) });
+                                  }
+                                }}
+                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300">{subject.name}</span>
+                              <Badge variant="outline" className="text-xs ml-auto">{subject.code}</Badge>
+                              {subject.category && (
+                                <span className="text-xs text-gray-400">{subject.category}</span>
+                              )}
+                            </label>
+                          ))}
+                          <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
+                          <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
                             <input
                               type="checkbox"
-                              checked={formData.subject_ids.includes(subject.id)}
+                              checked={formData.subject_ids.includes(0)}
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  setFormData({ ...formData, subject_ids: [...formData.subject_ids, subject.id] });
+                                  setFormData({ ...formData, subject_ids: [0] });
                                 } else {
-                                  setFormData({ ...formData, subject_ids: formData.subject_ids.filter((id) => id !== subject.id) });
+                                  setFormData({ ...formData, subject_ids: formData.subject_ids.filter((id) => id !== 0) });
                                 }
                               }}
                               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                             />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">{subject.name}</span>
-                            <Badge variant="outline" className="text-xs ml-auto">{subject.code}</Badge>
-                            {subject.category && (
-                              <span className="text-xs text-gray-400">{subject.category}</span>
-                            )}
+                            <span className="text-sm text-gray-700 dark:text-gray-300">Other</span>
+                            <Badge variant="secondary" className="text-xs ml-auto">Versatile</Badge>
                           </label>
-                        ))
+                        </>
                       )}
                     </div>
                     <p className="text-xs text-gray-400">{t.users.selectSubjects}</p>
