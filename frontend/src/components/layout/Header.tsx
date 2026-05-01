@@ -38,22 +38,22 @@ const getNotificationIcon = (type: string) => {
   }
 };
 
-const timeAgo = (dateStr: string): string => {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return 'Just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-  return date.toLocaleDateString();
-};
-
 export const Header: React.FC<HeaderProps> = ({ title, description }) => {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const timeAgo = (dateStr: string): string => {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return (t.notifications as any).justNow || 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  };
 
   // Translate notification title and message
   const translateNotif = (notif: NotificationItem): { title: string; message: string } => {
@@ -104,9 +104,74 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
           title: n.added_to_class_title || 'Added to Class',
           message: interpolate(n.added_to_class_msg || notif.message, { class_name: data.class_name || '' }),
         };
-      default:
-        // Fallback: use raw title/message from backend (for old notifications)
-        return { title: notif.title, message: notif.message };
+      default: {
+        const oldTitleMap: Record<string, string> = {
+          'Kuis Baru': n.quiz_created_title || 'New Quiz',
+          'Kuis Dikumpulkan': n.quiz_submitted_title || 'Quiz Submitted',
+          'Absensi Dicatat': n.attendance_recorded_title || 'Attendance Recorded',
+          'Materi Baru': n.material_uploaded_title || 'New Material',
+          'Ditambahkan ke Kelas': n.added_to_class_title || 'Added to Class',
+          'New Quiz': n.quiz_created_title || 'New Quiz',
+          'Quiz Submitted': n.quiz_submitted_title || 'Quiz Submitted',
+          'Attendance Recorded': n.attendance_recorded_title || 'Attendance Recorded',
+          'New Material': n.material_uploaded_title || 'New Material',
+          'Added to Class': n.added_to_class_title || 'Added to Class',
+        };
+
+        const translatedTitle = oldTitleMap[notif.title] || notif.title;
+
+        let translatedMessage = '';
+
+        if (notif.type === 'quiz') {
+          if (data.quiz_title && (notif.title === 'Kuis Baru' || notif.title === 'New Quiz' || notif.title === 'notif.quiz_created')) {
+            translatedMessage = interpolate(n.quiz_created_msg || '', {
+              quiz_title: data.quiz_title,
+              class_name: data.class_name || '',
+            });
+          } else if (data.quiz_title && data.student_name) {
+            translatedMessage = interpolate(n.quiz_submitted_msg || '', {
+              student_name: data.student_name,
+              quiz_title: data.quiz_title,
+            });
+          } else {
+            translatedMessage = translatedTitle;
+          }
+        } else if (notif.type === 'attendance') {
+          if (data.status) {
+            translatedMessage = interpolate(n.attendance_recorded_msg || '', {
+              date: data.date || '',
+              status: translateStatus(data.status),
+            });
+          } else {
+            translatedMessage = translatedTitle;
+          }
+        } else if (notif.type === 'material') {
+          if (data.material_title) {
+            translatedMessage = interpolate(n.material_uploaded_msg || '', {
+              material_title: data.material_title,
+              class_name: data.class_name || '',
+            });
+          } else {
+            translatedMessage = translatedTitle;
+          }
+        } else if (notif.type === 'class') {
+          if (data.class_name) {
+            translatedMessage = interpolate(n.added_to_class_msg || '', {
+              class_name: data.class_name,
+            });
+          } else {
+            translatedMessage = translatedTitle;
+          }
+        } else {
+          translatedMessage = notif.message;
+        }
+
+        if (!translatedMessage) {
+          translatedMessage = translatedTitle;
+        }
+
+        return { title: translatedTitle, message: translatedMessage };
+      }
     }
   };
 
