@@ -1,6 +1,6 @@
 # 🎓 MyEdu LMS
 
-A modern, full-stack **Learning Management System** built for schools and educational institutions. MyEdu LMS supports three roles — Admin, Teacher, and Student — with a rich feature set including quizzes, attendance tracking, class materials, a curriculum library, real-time notifications, and a full audit trail.
+A modern, full-stack **Learning Management System** built for schools and educational institutions. MyEdu LMS supports three roles — Admin, Teacher, and Student — with a rich feature set including quizzes, attendance tracking, class materials, a curriculum library, assignments, real-time notifications, and a full audit trail.
 
 ---
 
@@ -14,7 +14,7 @@ A modern, full-stack **Learning Management System** built for schools and educat
 - Multi-language support: 🇬🇧 English, 🇮🇩 Bahasa Indonesia, 🇨🇳 中文
 
 ### 📊 Role-Specific Dashboards
-- **Student**: Today's attendance status, class info, available quizzes, new materials, upcoming deadlines, recent quiz scores, and a "Mark Present" self-attendance button
+- **Student**: Today's attendance status, class info, available quizzes, new materials, upcoming deadlines, recent quiz scores, a "Mark Present" self-attendance button, and **Upcoming Assignments** card with due date badges (Overdue / Due Today / X days left)
 - **Teacher**: Class attendance status per class with "Record Now" button, active quizzes, recent student submissions, and new materials
 - **Admin**: System overview, platform statistics, today's materials, and quick action shortcuts
 
@@ -67,21 +67,50 @@ A modern, full-stack **Learning Management System** built for schools and educat
 - Export quiz results as CSV
 - Configurable max attempts: 1, unlimited, or custom number
 
+### 📝 Assignment System
+- Teachers and admins create assignments with title, description, class, subject, due date, and max score
+- Optional file attachment from teacher (PDF, DOC, images, max 10MB)
+- Configurable policies: allow late submission, allow resubmission
+- Students submit files (PDF, DOC, DOCX, images, max 10MB)
+- Version tracking for resubmissions
+- Teachers grade submissions with a score (0–max) and text feedback
+- Late submission detection with badge display
+- Overdue detection with color-coded badges
+- Download teacher attachments and student submissions
+- Submission statistics (X/Y submitted, X/Y graded)
+- Role-based access: Admin/Teacher create & grade, Student submit
+- Activity logging for all assignment actions
+- Notifications on new assignment, submission received, and grading completed
+
 ### 🔔 Notifications
 - Real-time notification bell with unread count badge
 - Auto-refresh every 30 seconds
-- Triggered by: new quiz, quiz submitted, attendance recorded, new material, added to class
+- Triggered by: new quiz, quiz submitted, attendance recorded, new material, added to class, new assignment, assignment submitted, assignment graded
 - Mark single or all notifications as read
 - Multi-language notification messages
 - 90-day retention policy
 
 ### 🕵️ Activity Log *(Admin)*
 - Full audit trail of all platform actions
-- Logs: user CRUD, class CRUD, quiz CRUD, attendance recording, material uploads, subject CRUD, login/logout
+- Logs: user CRUD, class CRUD, quiz CRUD, assignment CRUD, attendance recording, material uploads, subject CRUD, login/logout
 - Filter by action type, target type, user, and date range
 - Export as CSV
 - Color-coded timeline view
 - Stats: today, this week, total (90-day window)
+
+### ⚡ Performance & Caching
+- **React Query (TanStack Query)** — client-side caching with smart TTLs (30 min for static data, 1 min for dynamic data)
+- **Laravel HTTP Cache Headers** — browser caching via middleware
+- **Laravel Query Caching** — server-side DB query caching with auto-invalidation
+- **Enhanced Service Worker** — offline support, stale-while-revalidate, multi-cache strategy
+- **Skeleton Loading Screens** — all pages show content-aware skeletons instead of spinners
+
+### 🔧 Code Quality
+- React Doctor audit: fixed 1000+ issues (accessibility, performance, correctness)
+- Replaced `w-N h-N` with `size-N` Tailwind shorthand throughout
+- Functional setState patterns to avoid stale closures
+- localStorage versioning (`token:v1`, `user:v1`)
+- Keyboard accessibility on all interactive elements
 
 ### 🌐 Multi-Language (i18n)
 - Three languages: 🇬🇧 English, 🇮🇩 Bahasa Indonesia, 🇨🇳 中文
@@ -110,6 +139,7 @@ A modern, full-stack **Learning Management System** built for schools and educat
 | **Build Tool** | Vite 5 |
 | **Styling** | Tailwind CSS v3 |
 | **State Management** | Zustand |
+| **Server State / Caching** | TanStack Query (React Query) |
 | **HTTP Client** | Axios |
 | **Routing** | React Router v6 |
 | **Icons** | Lucide React |
@@ -136,7 +166,7 @@ MyEdu-LMS/
 │   ├── routes/
 │   │   └── api.php             # API route definitions
 │   └── storage/
-│       └── app/public/         # Uploaded files (avatars, materials)
+│       └── app/public/         # Uploaded files (avatars, materials, assignments)
 │
 └── frontend/                   # React + TypeScript SPA
     └── src/
@@ -146,6 +176,7 @@ MyEdu-LMS/
         ├── lib/                # Axios instance & utilities
         ├── pages/              # Page components by feature
         │   ├── admin/          # Activity logs
+        │   ├── assignments/    # Assignment pages
         │   ├── attendance/     # Attendance pages
         │   ├── classes/        # Class management
         │   ├── library/        # Curriculum library
@@ -311,33 +342,28 @@ All endpoints are prefixed with `/api` and require a Bearer token (except `/logi
 |---|---|---|
 | `GET` | `/library` | List library materials |
 | `POST` | `/library` | Upload a library material |
-| `GET` | `/library/grade-levels` | List grade levels with materials |
-| `POST` | `/library/{id}/update` | Update a library material |
+| `GET` | `/library/{id}` | Get a library material |
 | `DELETE` | `/library/{id}` | Delete a library material |
+| `GET` | `/library/{id}/download` | Download a library material |
 
 ### 📄 Class Materials
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/classes/{classId}/subject-matters` | List materials for a class |
-| `POST` | `/classes/{classId}/subject-matters` | Upload material to a class |
-| `GET` | `/subject-matters/{id}` | Get a material |
-| `PUT` | `/subject-matters/{id}` | Update a material |
-| `DELETE` | `/subject-matters/{id}` | Delete a material |
-| `GET` | `/subject-matters/{id}/download` | Download a material file |
-| `GET` | `/subject-matters/{id}/preview` | Preview a material in-browser |
+| `GET` | `/materials` | List class materials |
+| `POST` | `/materials` | Upload a class material |
+| `GET` | `/materials/{id}` | Get a class material |
+| `DELETE` | `/materials/{id}` | Delete a class material |
+| `GET` | `/materials/{id}/download` | Download a class material |
 
 ### 📋 Attendance
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/attendances` | List attendance records |
-| `GET` | `/attendances/summary` | Attendance statistics |
-| `GET` | `/attendances/export` | Export attendance as CSV |
-| `POST` | `/attendances` | Record a single attendance |
-| `POST` | `/attendances/bulk` | Record bulk attendance |
-| `POST` | `/attendances/self` | Student self-attendance |
-| `GET` | `/attendances/{id}` | Get a specific record |
+| `GET` | `/attendance` | List attendance records |
+| `POST` | `/attendance` | Record bulk attendance |
+| `POST` | `/attendance/self` | Student self-attendance |
+| `GET` | `/attendance/export` | Export attendance as CSV |
 
 ### 📝 Quizzes
 
@@ -352,6 +378,22 @@ All endpoints are prefixed with `/api` and require a Bearer token (except `/logi
 | `POST` | `/quizzes/{id}/start` | Start a quiz attempt |
 | `POST` | `/quizzes/{id}/submit` | Submit quiz answers |
 | `GET` | `/quizzes/{id}/results` | Get quiz results/analytics |
+
+### 📝 Assignments
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/assignments` | List assignments (role-filtered) |
+| `POST` | `/assignments` | Create assignment (admin/teacher) |
+| `GET` | `/assignments/{id}` | Get assignment details |
+| `PUT` | `/assignments/{id}` | Update assignment (admin/teacher) |
+| `DELETE` | `/assignments/{id}` | Delete assignment (admin/teacher) |
+| `POST` | `/assignments/{id}/submit` | Submit assignment (student) |
+| `GET` | `/assignments/{id}/my-submission` | Get own submission (student) |
+| `GET` | `/assignments/{id}/submissions` | Get all submissions (admin/teacher) |
+| `POST` | `/assignment-submissions/{id}/grade` | Grade submission (admin/teacher) |
+| `GET` | `/assignment-submissions/{id}/download` | Download submission file |
+| `GET` | `/assignments/{id}/download-attachment` | Download teacher attachment |
 
 ### 🔔 Notifications
 
@@ -390,9 +432,21 @@ All endpoints are prefixed with `/api` and require a Bearer token (except `/logi
 | Take quizzes | ❌ | ❌ | ✅ |
 | View quiz analytics | ✅ | ✅ | ❌ |
 | Export quiz results CSV | ✅ | ✅ | ❌ |
+| Assignments | ✅ Full CRUD | ✅ Create/Grade own | ✅ View/Submit |
 | View notifications | ✅ | ✅ | ✅ |
 | View activity logs | ✅ | ❌ | ❌ |
 | Export activity logs CSV | ✅ | ❌ | ❌ |
+
+---
+
+## 🐛 Bug Fixes (2026-05-18)
+
+- Fixed localStorage key versioning mismatch in axios interceptor (`token` vs `token:v1`)
+- Fixed `BinaryFileResponse` crash in `SetCacheHeaders` middleware for file downloads
+- Fixed student class authorization using `enrolledClasses()` pivot instead of non-existent `class_id` column
+- Fixed assignment route middleware separator (comma vs pipe)
+- Fixed `ClassModel` → `ClassRoom` model reference in Assignment model
+- Fixed `ActivityLog::create()` → `ActivityLog::log()` in AssignmentController
 
 ---
 
