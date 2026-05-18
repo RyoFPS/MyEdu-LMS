@@ -205,11 +205,20 @@ const AssignmentList: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <>
       <Header
         title={t.assignments.title}
         description={t.assignments.subtitle}
+        action={
+          (isTeacher || isAdmin) && (
+            <Button onClick={() => navigate('/assignments/create')} className="gap-2">
+              <Plus className="h-4 w-4" />
+              {t.assignments.createAssignment}
+            </Button>
+          )
+        }
       />
+      <div className="page-container">
 
       {/* Filters */}
       <Card>
@@ -399,7 +408,8 @@ const AssignmentList: React.FC = () => {
           )}
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

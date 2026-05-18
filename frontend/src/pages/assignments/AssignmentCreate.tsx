@@ -122,19 +122,17 @@ const AssignmentCreate: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{t.assignments.createAssignment}</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{t.assignments.subtitle}</p>
+    <>
+      <Header title={t.assignments.createAssignment} description={t.assignments.subtitle} />
+      <div className="page-container">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="ghost" onClick={() => navigate('/assignments')} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            {t.common.back}
+          </Button>
         </div>
-        <Button variant="ghost" onClick={() => navigate('/assignments')} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {t.common.back}
-        </Button>
-      </div>
 
-      <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
         <Card>
           <CardContent className="p-6 space-y-6">
             {/* Title */}
@@ -297,7 +295,8 @@ const AssignmentCreate: React.FC = () => {
           </CardContent>
         </Card>
       </form>
-    </div>
+      </div>
+    </>
   );
 };
 
