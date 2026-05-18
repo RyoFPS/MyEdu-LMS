@@ -15,6 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '../../components/ui/dialog';
+import { TableSkeleton } from '../../components/skeletons';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
@@ -379,9 +380,9 @@ const UserList: React.FC = () => {
         {/* Table */}
         <Card>
           {loading ? (
-            <div className="flex items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-            </div>
+            <CardContent className="p-0">
+              <TableSkeleton rows={10} columns={7} />
+            </CardContent>
           ) : users.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />

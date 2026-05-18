@@ -6,6 +6,7 @@ import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
 import { Avatar } from '../../components/ui/avatar';
+import { TableSkeleton } from '../../components/skeletons';
 import api from '../../lib/axios';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
@@ -345,9 +346,11 @@ const ActivityLog: React.FC = () => {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-          </div>
+          <Card>
+            <CardContent className="p-0">
+              <TableSkeleton rows={10} columns={5} />
+            </CardContent>
+          </Card>
         ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />

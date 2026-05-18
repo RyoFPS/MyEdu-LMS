@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
+import { DashboardSkeleton } from '../components/skeletons';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import api from '../lib/axios';
@@ -901,12 +902,15 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500 mx-auto" />
-          <p className="text-sm text-gray-400 mt-2">{t.common.loading}</p>
+      <>
+        <Header
+          title={`${t.dashboard.welcomeBack}, ${user?.name?.split(' ')[0] ?? 'User'}!`}
+          description={t.dashboard.whatsHappening}
+        />
+        <div className="page-container">
+          <DashboardSkeleton />
         </div>
-      </div>
+      </>
     );
   }
 

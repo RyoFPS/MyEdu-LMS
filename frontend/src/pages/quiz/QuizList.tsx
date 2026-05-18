@@ -6,6 +6,7 @@ import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
+import { CardGridSkeleton } from '../../components/skeletons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
@@ -270,9 +271,7 @@ const QuizList: React.FC = () => {
 
         {/* Quiz Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-          </div>
+          <CardGridSkeleton count={6} columns={3} />
         ) : quizzes.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />

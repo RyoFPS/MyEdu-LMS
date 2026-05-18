@@ -8,6 +8,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Select } from '../../components/ui/select';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { CardGridSkeleton } from '../../components/skeletons';
 import api from '../../lib/axios';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
@@ -251,8 +252,8 @@ const SubjectList: React.FC = () => {
 
         {/* Subject List */}
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+          <div className="space-y-6">
+            <CardGridSkeleton count={6} columns={1} />
           </div>
         ) : subjects.length === 0 ? (
           <Card>
