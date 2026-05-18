@@ -8,6 +8,8 @@ import type {
   Quiz,
   Attendance,
   SubjectMatter,
+  Assignment,
+  AssignmentSubmission,
   PaginatedResponse,
   ApiResponse,
   ActivityItem,
@@ -611,5 +613,76 @@ export const useMyClasses = (
     queryKey: ['my-classes', params],
     queryFn: () => api.get('/my-classes', { params }).then((res) => res.data.data),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    ...options,
+  });
+
+// ============================================================================
+// ASSIGNMENT HOOKS
+// ============================================================================
+
+/**
+ * Fetches paginated list of assignments with optional filters
+ * Cache duration: 2 minutes - Assignment list changes moderately
+ * @param params - Query parameters for filtering and pagination
+ */
+export const useAssignments = (
+  params?: Record<string, any>,
+  options?: Omit<UseQueryOptions<PaginatedResponse<Assignment>>, 'queryKey' | 'queryFn'>
+) =>
+  useQuery<PaginatedResponse<Assignment>>({
+    queryKey: ['assignments', params],
+    queryFn: () => api.get('/assignments', { params }).then((res) => res.data),
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    ...options,
+  });
+
+/**
+ * Fetches a single assignment by ID with full details
+ * Cache duration: 2 minutes - Individual assignment data is relatively stable
+ * @param id - Assignment ID
+ */
+export const useAssignment = (
+  id: string | number,
+  options?: Omit<UseQueryOptions<Assignment>, 'queryKey' | 'queryFn'>
+) =>
+  useQuery<Assignment>({
+    queryKey: ['assignments', id],
+    queryFn: () => api.get(`/assignments/${id}`).then((res) => res.data.data),
+    enabled: !!id,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    ...options,
+  });
+
+/**
+ * Fetches all submissions for a specific assignment
+ * Cache duration: 1 minute - Submission list changes frequently
+ * @param assignmentId - Assignment ID
+ */
+export const useAssignmentSubmissions = (
+  assignmentId: string | number,
+  options?: Omit<UseQueryOptions<AssignmentSubmission[]>, 'queryKey' | 'queryFn'>
+) =>
+  useQuery<AssignmentSubmission[]>({
+    queryKey: ['assignment-submissions', assignmentId],
+    queryFn: () => api.get(`/assignments/${assignmentId}/submissions`).then((res) => res.data.data),
+    enabled: !!assignmentId,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    ...options,
+  });
+
+/**
+ * Fetches current user's submission for a specific assignment
+ * Cache duration: 30 seconds - User's submission status changes frequently
+ * @param assignmentId - Assignment ID
+ */
+export const useMySubmission = (
+  assignmentId: string | number,
+  options?: Omit<UseQueryOptions<AssignmentSubmission>, 'queryKey' | 'queryFn'>
+) =>
+  useQuery<AssignmentSubmission>({
+    queryKey: ['my-submission', assignmentId],
+    queryFn: () => api.get(`/assignments/${assignmentId}/my-submission`).then((res) => res.data.data),
+    enabled: !!assignmentId,
+    staleTime: 30 * 1000, // 30 seconds
     ...options,
   });

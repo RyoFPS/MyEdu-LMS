@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   Activity,
+  ClipboardList,
 } from 'lucide-react';
 
 interface NavItem {
@@ -70,6 +71,12 @@ const navItems: NavItem[] = [
     label: 'quizzes',
     path: '/quizzes',
     icon: <FileQuestion className="h-5 w-5" />,
+    roles: ['admin', 'teacher', 'student'],
+  },
+  {
+    label: 'assignments',
+    path: '/assignments',
+    icon: <ClipboardList className="h-5 w-5" />,
     roles: ['admin', 'teacher', 'student'],
   },
   {

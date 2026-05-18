@@ -19,10 +19,11 @@ import {
 
 const TeacherList: React.FC = () => {
   const { t } = useTranslation();
-  const { data: teachers = [], isLoading: loading } = useTeachers();
+  const { data: teachersData, isLoading: loading } = useTeachers();
+  const teachers = Array.isArray(teachersData) ? teachersData : teachersData?.data || [];
   const [search, setSearch] = useState('');
 
-  const filteredTeachers = teachers.filter((teacher) => {
+  const filteredTeachers = teachers.filter((teacher: User) => {
     if (!search) return true;
     const searchLower = search.toLowerCase();
     return (
@@ -62,7 +63,7 @@ const TeacherList: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTeachers.map((teacher) => (
+            {filteredTeachers.map((teacher: User) => (
               <Card key={teacher.id} className="hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-4">

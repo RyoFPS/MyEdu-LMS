@@ -23,6 +23,9 @@ import StudentList from './pages/users/StudentList';
 import SubjectList from './pages/subjects/SubjectList';
 import Library from './pages/library/Library';
 import ActivityLog from './pages/admin/ActivityLog';
+import AssignmentList from './pages/assignments/AssignmentList';
+import AssignmentCreate from './pages/assignments/AssignmentCreate';
+import AssignmentDetail from './pages/assignments/AssignmentDetail';
 
 function App() {
   const initialize = useAuthStore((state) => state.initialize);
@@ -79,6 +82,18 @@ function App() {
           }
         />
         <Route path="/quizzes/:id/results" element={<QuizResults />} />
+
+        {/* Assignments */}
+        <Route path="/assignments" element={<AssignmentList />} />
+        <Route
+          path="/assignments/create"
+          element={
+            <ProtectedRoute roles={['admin', 'teacher']}>
+              <AssignmentCreate />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/assignments/:id" element={<AssignmentDetail />} />
 
         {/* Classes */}
         <Route path="/classes" element={<ClassList />} />

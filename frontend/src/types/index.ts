@@ -163,3 +163,48 @@ export interface SubjectMatter {
   subject?: Subject;
   uploader?: User;
 }
+
+export interface Assignment {
+  id: number;
+  title: string;
+  description: string;
+  class_id: number;
+  class_name: string;
+  subject_id: number | null;
+  subject_name: string | null;
+  teacher_id: number;
+  teacher_name: string;
+  due_date: string;
+  max_score: number;
+  allow_late_submission: boolean;
+  allow_resubmission: boolean;
+  attachment_path: string | null;
+  attachment_name: string | null;
+  is_overdue: boolean;
+  days_until_due: number;
+  submission_count: number;
+  graded_count: number;
+  my_submission?: AssignmentSubmission;
+  created_at: string;
+}
+
+export interface AssignmentSubmission {
+  id: number;
+  assignment_id: number;
+  student_id: number;
+  student_name: string;
+  student_email: string;
+  file_path: string;
+  file_name: string;
+  file_size: number;
+  formatted_file_size: string;
+  submitted_at: string;
+  is_late: boolean;
+  score: number | null;
+  feedback: string | null;
+  graded_at: string | null;
+  graded_by: number | null;
+  grader_name: string | null;
+  is_graded: boolean;
+  version: number;
+}
