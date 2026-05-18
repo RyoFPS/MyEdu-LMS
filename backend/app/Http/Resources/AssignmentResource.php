@@ -42,6 +42,7 @@ class AssignmentResource extends JsonResource
 
         if ($request->user()?->isStudent()) {
             $mySubmission = $this->submissions()
+                ->with(['student:id,name,email', 'gradedBy:id,name'])
                 ->where('student_id', $request->user()->id)
                 ->orderBy('version', 'desc')
                 ->first();
