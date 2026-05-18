@@ -116,6 +116,15 @@ export const useClassTeachers = (
 // USER HOOKS
 // ============================================================================
 
+interface UsersResponse extends PaginatedResponse<User> {
+  counts: {
+    total: number;
+    admin: number;
+    teacher: number;
+    student: number;
+  };
+}
+
 /**
  * Fetches paginated list of all users with optional filters
  * Cache duration: 5 minutes - User list changes moderately
@@ -123,9 +132,9 @@ export const useClassTeachers = (
  */
 export const useUsers = (
   params?: Record<string, any>,
-  options?: Omit<UseQueryOptions<PaginatedResponse<User>>, 'queryKey' | 'queryFn'>
+  options?: Omit<UseQueryOptions<UsersResponse>, 'queryKey' | 'queryFn'>
 ) =>
-  useQuery<PaginatedResponse<User>>({
+  useQuery<UsersResponse>({
     queryKey: ['users', params],
     queryFn: () => api.get('/users', { params }).then((res) => res.data),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -301,6 +310,23 @@ export const useMyQuizAttempts = (
     ...options,
   });
 
+/**
+ * Fetches quiz results including quiz details, all attempts, and statistics
+ * Cache duration: 1 minute - Results update as students complete quizzes
+ * @param quizId - Quiz ID
+ */
+export const useQuizResults = (
+  quizId: string | number,
+  options?: Omit<UseQueryOptions<any>, 'queryKey' | 'queryFn'>
+) =>
+  useQuery<any>({
+    queryKey: ['quizzes', quizId, 'results'],
+    queryFn: () => api.get(`/quizzes/${quizId}/results`).then((res) => res.data.data || res.data),
+    enabled: !!quizId,
+    staleTime: 1 * 60 * 1000, // 1 minute
+    ...options,
+  });
+
 // ============================================================================
 // ATTENDANCE HOOKS
 // ============================================================================
@@ -407,6 +433,25 @@ export const useSubjectMatters = (
     queryKey: ['subjects', subjectId, 'matters', params],
     queryFn: () => api.get(`/subjects/${subjectId}/matters`, { params }).then((res) => res.data),
     enabled: !!subjectId,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    ...options,
+  });
+
+/**
+ * Fetches subject matters for a specific class
+ * Cache duration: 10 minutes - Class materials are relatively stable
+ * @param classId - Class ID
+ * @param params - Query parameters (search, filters, etc.)
+ */
+export const useClassSubjectMatters = (
+  classId: string | number,
+  params?: Record<string, any>,
+  options?: Omit<UseQueryOptions<SubjectMatter[]>, 'queryKey' | 'queryFn'>
+) =>
+  useQuery<SubjectMatter[]>({
+    queryKey: ['classes', classId, 'subject-matters', params],
+    queryFn: () => api.get(`/classes/${classId}/subject-matters`, { params }).then((res) => res.data.data),
+    enabled: !!classId,
     staleTime: 10 * 60 * 1000, // 10 minutes
     ...options,
   });

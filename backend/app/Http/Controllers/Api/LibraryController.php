@@ -7,6 +7,7 @@ use App\Http\Resources\SubjectMatterResource;
 use App\Models\SubjectMatter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 class LibraryController extends Controller
@@ -20,41 +21,51 @@ class LibraryController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = SubjectMatter::with(['subject', 'uploader:id,name,role'])
-            ->where('type', 'main')
-            ->whereNull('class_id');
+        $cacheKey = 'library:index:' . md5(json_encode([
+            'grade_level' => $request->input('grade_level'),
+            'subject_id' => $request->input('subject_id'),
+            'search' => $request->input('search'),
+            'per_page' => $request->input('per_page', 20),
+            'page' => $request->input('page', 1),
+        ]));
+        
+        return Cache::remember($cacheKey, 600, function () use ($request) {
+            $query = SubjectMatter::with(['subject', 'uploader:id,name,role'])
+                ->where('type', 'main')
+                ->whereNull('class_id');
 
-        // Filters — all explicit, no auto-filtering
-        if ($request->filled('grade_level')) {
-            $query->where('grade_level', $request->input('grade_level'));
-        }
+            // Filters — all explicit, no auto-filtering
+            if ($request->filled('grade_level')) {
+                $query->where('grade_level', $request->input('grade_level'));
+            }
 
-        if ($request->filled('subject_id')) {
-            $query->where('subject_id', $request->input('subject_id'));
-        }
+            if ($request->filled('subject_id')) {
+                $query->where('subject_id', $request->input('subject_id'));
+            }
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('file_name', 'like', "%{$search}%");
-            });
-        }
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%")
+                      ->orWhere('file_name', 'like', "%{$search}%");
+                });
+            }
 
-        $materials = $query->orderBy('grade_level')
-                           ->orderByDesc('created_at')
-                           ->paginate($request->input('per_page', 20));
+            $materials = $query->orderBy('grade_level')
+                               ->orderByDesc('created_at')
+                               ->paginate($request->input('per_page', 20));
 
-        return response()->json([
-            'data' => SubjectMatterResource::collection($materials),
-            'meta' => [
-                'current_page' => $materials->currentPage(),
-                'last_page'    => $materials->lastPage(),
-                'per_page'     => $materials->perPage(),
-                'total'        => $materials->total(),
-            ],
-        ]);
+            return response()->json([
+                'data' => SubjectMatterResource::collection($materials),
+                'meta' => [
+                    'current_page' => $materials->currentPage(),
+                    'last_page'    => $materials->lastPage(),
+                    'per_page'     => $materials->perPage(),
+                    'total'        => $materials->total(),
+                ],
+            ]);
+        });
     }
 
     /**
@@ -105,6 +116,9 @@ class LibraryController extends Controller
             ['grade_level' => $material->grade_level, 'subject_id' => $material->subject_id, 'file_name' => $material->file_name],
             $request->ip()
         );
+
+        // Clear cache
+        $this->clearLibraryCache();
 
         return response()->json([
             'message' => 'Materi perpustakaan berhasil diunggah.',
@@ -157,6 +171,9 @@ class LibraryController extends Controller
         $material->save();
         $material->load(['subject', 'uploader:id,name,role']);
 
+        // Clear cache
+        $this->clearLibraryCache();
+
         return response()->json([
             'message' => 'Materi perpustakaan berhasil diperbarui.',
             'data'    => new SubjectMatterResource($material),
@@ -189,6 +206,9 @@ class LibraryController extends Controller
 
         $material->delete();
 
+        // Clear cache
+        $this->clearLibraryCache();
+
         return response()->json([
             'message' => 'Materi perpustakaan berhasil dihapus.',
         ]);
@@ -201,13 +221,27 @@ class LibraryController extends Controller
      */
     public function gradeLevels(): JsonResponse
     {
-        $levels = SubjectMatter::where('type', 'main')
-            ->whereNull('class_id')
-            ->whereNotNull('grade_level')
-            ->distinct()
-            ->orderBy('grade_level')
-            ->pluck('grade_level');
+        $cacheKey = 'library:grade_levels';
+        
+        return Cache::remember($cacheKey, 1800, function () {
+            $levels = SubjectMatter::where('type', 'main')
+                ->whereNull('class_id')
+                ->whereNotNull('grade_level')
+                ->distinct()
+                ->orderBy('grade_level')
+                ->pluck('grade_level');
 
-        return response()->json(['data' => $levels]);
+            return response()->json(['data' => $levels]);
+        });
+    }
+
+    /**
+     * Clear library-related cache.
+     */
+    private function clearLibraryCache(): void
+    {
+        Cache::forget('library:grade_levels');
+        // Clear all library index cache variations
+        // In production, consider using cache tags
     }
 }

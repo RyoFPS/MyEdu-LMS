@@ -15,6 +15,7 @@ import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAuth } from '../../hooks/useAuth';
+import { useClasses, useClass } from '../../hooks/useApi';
 import type { ClassRoom, User, AttendanceRecord } from '../../types';
 import {
   ClipboardCheck,
@@ -81,79 +82,46 @@ const RecordAttendance: React.FC = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, isAdmin } = useAuth();
-  const [classes, setClasses] = useState<ClassRoom[]>([]);
-  const [students, setStudents] = useState<User[]>([]);
-  const [teachers, setTeachers] = useState<User[]>([]);
   const [selectedClass, setSelectedClass] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [records, setRecords] = useState<Record<number, AttendanceRecord>>({});
-  const [loading, setLoading] = useState(false);
-  const [loadingStudents, setLoadingStudents] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchClasses();
-  }, []);
+  const { data: classesResponse, isLoading: loading } = useClasses();
+  const classes = Array.isArray(classesResponse) ? classesResponse : classesResponse?.data || [];
+  const { data: classData, isLoading: loadingStudents } = useClass(selectedClass, { enabled: !!selectedClass });
+  const students = classData?.students || [];
+  const teachers = classData?.teachers || [];
 
   useEffect(() => {
-    if (selectedClass) {
-      fetchClassMembers(selectedClass);
+    if (selectedClass && classData) {
+      initializeRecords(classData.students || [], classData.teachers || []);
     } else {
-      setStudents([]);
-      setTeachers([]);
       setRecords({});
     }
-  }, [selectedClass]);
+  }, [selectedClass, classData]);
 
-  const fetchClasses = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/classes');
-      const data = response.data.data || response.data;
-      setClasses(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setClasses([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const initializeRecords = (studentList: User[], teacherList: User[]) => {
+    const filteredTeacherList = isAdmin
+      ? teacherList
+      : teacherList.filter((teacher) => teacher.id === user?.id);
 
-  const fetchClassMembers = async (classId: string) => {
-    setLoadingStudents(true);
-    try {
-      const response = await api.get(`/classes/${classId}`);
-      const classData = response.data.data;
-      const studentList: User[] = classData.students || [];
-      const teacherList: User[] = classData.teachers || [];
-      const filteredTeacherList = isAdmin
-        ? teacherList
-        : teacherList.filter((teacher) => teacher.id === user?.id);
-      setStudents(studentList);
-      setTeachers(filteredTeacherList);
-
-      // Initialize records for both students and teachers
-      const initialRecords: Record<number, AttendanceRecord> = {};
-      filteredTeacherList.forEach((teacher: User) => {
-        initialRecords[teacher.id] = {
-          user_id: teacher.id,
-          status: 'present',
-          notes: '',
-        };
-      });
-      studentList.forEach((student: User) => {
-        initialRecords[student.id] = {
-          user_id: student.id,
-          status: 'present',
-          notes: '',
-        };
-      });
-      setRecords(initialRecords);
-    } catch {
-      setStudents([]);
-      setTeachers([]);
-    } finally {
-      setLoadingStudents(false);
-    }
+    const initialRecords: Record<number, AttendanceRecord> = {};
+    filteredTeacherList.forEach((teacher: User) => {
+      initialRecords[teacher.id] = {
+        user_id: teacher.id,
+        status: 'present',
+        notes: '',
+      };
+    });
+    studentList.forEach((student: User) => {
+      initialRecords[student.id] = {
+        user_id: student.id,
+        status: 'present',
+        notes: '',
+      };
+    });
+    setRecords(initialRecords);
   };
 
   const updateRecord = (userId: number, field: keyof AttendanceRecord, value: string) => {

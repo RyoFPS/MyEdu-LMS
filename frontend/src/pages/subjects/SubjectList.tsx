@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -13,6 +13,8 @@ import api from '../../lib/axios';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useSubjects, useSubjectCategories } from '../../hooks/useApi';
+import type { Subject } from '../../types';
 import {
   Plus,
   Search,
@@ -26,24 +28,10 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 
-interface Subject {
-  id: number;
-  name: string;
-  code: string;
-  category: string | null;
-  description: string | null;
-  subject_matters_count: number;
-  created_at: string;
-  updated_at: string;
-}
-
 const SubjectList: React.FC = () => {
   const { t } = useTranslation();
 
   // State
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -65,35 +53,12 @@ const SubjectList: React.FC = () => {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch subjects
-  const fetchSubjects = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, string> = {};
-      if (debouncedSearch) params.search = debouncedSearch;
-      if (filterCategory) params.category = filterCategory;
-
-      const res = await api.get('/subjects', { params });
-      setSubjects(res.data.data || []);
-    } catch {
-      // handled by interceptor
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearch, filterCategory]);
-
-  // Fetch categories
-  const fetchCategories = useCallback(async () => {
-    try {
-      const res = await api.get('/subjects/categories');
-      setCategories(res.data.data || []);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => { fetchSubjects(); }, [fetchSubjects]);
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+  // React Query hooks
+  const { data: subjects = [], isLoading: loading, refetch } = useSubjects({ 
+    search: debouncedSearch, 
+    category: filterCategory 
+  });
+  const { data: categories = [] } = useSubjectCategories();
 
   // Open add dialog
   const openAddDialog = () => {
@@ -131,8 +96,7 @@ const SubjectList: React.FC = () => {
         toast.success('Subject created successfully!');
       }
       setShowDialog(false);
-      fetchSubjects();
-      fetchCategories();
+      refetch();
     } catch (error: any) {
       if (!error.response || ![422].includes(error.response.status)) {
         toast.error('Failed to save subject.');
@@ -144,7 +108,7 @@ const SubjectList: React.FC = () => {
 
   // Delete
   const handleDelete = async (subject: Subject) => {
-    if (subject.subject_matters_count > 0) {
+    if ((subject.subject_matters_count ?? 0) > 0) {
       toast.error(`${t.subjects.cannotDelete}: "${subject.name}" (${subject.subject_matters_count})`);
       return;
     }
@@ -153,8 +117,7 @@ const SubjectList: React.FC = () => {
     try {
       await api.delete(`/subjects/${subject.id}`);
       toast.success('Subject deleted successfully.');
-      fetchSubjects();
-      fetchCategories();
+      refetch();
     } catch (error: any) {
       if (error.response?.status === 422) {
         toast.error(error.response.data.message);
@@ -213,7 +176,7 @@ const SubjectList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                  {subjects.reduce((sum, s) => sum + s.subject_matters_count, 0)}
+                  {subjects.reduce((sum, s) => sum + (s.subject_matters_count ?? 0), 0)}
                 </p>
                 <p className="text-xs text-zinc-500">{t.subjects.totalMaterials}</p>
               </div>
@@ -305,8 +268,8 @@ const SubjectList: React.FC = () => {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={subject.subject_matters_count > 0 ? 'default' : 'secondary'}>
-                            {subject.subject_matters_count} {t.subjects.materials}
+                          <Badge variant={(subject.subject_matters_count ?? 0) > 0 ? 'default' : 'secondary'}>
+                            {subject.subject_matters_count ?? 0} {t.subjects.materials}
                           </Badge>
                         </TableCell>
                         <TableCell>

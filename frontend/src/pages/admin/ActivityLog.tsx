@@ -11,6 +11,7 @@ import api from '../../lib/axios';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useActivityLogs } from '../../hooks/useApi';
 import {
   Activity,
   Search,
@@ -110,39 +111,46 @@ const timeAgo = (dateStr: string, justNowLabel: string): string => {
 
 const ActivityLog: React.FC = () => {
   const { t } = useTranslation();
-  const [logs, setLogs] = useState<ActivityLogEntry[]>([]);
   const [stats, setStats] = useState<Stats>({ today: 0, this_week: 0, total: 0 });
-  const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 20, total: 0 });
   const [page, setPage] = useState(1);
 
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterAction, setFilterAction] = useState('');
   const [filterTargetType, setFilterTargetType] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchLogs = useCallback(async (currentPage = 1) => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = { page: currentPage, per_page: 20 };
-      if (search.trim()) params.search = search.trim();
-      if (filterAction) params.action = filterAction;
-      if (filterTargetType) params.target_type = filterTargetType;
-      if (dateFrom) params.date_from = dateFrom;
-      if (dateTo) params.date_to = dateTo;
+  // Debounce search input
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [search]);
 
-      const res = await api.get('/activity-logs', { params });
-      setLogs(res.data.data || []);
-      if (res.data.meta) setMeta(res.data.meta);
-    } catch {
-      setLogs([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, filterAction, filterTargetType, dateFrom, dateTo]);
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filterAction, filterTargetType, dateFrom, dateTo]);
 
+  // Fetch activity logs with React Query
+  const { data: logsData, isLoading: loading } = useActivityLogs({
+    page,
+    search: debouncedSearch,
+    action: filterAction,
+    target_type: filterTargetType,
+    date_from: dateFrom,
+    date_to: dateTo,
+  });
+
+  const logs = (logsData?.data || []) as unknown as ActivityLogEntry[];
+  const meta = logsData?.meta || { current_page: 1, last_page: 1, per_page: 20, total: 0 };
+
+  // Fetch stats
   const fetchStats = useCallback(async () => {
     try {
       const res = await api.get('/activity-logs/stats');
@@ -150,28 +158,12 @@ const ActivityLog: React.FC = () => {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => {
-    setPage(1);
-    fetchLogs(1);
-  }, [filterAction, filterTargetType, dateFrom, dateTo]);
-
-  useEffect(() => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
-      setPage(1);
-      fetchLogs(1);
-    }, 300);
-    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
-  }, [search]);
-
-  useEffect(() => { fetchLogs(page); }, [page]);
-
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
   const handleExport = async () => {
     try {
       const params: Record<string, string> = {};
-      if (search.trim()) params.search = search.trim();
+      if (debouncedSearch.trim()) params.search = debouncedSearch.trim();
       if (filterAction) params.action = filterAction;
       if (filterTargetType) params.target_type = filterTargetType;
       if (dateFrom) params.date_from = dateFrom;
@@ -194,6 +186,7 @@ const ActivityLog: React.FC = () => {
 
   const clearFilters = () => {
     setSearch('');
+    setDebouncedSearch('');
     setFilterAction('');
     setFilterTargetType('');
     setDateFrom('');

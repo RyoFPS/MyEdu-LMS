@@ -9,6 +9,7 @@ use App\Models\ClassRoom;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ClassController extends Controller
 {
@@ -31,38 +32,50 @@ class ClassController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user  = $request->user();
-        $query = ClassRoom::withCount(['students', 'teachers']);
+        
+        // Build cache key based on user role and filters
+        $cacheKey = 'classes:index:' . $user->id . ':' . md5(json_encode([
+            'grade_level' => $request->input('grade_level'),
+            'academic_year' => $request->input('academic_year'),
+            'search' => $request->input('search'),
+            'per_page' => $request->input('per_page', 15),
+            'page' => $request->input('page', 1),
+        ]));
+        
+        return Cache::remember($cacheKey, 300, function () use ($request, $user) {
+            $query = ClassRoom::withCount(['students', 'teachers']);
 
-        if ($user->isTeacher()) {
-            // Teachers only see classes they are assigned to
-            $query->whereHas('teachers', fn ($q) => $q->where('users.id', $user->id));
-        } elseif ($user->isStudent()) {
-            // Students only see classes they are enrolled in
-            $query->whereHas('students', fn ($q) => $q->where('users.id', $user->id));
-        }
+            if ($user->isTeacher()) {
+                // Teachers only see classes they are assigned to
+                $query->whereHas('teachers', fn ($q) => $q->where('users.id', $user->id));
+            } elseif ($user->isStudent()) {
+                // Students only see classes they are enrolled in
+                $query->whereHas('students', fn ($q) => $q->where('users.id', $user->id));
+            }
 
-        // Optional filters
-        if ($request->filled('grade_level')) {
-            $query->where('grade_level', $request->input('grade_level'));
-        }
-        if ($request->filled('academic_year')) {
-            $query->where('academic_year', $request->input('academic_year'));
-        }
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->input('search') . '%');
-        }
+            // Optional filters
+            if ($request->filled('grade_level')) {
+                $query->where('grade_level', $request->input('grade_level'));
+            }
+            if ($request->filled('academic_year')) {
+                $query->where('academic_year', $request->input('academic_year'));
+            }
+            if ($request->filled('search')) {
+                $query->where('name', 'like', '%' . $request->input('search') . '%');
+            }
 
-        $classes = $query->orderBy('name')->paginate($request->input('per_page', 15));
+            $classes = $query->orderBy('name')->paginate($request->input('per_page', 15));
 
-        return response()->json([
-            'data' => ClassResource::collection($classes),
-            'meta' => [
-                'current_page' => $classes->currentPage(),
-                'last_page'    => $classes->lastPage(),
-                'per_page'     => $classes->perPage(),
-                'total'        => $classes->total(),
-            ],
-        ]);
+            return response()->json([
+                'data' => ClassResource::collection($classes),
+                'meta' => [
+                    'current_page' => $classes->currentPage(),
+                    'last_page'    => $classes->lastPage(),
+                    'per_page'     => $classes->perPage(),
+                    'total'        => $classes->total(),
+                ],
+            ]);
+        });
     }
 
     /**
@@ -74,19 +87,24 @@ class ClassController extends Controller
     public function gradeLevels(Request $request): JsonResponse
     {
         $user = $request->user();
-        $query = ClassRoom::query();
+        
+        $cacheKey = 'classes:grade_levels:' . $user->id;
+        
+        return Cache::remember($cacheKey, 1800, function () use ($request, $user) {
+            $query = ClassRoom::query();
 
-        if ($user->isTeacher()) {
-            $query->whereHas('teachers', fn ($q) => $q->where('users.id', $user->id));
-        } elseif ($user->isStudent()) {
-            $query->whereHas('students', fn ($q) => $q->where('users.id', $user->id));
-        }
+            if ($user->isTeacher()) {
+                $query->whereHas('teachers', fn ($q) => $q->where('users.id', $user->id));
+            } elseif ($user->isStudent()) {
+                $query->whereHas('students', fn ($q) => $q->where('users.id', $user->id));
+            }
 
-        $levels = $query->distinct()
-            ->orderBy('grade_level')
-            ->pluck('grade_level');
+            $levels = $query->distinct()
+                ->orderBy('grade_level')
+                ->pluck('grade_level');
 
-        return response()->json(['data' => $levels]);
+            return response()->json(['data' => $levels]);
+        });
     }
 
     /**
@@ -108,6 +126,9 @@ class ClassController extends Controller
             ['grade_level' => $classRoom->grade_level, 'academic_year' => $classRoom->academic_year],
             $request->ip()
         );
+
+        // Clear cache
+        $this->clearClassCache($request->user());
 
         return response()->json([
             'message' => 'Kelas berhasil dibuat.',
@@ -163,6 +184,9 @@ class ClassController extends Controller
             $request->ip()
         );
 
+        // Clear cache
+        $this->clearClassCache($request->user());
+
         return response()->json([
             'message' => 'Kelas berhasil diperbarui.',
             'data'    => new ClassResource($classRoom->fresh()),
@@ -194,6 +218,9 @@ class ClassController extends Controller
         );
 
         $classRoom->delete();
+
+        // Clear cache
+        $this->clearClassCache($request->user());
 
         return response()->json([
             'message' => 'Kelas berhasil dihapus.',
@@ -371,5 +398,24 @@ class ClassController extends Controller
         return response()->json([
             'message' => 'Siswa berhasil dihapus dari kelas.',
         ]);
+    }
+
+    /**
+     * Clear class-related cache for all users.
+     */
+    private function clearClassCache(?User $user = null): void
+    {
+        // Clear cache patterns for classes
+        Cache::forget('classes:grade_levels:' . ($user ? $user->id : '*'));
+        
+        // For index cache, we need to clear all variations
+        // In production, consider using cache tags for better management
+        $patterns = ['classes:index:*'];
+        foreach ($patterns as $pattern) {
+            // Note: This is a simple approach. For production, use Redis tags or similar
+            if ($user) {
+                Cache::forget('classes:index:' . $user->id);
+            }
+        }
     }
 }

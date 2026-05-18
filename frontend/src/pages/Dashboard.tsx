@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Header } from '../components/layout/Header';
@@ -9,6 +9,7 @@ import { Progress } from '../components/ui/progress';
 import { DashboardSkeleton } from '../components/skeletons';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
+import { useDashboard } from '../hooks/useApi';
 import api from '../lib/axios';
 import { formatDate, formatDateTime } from '../lib/utils';
 import {
@@ -880,25 +881,14 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
 // ─── Main Dashboard ──────────────────────────────────────────────────────────
 
 const Dashboard: React.FC = () => {
-  const { user, isAdmin, isTeacher, isStudent } = useAuth();
-  const { t } = useTranslation();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+  const { data: stats, isLoading: loading } = useDashboard();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await api.get('/dashboard');
-        setStats(response.data.data || response.data);
-      } catch {
-        setStats(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
+  const isAdmin = user?.role === 'admin';
+  const isTeacher = user?.role === 'teacher';
+  const isStudent = user?.role === 'student';
 
   if (loading) {
     return (

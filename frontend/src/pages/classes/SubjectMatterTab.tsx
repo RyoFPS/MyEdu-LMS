@@ -11,6 +11,7 @@ import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useClassSubjectMatters, useSubjects } from '../../hooks/useApi';
 import toast from 'react-hot-toast';
 import type { SubjectMatter, Subject } from '../../types';
 import {
@@ -64,11 +65,12 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   const { t } = useTranslation();
   const canUpload = isAdmin || isTeacher;
 
-  const [materials, setMaterials] = useState<SubjectMatter[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // React Query hooks
+  const { data: materials = [], isLoading: loading, refetch } = useClassSubjectMatters(classId, { search: debouncedSearch });
+  const { data: subjects = [] } = useSubjects();
 
   // Upload dialog state
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -101,38 +103,6 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     const timer = setTimeout(() => setDebouncedSearch(searchQuery), 400);
     return () => clearTimeout(timer);
   }, [searchQuery]);
-
-  const fetchMaterials = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, string> = {};
-      if (debouncedSearch) params.search = debouncedSearch;
-
-      const res = await api.get(`/classes/${classId}/subject-matters`, { params });
-      setMaterials(res.data.data || []);
-    } catch {
-      // handled by interceptor
-    } finally {
-      setLoading(false);
-    }
-  }, [classId, debouncedSearch]);
-
-  const fetchSubjects = useCallback(async () => {
-    try {
-      const res = await api.get('/subjects');
-      setSubjects(res.data.data || []);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchMaterials();
-  }, [fetchMaterials]);
-
-  useEffect(() => {
-    fetchSubjects();
-  }, [fetchSubjects]);
 
   // Check if file type is previewable in browser
   const isPreviewable = (fileType: string): boolean => {
@@ -168,7 +138,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       toast.success('Material uploaded successfully!');
       setShowUploadDialog(false);
       resetUploadForm();
-      fetchMaterials();
+      refetch();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
         toast.error('Failed to upload material.');
@@ -224,7 +194,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       toast.success('Material updated successfully!');
       setShowEditDialog(false);
       setEditingMaterial(null);
-      fetchMaterials();
+      refetch();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
         toast.error('Failed to update material.');
@@ -241,7 +211,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
     try {
       await api.delete(`/subject-matters/${material.id}`);
       toast.success('Material deleted successfully.');
-      fetchMaterials();
+      refetch();
     } catch {
       toast.error('Failed to delete material.');
     }

@@ -8,9 +8,9 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '.
 import { Avatar } from '../../components/ui/avatar';
 import { TableSkeleton } from '../../components/skeletons';
 import { useTranslation } from '../../hooks/useTranslation';
-import api from '../../lib/axios';
+import { useStudents, useClasses } from '../../hooks/useApi';
 import { formatDate } from '../../lib/utils';
-import type { User, ClassRoom } from '../../types';
+import type { User } from '../../types';
 import {
   Search,
   Mail,
@@ -21,50 +21,29 @@ import {
 
 const StudentList: React.FC = () => {
   const { t } = useTranslation();
-  const [students, setStudents] = useState<User[]>([]);
-  const [classes, setClasses] = useState<ClassRoom[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [classFilter, setClassFilter] = useState('');
+  const [selectedClass, setSelectedClass] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
+  // Debounce search input
   useEffect(() => {
-    fetchStudents();
-    fetchClasses();
-  }, [classFilter]);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const fetchStudents = async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, string> = { role: 'student' };
-      if (classFilter) params.class_id = classFilter;
-      const response = await api.get('/users', { params });
-      const data = response.data.data || response.data;
-      setStudents(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setStudents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchClasses = async () => {
-    try {
-      const response = await api.get('/classes');
-      const data = response.data.data || response.data;
-      setClasses(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setClasses([]);
-    }
-  };
-
-  const filteredStudents = students.filter((student) => {
-    if (!search) return true;
-    const searchLower = search.toLowerCase();
-    return (
-      student.name.toLowerCase().includes(searchLower) ||
-      student.email.toLowerCase().includes(searchLower)
-    );
+  // Fetch students with React Query
+  const { data: studentsData, isLoading: loading } = useStudents({
+    search: debouncedSearch,
+    class_id: selectedClass,
   });
+
+  // Fetch classes for filter dropdown
+  const { data: classesData } = useClasses();
+
+  const students = studentsData?.data || [];
+  const classes = classesData?.data || [];
 
   return (
     <>
@@ -88,8 +67,8 @@ const StudentList: React.FC = () => {
             />
           </div>
           <Select
-            value={classFilter}
-            onChange={(e) => setClassFilter(e.target.value)}
+            value={selectedClass}
+            onChange={(e) => setSelectedClass(e.target.value)}
             options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
             placeholder={t.quizzes.allClasses}
             className="w-full sm:w-48"
@@ -100,7 +79,7 @@ const StudentList: React.FC = () => {
         <Card>
           {loading ? (
             <TableSkeleton rows={8} columns={5} />
-          ) : filteredStudents.length === 0 ? (
+          ) : students.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">{t.common.noData}</p>
@@ -118,7 +97,7 @@ const StudentList: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStudents.map((student, index) => (
+                {students.map((student, index) => (
                   <TableRow key={student.id}>
                     <TableCell className="text-zinc-400">{index + 1}</TableCell>
                     <TableCell>

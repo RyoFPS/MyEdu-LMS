@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -16,6 +16,7 @@ import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useClass, useQuizzes, useAttendances } from '../../hooks/useApi';
 import toast from 'react-hot-toast';
 import SubjectMatterTab from './SubjectMatterTab';
 import type { ClassRoom, User, Attendance, Quiz } from '../../types';
@@ -39,12 +40,26 @@ const ClassDetail: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
-  const [classRoom, setClassRoom] = useState<ClassRoom | null>(null);
-  const [students, setStudents] = useState<User[]>([]);
-  const [teachers, setTeachers] = useState<User[]>([]);
-  const [attendance, setAttendance] = useState<Attendance[]>([]);
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Use React Query hooks
+  const { data: classData, isLoading: loading, refetch } = useClass(id || '');
+  const classRoom = classData || null;
+  const students = classRoom?.students || [];
+  const teachers = classRoom?.teachers || [];
+  
+  // Fetch attendance and quizzes separately using the numeric class ID
+  const numericId = classRoom?.id;
+  const { data: attendanceData } = useAttendances(
+    { class_id: numericId },
+    { enabled: !!numericId }
+  );
+  const { data: quizzesData } = useQuizzes(
+    { class_id: numericId },
+    { enabled: !!numericId }
+  );
+  
+  const attendance = attendanceData?.data || [];
+  const quizzes = quizzesData?.data || [];
 
   // Assign dialog state
   const [showAssignTeacher, setShowAssignTeacher] = useState(false);
@@ -56,42 +71,6 @@ const ClassDetail: React.FC = () => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [assigning, setAssigning] = useState(false);
   const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
-
-  const fetchClassDetail = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Step 1: Fetch class detail (accepts slug)
-      const classRes = await api.get(`/classes/${id}`);
-      const classData = classRes.data.data;
-      setClassRoom(classData);
-      setStudents(classData.students || []);
-      setTeachers(classData.teachers || []);
-
-      // Step 2: Use the numeric class ID for related data
-      const numericId = classData.id;
-      const [attendanceRes, quizzesRes] = await Promise.allSettled([
-        api.get('/attendances', { params: { class_id: numericId } }),
-        api.get('/quizzes', { params: { class_id: numericId } }),
-      ]);
-
-      if (attendanceRes.status === 'fulfilled') {
-        const data = attendanceRes.value.data.data;
-        setAttendance(Array.isArray(data) ? data : []);
-      }
-      if (quizzesRes.status === 'fulfilled') {
-        const data = quizzesRes.value.data.data;
-        setQuizzes(Array.isArray(data) ? data : []);
-      }
-    } catch {
-      // Class not found
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchClassDetail();
-  }, [fetchClassDetail]);
 
   // --- Assign dialog openers ---
   const openAssignTeacher = async () => {
@@ -143,7 +122,7 @@ const ClassDetail: React.FC = () => {
       setShowAssignTeacher(false);
       setSelectedTeacherId('');
       setTeacherSubject('');
-      fetchClassDetail();
+      refetch();
     } catch (error: any) {
       if (!error.response || ![403, 422, 500].includes(error.response.status)) {
         toast.error('Failed to assign teacher');
@@ -163,7 +142,7 @@ const ClassDetail: React.FC = () => {
       toast.success('Student assigned successfully');
       setShowAssignStudent(false);
       setSelectedStudentId('');
-      fetchClassDetail();
+      refetch();
     } catch (error: any) {
       if (error.response?.status === 422 && error.response?.data?.message) {
         toast.error(error.response.data.message);
@@ -180,7 +159,7 @@ const ClassDetail: React.FC = () => {
     try {
       await api.delete(`/classes/${id}/remove-teacher/${teacherId}`);
       toast.success('Teacher removed');
-      fetchClassDetail();
+      refetch();
     } catch {
       toast.error('Failed to remove teacher');
     }
@@ -191,7 +170,7 @@ const ClassDetail: React.FC = () => {
     try {
       await api.delete(`/classes/${id}/remove-student/${studentId}`);
       toast.success('Student removed');
-      fetchClassDetail();
+      refetch();
     } catch {
       toast.error('Failed to remove student');
     }

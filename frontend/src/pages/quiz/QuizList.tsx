@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent } from '../../components/ui/card';
@@ -9,10 +9,11 @@ import { Select } from '../../components/ui/select';
 import { CardGridSkeleton } from '../../components/skeletons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useQuizzes, useClasses, useSubjects } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { formatDateTime, cn } from '../../lib/utils';
-import type { Quiz, ClassRoom } from '../../types';
+import type { Quiz } from '../../types';
 import {
   Dialog,
   DialogContent,
@@ -44,26 +45,15 @@ import {
   Tag,
 } from 'lucide-react';
 
-interface PaginationMeta {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
-
 const QuizList: React.FC = () => {
   const { isTeacher, isAdmin, isStudent } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [classes, setClasses] = useState<ClassRoom[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
 
   // Filters
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
-  const [subjects, setSubjects] = useState<{id: number; name: string; code: string}[]>([]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [page, setPage] = useState(1);
@@ -72,82 +62,56 @@ const QuizList: React.FC = () => {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Debounce ref
-  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const fetchQuizzes = useCallback(async (currentPage: number = 1) => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = { page: currentPage, per_page: 12 };
-      if (search.trim()) params.search = search.trim();
-      if (selectedClass) params.class_id = selectedClass;
-      if (selectedSubject) params.subject_id = selectedSubject;
-      if (selectedStatus) params.is_active = selectedStatus;
-
-      const response = await api.get('/quizzes', { params });
-      setQuizzes(response.data.data || []);
-      if (response.data.meta) setMeta(response.data.meta);
-    } catch {
-      setQuizzes([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, selectedClass, selectedSubject, selectedStatus]);
-
-  // Fetch classes for filter dropdown (once)
+  // Debounce search input
   useEffect(() => {
-    const loadClasses = async () => {
-      try {
-        const response = await api.get('/classes', { params: { per_page: 100 } });
-        const data = response.data.data || [];
-        setClasses(Array.isArray(data) ? data : []);
-      } catch {
-        setClasses([]);
-      }
-    };
-    loadClasses();
-  }, []);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset to first page on search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  // Fetch subjects for filter dropdown (once)
-  useEffect(() => {
-    const loadSubjects = async () => {
-      try {
-        const res = await api.get('/subjects');
-        setSubjects(res.data.data || []);
-      } catch { setSubjects([]); }
-    };
-    loadSubjects();
-  }, []);
+  // Fetch quizzes using React Query
+  const { data: quizzesData, isLoading: loading, refetch } = useQuizzes({
+    page,
+    per_page: 12,
+    ...(debouncedSearch.trim() && { search: debouncedSearch.trim() }),
+    ...(selectedClass && { class_id: selectedClass }),
+    ...(selectedSubject && { subject_id: selectedSubject }),
+    ...(selectedStatus && { is_active: selectedStatus }),
+  });
 
-  // Fetch when dropdown filters change
-  useEffect(() => {
+  const quizzes = quizzesData?.data || [];
+  const meta = quizzesData?.meta || { current_page: 1, last_page: 1, per_page: 12, total: 0 };
+
+  // Fetch classes for filter dropdown
+  const { data: classesData } = useClasses({ per_page: 100 });
+  const classes = classesData?.data || [];
+
+  // Fetch subjects for filter dropdown
+  const { data: subjectsData } = useSubjects();
+  const subjects = subjectsData || [];
+
+  // Filter change handlers that reset page
+  const handleClassChange = (value: string) => {
+    setSelectedClass(value);
     setPage(1);
-    fetchQuizzes(1);
-  }, [selectedClass, selectedSubject, selectedStatus]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Debounced search
-  useEffect(() => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
-      setPage(1);
-      fetchQuizzes(1);
-    }, 300);
-    return () => {
-      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    };
-  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fetch when page changes
-  useEffect(() => {
-    fetchQuizzes(page);
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= meta.last_page) {
-      setPage(newPage);
-    }
   };
 
+  const handleSubjectChange = (value: string) => {
+    setSelectedSubject(value);
+    setPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setSelectedStatus(value);
+    setPage(1);
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = search.trim() !== '' || selectedClass !== '' || selectedSubject !== '' || selectedStatus !== '';
+
+  // Clear all filters
   const clearFilters = () => {
     setSearch('');
     setSelectedClass('');
@@ -156,7 +120,11 @@ const QuizList: React.FC = () => {
     setPage(1);
   };
 
-  const hasActiveFilters = !!(search || selectedClass || selectedSubject || selectedStatus);
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -164,7 +132,7 @@ const QuizList: React.FC = () => {
     try {
       await api.delete(`/quizzes/${deleteId}`);
       toast.success('Quiz deleted successfully');
-      fetchQuizzes(page);
+      refetch();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error('Failed to delete quiz');
@@ -216,14 +184,14 @@ const QuizList: React.FC = () => {
               {/* Class filter */}
               <Select
                 value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
+                onChange={(e) => handleClassChange(e.target.value)}
                 options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
                 placeholder={t.quizzes.allClasses}
               />
               {/* Subject filter */}
               <Select
                 value={selectedSubject}
-                onChange={(e) => setSelectedSubject(e.target.value)}
+                onChange={(e) => handleSubjectChange(e.target.value)}
                 options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
                 placeholder={t.quizzes.allSubjects}
               />
@@ -231,7 +199,7 @@ const QuizList: React.FC = () => {
               <div className="flex gap-2">
                 <Select
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  onChange={(e) => handleStatusChange(e.target.value)}
                   options={[
                     { value: 'true', label: t.quizzes.active },
                     { value: 'false', label: t.quizzes.inactive },

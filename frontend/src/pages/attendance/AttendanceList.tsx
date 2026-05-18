@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent } from '../../components/ui/card';
@@ -11,6 +11,7 @@ import { Avatar } from '../../components/ui/avatar';
 import { TableSkeleton } from '../../components/skeletons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useAttendances } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import type { Attendance, ClassRoom } from '../../types';
@@ -35,24 +36,15 @@ const statusBadgeVariant: Record<string, 'success' | 'destructive' | 'warning' |
   excused: 'info',
 };
 
-interface PaginationMeta {
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-}
-
 const AttendanceList: React.FC = () => {
   const { isTeacher, isAdmin } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [classes, setClasses] = useState<ClassRoom[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
 
   // Filters
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -62,25 +54,35 @@ const AttendanceList: React.FC = () => {
   // Debounce ref
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchAttendance = useCallback(async (currentPage: number = 1) => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = { page: currentPage, per_page: 15 };
-      if (search.trim()) params.search = search.trim();
-      if (selectedClass) params.class_id = selectedClass;
-      if (selectedStatus) params.status = selectedStatus;
-      if (dateFrom) params.date_from = dateFrom;
-      if (dateTo) params.date_to = dateTo;
+  // Debounced search effect
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 300);
+    return () => {
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    };
+  }, [search]);
 
-      const response = await api.get('/attendances', { params });
-      setAttendance(response.data.data || []);
-      if (response.data.meta) setMeta(response.data.meta);
-    } catch {
-      setAttendance([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, selectedClass, selectedStatus, dateFrom, dateTo]);
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [selectedClass, selectedStatus, dateFrom, dateTo]);
+
+  // Fetch attendance using React Query
+  const { data: attendanceData, isLoading: loading } = useAttendances({
+    page,
+    class_id: selectedClass,
+    status: selectedStatus,
+    date_from: dateFrom,
+    date_to: dateTo,
+    search: debouncedSearch,
+  });
+
+  const attendance = attendanceData?.data || [];
+  const meta = attendanceData?.meta || { current_page: 1, last_page: 1, per_page: 15, total: 0 };
 
   // Fetch classes for filter dropdown (once)
   useEffect(() => {
@@ -95,29 +97,6 @@ const AttendanceList: React.FC = () => {
     };
     loadClasses();
   }, []);
-
-  // Fetch when dropdown/date filters change (reset to page 1)
-  useEffect(() => {
-    setPage(1);
-    fetchAttendance(1);
-  }, [selectedClass, selectedStatus, dateFrom, dateTo]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Debounced search
-  useEffect(() => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
-      setPage(1);
-      fetchAttendance(1);
-    }, 300);
-    return () => {
-      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    };
-  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fetch when page changes
-  useEffect(() => {
-    fetchAttendance(page);
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= meta.last_page) {

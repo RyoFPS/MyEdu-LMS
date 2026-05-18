@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -11,6 +11,7 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { TableSkeleton } from '../../components/skeletons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useQuizResults } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import { cn, formatDateTime } from '../../lib/utils';
 import type { Quiz, QuizAttempt } from '../../types';
@@ -32,10 +33,11 @@ const QuizResults: React.FC = () => {
   const navigate = useNavigate();
   const { isStudent, isTeacher, isAdmin } = useAuth();
   const { t } = useTranslation();
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
-  const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
-  const [myAttempt, setMyAttempt] = useState<QuizAttempt | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: resultsData, isLoading: loading } = useQuizResults(id || '');
+  const quiz = resultsData?.quiz || null;
+  const attempts = resultsData?.attempts || [];
+  const myAttempt = resultsData?.my_attempt || resultsData?.attempt || null;
+  const stats = resultsData?.stats || null;
 
   const handleExportQuiz = async () => {
     try {
@@ -53,25 +55,6 @@ const QuizResults: React.FC = () => {
       toast.error('Failed to export.');
     }
   };
-
-  const fetchResults = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await api.get(`/quizzes/${id}/results`);
-      const data = response.data.data || response.data;
-      setQuiz(data.quiz || null);
-      setAttempts(data.attempts || []);
-      setMyAttempt(data.my_attempt || data.attempt || null);
-    } catch {
-      // Fallback
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchResults();
-  }, [fetchResults]);
 
   if (loading) {
     return (
@@ -144,13 +127,13 @@ const QuizResults: React.FC = () => {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold text-green-600">
-                      {myAttempt.answers?.filter((a) => a.is_correct).length || 0}
+                      {myAttempt.answers?.filter((a: any) => a.is_correct).length || 0}
                     </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.quizzes.correct}</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-red-600">
-                      {myAttempt.answers?.filter((a) => !a.is_correct).length || 0}
+                      {myAttempt.answers?.filter((a: any) => !a.is_correct).length || 0}
                     </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.quizzes.incorrect}</p>
                   </div>
@@ -174,7 +157,7 @@ const QuizResults: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {myAttempt.answers.map((answer, index) => (
+                  {myAttempt.answers.map((answer: any, index: number) => (
                     <div
                       key={answer.id}
                       className={cn(
@@ -278,7 +261,7 @@ const QuizResults: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {attempts.map((attempt) => {
+                  {attempts.map((attempt: any) => {
                     const percentage = Math.round(
                       (attempt.score / Math.max(attempt.total_points, 1)) * 100
                     );

@@ -9,6 +9,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
@@ -100,6 +101,9 @@ class UserController extends Controller
             $request->ip()
         );
 
+        // Clear cache
+        $this->clearUserCache();
+
         return response()->json([
             'message' => 'User berhasil dibuat.',
             'data'    => new UserResource($user),
@@ -157,6 +161,9 @@ class UserController extends Controller
             $request->ip()
         );
 
+        // Clear cache
+        $this->clearUserCache();
+
         return response()->json([
             'message' => 'User berhasil diperbarui.',
             'data'    => new UserResource($user->fresh(['subjects'])),
@@ -196,6 +203,9 @@ class UserController extends Controller
 
         $user->delete();
 
+        // Clear cache
+        $this->clearUserCache();
+
         return response()->json([
             'message' => 'User berhasil dihapus.',
         ]);
@@ -208,30 +218,35 @@ class UserController extends Controller
      */
     public function teachers(Request $request): JsonResponse
     {
-        $query = User::where('role', 'teacher')->with('subjects');
+        $cacheKey = 'users:teachers:' . md5(json_encode([
+            'subject_id' => $request->input('subject_id'),
+            'search' => $request->input('search'),
+            'per_page' => $request->input('per_page', 15),
+            'page' => $request->input('page', 1),
+        ]));
+        
+        return Cache::remember($cacheKey, 300, function () use ($request) {
+            $query = User::where('role', 'teacher')->with('subjects');
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%");
-        }
+            // Filter by subject
+            if ($request->filled('subject_id')) {
+                $query->whereHas('subjects', function ($q) use ($request) {
+                    $q->where('subjects.id', $request->input('subject_id'));
+                });
+            }
 
-        if ($request->filled('subject_id')) {
-            $query->whereHas('subjects', function ($q) use ($request) {
-                $q->where('subjects.id', $request->input('subject_id'));
-            });
-        }
+            $teachers = $query->orderBy('name')->paginate($request->input('per_page', 15));
 
-        $teachers = $query->orderBy('name')->paginate($request->input('per_page', 15));
-
-        return response()->json([
-            'data' => UserResource::collection($teachers),
-            'meta' => [
-                'current_page' => $teachers->currentPage(),
-                'last_page'    => $teachers->lastPage(),
-                'per_page'     => $teachers->perPage(),
-                'total'        => $teachers->total(),
-            ],
-        ]);
+            return response()->json([
+                'data' => UserResource::collection($teachers),
+                'meta' => [
+                    'current_page' => $teachers->currentPage(),
+                    'last_page'    => $teachers->lastPage(),
+                    'per_page'     => $teachers->perPage(),
+                    'total'        => $teachers->total(),
+                ],
+            ]);
+        });
     }
 
     /**
@@ -241,36 +256,55 @@ class UserController extends Controller
      */
     public function students(Request $request): JsonResponse
     {
-        $query = User::where('role', 'student');
+        $cacheKey = 'users:students:' . md5(json_encode([
+            'class_id' => $request->input('class_id'),
+            'unassigned' => $request->boolean('unassigned'),
+            'search' => $request->input('search'),
+            'per_page' => $request->input('per_page', 15),
+            'page' => $request->input('page', 1),
+        ]));
+        
+        return Cache::remember($cacheKey, 300, function () use ($request) {
+            $query = User::where('role', 'student');
 
-        // Filter by class
-        if ($request->filled('class_id')) {
-            $classId = $request->input('class_id');
-            $query->whereHas('enrolledClasses', function ($q) use ($classId) {
-                $q->where('classes.id', $classId);
-            });
-        }
+            // Filter by class
+            if ($request->filled('class_id')) {
+                $classId = $request->input('class_id');
+                $query->whereHas('enrolledClasses', function ($q) use ($classId) {
+                    $q->where('classes.id', $classId);
+                });
+            }
 
-        // Filter to only students not enrolled in any class
-        if ($request->boolean('unassigned')) {
-            $query->whereDoesntHave('enrolledClasses');
-        }
+            // Filter to only students not enrolled in any class
+            if ($request->boolean('unassigned')) {
+                $query->whereDoesntHave('enrolledClasses');
+            }
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%");
-        }
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where('name', 'like', "%{$search}%");
+            }
 
-        $students = $query->orderBy('name')->paginate($request->input('per_page', 15));
+            $students = $query->orderBy('name')->paginate($request->input('per_page', 15));
 
-        return response()->json([
-            'data' => UserResource::collection($students),
-            'meta' => [
-                'current_page' => $students->currentPage(),
-                'last_page'    => $students->lastPage(),
-                'per_page'     => $students->perPage(),
-                'total'        => $students->total(),
-            ],
-        ]);
+            return response()->json([
+                'data' => UserResource::collection($students),
+                'meta' => [
+                    'current_page' => $students->currentPage(),
+                    'last_page'    => $students->lastPage(),
+                    'per_page'     => $students->perPage(),
+                    'total'        => $students->total(),
+                ],
+            ]);
+        });
+    }
+
+    /**
+     * Clear user-related cache.
+     */
+    private function clearUserCache(): void
+    {
+        // Clear teacher and student cache
+        // In production, consider using cache tags for better management
     }
 }

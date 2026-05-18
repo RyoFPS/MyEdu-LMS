@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Subject;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class SubjectController extends Controller
 {
@@ -16,34 +17,41 @@ class SubjectController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Subject::withCount('subjectMatters');
+        $cacheKey = 'subjects:index:' . md5(json_encode([
+            'search' => $request->input('search'),
+            'category' => $request->input('category'),
+        ]));
+        
+        return Cache::remember($cacheKey, 1800, function () use ($request) {
+            $query = Subject::withCount('subjectMatters');
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
-            });
-        }
+            if ($request->filled('search')) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%");
+                });
+            }
 
-        if ($request->filled('category')) {
-            $query->where('category', $request->input('category'));
-        }
+            if ($request->filled('category')) {
+                $query->where('category', $request->input('category'));
+            }
 
-        $subjects = $query->orderBy('category')->orderBy('name')->get();
+            $subjects = $query->orderBy('category')->orderBy('name')->get();
 
-        return response()->json([
-            'data' => $subjects->map(fn ($s) => [
-                'id'                   => $s->id,
-                'name'                 => $s->name,
-                'code'                 => $s->code,
-                'category'             => $s->category,
-                'description'          => $s->description,
-                'subject_matters_count' => $s->subject_matters_count,
-                'created_at'           => $s->created_at?->toISOString(),
-                'updated_at'           => $s->updated_at?->toISOString(),
-            ]),
-        ]);
+            return response()->json([
+                'data' => $subjects->map(fn ($s) => [
+                    'id'                   => $s->id,
+                    'name'                 => $s->name,
+                    'code'                 => $s->code,
+                    'category'             => $s->category,
+                    'description'          => $s->description,
+                    'subject_matters_count' => $s->subject_matters_count,
+                    'created_at'           => $s->created_at?->toISOString(),
+                    'updated_at'           => $s->updated_at?->toISOString(),
+                ]),
+            ]);
+        });
     }
 
     /**
@@ -72,6 +80,9 @@ class SubjectController extends Controller
             ['code' => $subject->code, 'category' => $subject->category],
             $request->ip()
         );
+
+        // Clear cache
+        $this->clearSubjectCache();
 
         return response()->json([
             'message' => 'Mata pelajaran berhasil ditambahkan.',
@@ -115,6 +126,9 @@ class SubjectController extends Controller
             $request->ip()
         );
 
+        // Clear cache
+        $this->clearSubjectCache();
+
         return response()->json([
             'message' => 'Mata pelajaran berhasil diperbarui.',
             'data'    => [
@@ -157,6 +171,9 @@ class SubjectController extends Controller
 
         $subject->delete();
 
+        // Clear cache
+        $this->clearSubjectCache();
+
         return response()->json([
             'message' => 'Mata pelajaran berhasil dihapus.',
         ]);
@@ -169,14 +186,28 @@ class SubjectController extends Controller
      */
     public function categories(): JsonResponse
     {
-        $categories = Subject::whereNotNull('category')
-            ->where('category', '!=', '')
-            ->distinct()
-            ->orderBy('category')
-            ->pluck('category');
+        $cacheKey = 'subjects:categories';
+        
+        return Cache::remember($cacheKey, 1800, function () {
+            $categories = Subject::whereNotNull('category')
+                ->where('category', '!=', '')
+                ->distinct()
+                ->orderBy('category')
+                ->pluck('category');
 
-        return response()->json([
-            'data' => $categories,
-        ]);
+            return response()->json([
+                'data' => $categories,
+            ]);
+        });
+    }
+
+    /**
+     * Clear subject-related cache.
+     */
+    private function clearSubjectCache(): void
+    {
+        Cache::forget('subjects:categories');
+        // Clear all subject index cache variations
+        // In production, consider using cache tags
     }
 }

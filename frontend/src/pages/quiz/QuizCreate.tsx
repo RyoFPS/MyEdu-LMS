@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
@@ -14,6 +14,7 @@ import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useClasses, useSubjects, useQuiz } from '../../hooks/useApi';
 import type { ClassRoom, QuizQuestion } from '../../types';
 import {
   FileQuestion,
@@ -59,9 +60,12 @@ const QuizCreate: React.FC = () => {
   const isEditing = !!editId;
   const { t } = useTranslation();
 
-  const [classes, setClasses] = useState<ClassRoom[]>([]);
-  const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
-  const [loading, setLoading] = useState(false);
+  // React Query hooks
+  const { data: classesData } = useClasses();
+  const classes = classesData?.data || [];
+  const { data: subjects = [] } = useSubjects();
+  const { data: quiz, isLoading: loading } = useQuiz(editId || '', { enabled: !!editId });
+
   const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -82,28 +86,9 @@ const QuizCreate: React.FC = () => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  const fetchClasses = useCallback(async () => {
-    try {
-      const response = await api.get('/classes');
-      const data = response.data.data || response.data;
-      setClasses(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setClasses([]);
-    }
-  }, []);
-
-  const fetchSubjects = useCallback(async () => {
-    try {
-      const res = await api.get('/subjects');
-      setSubjects(res.data.data || []);
-    } catch { /* ignore */ }
-  }, []);
-
-  const fetchQuiz = useCallback(async (id: string) => {
-    setLoading(true);
-    try {
-      const response = await api.get(`/quizzes/${id}`);
-      const quiz = response.data.data || response.data;
+  // Load quiz data when editing
+  useEffect(() => {
+    if (isEditing && quiz) {
       setFormData({
         title: quiz.title,
         description: quiz.description || '',
@@ -129,21 +114,8 @@ const QuizCreate: React.FC = () => {
           }))
         );
       }
-    } catch {
-      toast.error('Failed to load quiz');
-      navigate('/quizzes');
-    } finally {
-      setLoading(false);
     }
-  }, [navigate]);
-
-  useEffect(() => {
-    fetchClasses();
-    fetchSubjects();
-    if (editId) {
-      fetchQuiz(editId);
-    }
-  }, [editId, fetchClasses, fetchSubjects, fetchQuiz]);
+  }, [isEditing, quiz]);
 
   const addQuestion = () => {
     setQuestions([...questions, { ...emptyQuestion, id: crypto.randomUUID() }]);
@@ -356,7 +328,7 @@ const QuizCreate: React.FC = () => {
                   <Select
                     value={formData.subject_id}
                     onChange={(e) => setFormData(prev => ({ ...prev, subject_id: e.target.value }))}
-                    options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
+                    options={subjects.map((s: any) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
                     placeholder={t.quizzes.selectSubject}
                   />
                 </div>

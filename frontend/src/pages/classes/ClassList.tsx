@@ -17,6 +17,7 @@ import {
 import { CardGridSkeleton } from '../../components/skeletons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useClasses, useGradeLevels } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
@@ -39,15 +40,24 @@ const ClassList: React.FC = () => {
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [classes, setClasses] = useState<ClassRoom[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // React Query hooks
+  const { data: classesResponse, isLoading: loading, refetch: refetchClasses } = useClasses();
+  const { data: gradeLevels = [] } = useGradeLevels();
+  
+  // Extract classes array from response
+  const classes = React.useMemo(() => {
+    if (!classesResponse) return [];
+    const data = classesResponse.data || classesResponse;
+    return Array.isArray(data) ? data : [];
+  }, [classesResponse]);
+  
   const [search, setSearch] = useState('');
   const [filterGrade, setFilterGrade] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassRoom | null>(null);
   const [deleteSlug, setDeleteSlug] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [gradeLevels, setGradeLevels] = useState<string[]>([]);
   const [classesByGrade, setClassesByGrade] = useState<Record<string, string[]>>({});
   const [formData, setFormData] = useState({
     name: '',
@@ -57,11 +67,6 @@ const ClassList: React.FC = () => {
   });
 
   useEffect(() => {
-    fetchClasses();
-    fetchGradeLevels();
-  }, []);
-
-  useEffect(() => {
     const byGrade: Record<string, string[]> = {};
     classes.forEach((cls) => {
       if (!byGrade[cls.grade_level]) byGrade[cls.grade_level] = [];
@@ -69,26 +74,6 @@ const ClassList: React.FC = () => {
     });
     setClassesByGrade(byGrade);
   }, [classes]);
-
-  const fetchClasses = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/classes');
-      const data = response.data.data || response.data;
-      setClasses(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setClasses([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchGradeLevels = async () => {
-    try {
-      const res = await api.get('/classes/grade-levels');
-      setGradeLevels(res.data.data || []);
-    } catch { /* ignore */ }
-  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,8 +87,7 @@ const ClassList: React.FC = () => {
         toast.success('Class created successfully');
       }
       resetForm();
-      fetchClasses();
-      fetchGradeLevels();
+      refetchClasses();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error(`Failed to ${editingClass ? 'update' : 'create'} class`);
@@ -118,8 +102,8 @@ const ClassList: React.FC = () => {
     setSubmitting(true);
     try {
       await api.delete(`/classes/${deleteSlug}`);
-      setClasses((prev) => prev.filter((c) => c.slug !== deleteSlug));
       toast.success('Class deleted successfully');
+      refetchClasses();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error('Failed to delete class');

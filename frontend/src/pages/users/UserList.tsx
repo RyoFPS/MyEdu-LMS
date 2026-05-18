@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -17,6 +17,7 @@ import {
 } from '../../components/ui/dialog';
 import { TableSkeleton } from '../../components/skeletons';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useUsers, useSubjects } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { formatDate } from '../../lib/utils';
@@ -63,24 +64,32 @@ interface RoleCounts {
 
 const UserList: React.FC = () => {
   const { t } = useTranslation();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<PaginationMeta>({ current_page: 1, last_page: 1, per_page: 15, total: 0 });
-  const [counts, setCounts] = useState<RoleCounts>({ total: 0, admin: 0, teacher: 0, student: 0 });
-
-  // Subjects
-  const [subjects, setSubjects] = useState<{id: number; name: string; code: string; category: string | null}[]>([]);
-  const [subjectFilter, setSubjectFilter] = useState('');
-
+  
   // Filters
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState('');
   const [joinedFrom, setJoinedFrom] = useState('');
   const [joinedTo, setJoinedTo] = useState('');
   const [page, setPage] = useState(1);
 
   // Debounce ref for search
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // React Query hooks
+  const { data: usersData, isLoading: loading, refetch: refetchUsers } = useUsers({ 
+    page, 
+    role: roleFilter, 
+    subject_id: subjectFilter,
+    search,
+    joined_from: joinedFrom,
+    joined_to: joinedTo,
+  });
+  const users = usersData?.data || [];
+  const meta = usersData?.meta || { current_page: 1, last_page: 1, per_page: 15, total: 0 };
+  const counts = usersData?.counts || { total: 0, admin: 0, teacher: 0, student: 0 };
+
+  const { data: subjects = [] } = useSubjects();
 
   // CRUD state
   const [showCreate, setShowCreate] = useState(false);
@@ -95,59 +104,6 @@ const UserList: React.FC = () => {
     phone: '',
     subject_ids: [] as number[],
   });
-
-  const fetchSubjects = async () => {
-    try {
-      const res = await api.get('/subjects');
-      setSubjects(res.data.data || []);
-    } catch { /* ignore */ }
-  };
-
-  useEffect(() => { fetchSubjects(); }, []);
-
-  const fetchUsers = useCallback(async (currentPage: number = 1) => {
-    setLoading(true);
-    try {
-      const params: Record<string, string | number> = { page: currentPage, per_page: 15 };
-      if (search.trim()) params.search = search.trim();
-      if (roleFilter) params.role = roleFilter;
-      if (subjectFilter) params.subject_id = subjectFilter;
-      if (joinedFrom) params.joined_from = joinedFrom;
-      if (joinedTo) params.joined_to = joinedTo;
-
-      const response = await api.get('/users', { params });
-      setUsers(response.data.data || []);
-      if (response.data.meta) setMeta(response.data.meta);
-      if (response.data.counts) setCounts(response.data.counts);
-    } catch {
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [search, roleFilter, subjectFilter, joinedFrom, joinedTo]);
-
-  // Fetch when filters change (except search which is debounced)
-  useEffect(() => {
-    setPage(1);
-    fetchUsers(1);
-  }, [roleFilter, subjectFilter, joinedFrom, joinedTo]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Debounced search
-  useEffect(() => {
-    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = setTimeout(() => {
-      setPage(1);
-      fetchUsers(1);
-    }, 300);
-    return () => {
-      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-    };
-  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Fetch when page changes
-  useEffect(() => {
-    fetchUsers(page);
-  }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= meta.last_page) {
@@ -191,7 +147,7 @@ const UserList: React.FC = () => {
         toast.success('User created successfully');
       }
       resetForm();
-      fetchUsers(page);
+      refetchUsers();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error(`Failed to ${editingUser ? 'update' : 'create'} user`);
@@ -207,7 +163,7 @@ const UserList: React.FC = () => {
     try {
       await api.delete(`/users/${deleteId}`);
       toast.success('User deleted successfully');
-      fetchUsers(page);
+      refetchUsers();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
         toast.error('Failed to delete user');

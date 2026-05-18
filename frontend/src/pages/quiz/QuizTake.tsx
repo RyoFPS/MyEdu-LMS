@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '../../components/ui/dialog';
+import { useQuiz } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { cn } from '../../lib/utils';
@@ -33,28 +34,29 @@ const QuizTake: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const { data: quiz, isLoading: loading } = useQuiz(id || '');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [attemptId, setAttemptId] = useState<number | null>(null);
+  const [attemptStarted, setAttemptStarted] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const startQuiz = async () => {
-      setLoading(true);
+      if (!id || attemptStarted) return;
+      
       try {
         // Start attempt
         const response = await api.post(`/quizzes/${id}/start`);
         const data = response.data.data;
-        setQuiz(data.quiz);
         setQuestions(data.questions || []);
         setAttemptId(data.attempt_id);
         setTimeLeft((data.duration_minutes || 30) * 60);
+        setAttemptStarted(true);
 
         // Start timer
         timerRef.current = setInterval(() => {
@@ -74,8 +76,6 @@ const QuizTake: React.FC = () => {
           toast.error(error.response?.data?.message || 'Failed to start quiz');
         }
         navigate('/quizzes');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -83,7 +83,7 @@ const QuizTake: React.FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [id, navigate]);
+  }, [id, navigate, attemptStarted]);
 
   const handleSubmit = useCallback(
     async (autoSubmit = false) => {

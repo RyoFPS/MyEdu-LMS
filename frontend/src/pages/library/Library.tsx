@@ -12,6 +12,7 @@ import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
+import { useLibrary } from '../../hooks/useApi';
 import toast from 'react-hot-toast';
 import type { SubjectMatter, Subject } from '../../types';
 import {
@@ -74,16 +75,23 @@ const Library: React.FC = () => {
   const { t } = useTranslation();
 
   // Data
-  const [materials, setMaterials] = useState<SubjectMatter[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [gradeLevels, setGradeLevels] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterGradeLevel, setFilterGradeLevel] = useState('');
   const [filterSubjectId, setFilterSubjectId] = useState('');
+
+  // React Query hook for library materials
+  const { data: libraryData, isLoading: loading, refetch } = useLibrary({
+    search: debouncedSearch,
+    grade_level: filterGradeLevel,
+    subject_id: filterSubjectId,
+  });
+
+  const materials = libraryData?.data || [];
 
   // Upload dialog
   const [showUploadDialog, setShowUploadDialog] = useState(false);
@@ -123,23 +131,6 @@ const Library: React.FC = () => {
 
   // ─── Fetch data ─────────────────────────────────────────────────────────────
 
-  const fetchMaterials = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params: Record<string, string> = {};
-      if (debouncedSearch) params.search = debouncedSearch;
-      if (filterGradeLevel) params.grade_level = filterGradeLevel;
-      if (filterSubjectId) params.subject_id = filterSubjectId;
-
-      const res = await api.get('/library', { params });
-      setMaterials(res.data.data || []);
-    } catch {
-      // handled by interceptor
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearch, filterGradeLevel, filterSubjectId]);
-
   const fetchGradeLevels = useCallback(async () => {
     try {
       const res = await api.get('/library/grade-levels');
@@ -157,10 +148,6 @@ const Library: React.FC = () => {
       // ignore
     }
   }, []);
-
-  useEffect(() => {
-    fetchMaterials();
-  }, [fetchMaterials]);
 
   useEffect(() => {
     fetchGradeLevels();
@@ -206,7 +193,7 @@ const Library: React.FC = () => {
       toast.success('Material uploaded successfully!');
       setShowUploadDialog(false);
       resetUploadForm();
-      fetchMaterials();
+      refetch();
       fetchGradeLevels(); // refresh grade levels in case a new one was added
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
@@ -255,7 +242,7 @@ const Library: React.FC = () => {
       toast.success('Material updated successfully!');
       setShowEditDialog(false);
       setEditingMaterial(null);
-      fetchMaterials();
+      refetch();
       fetchGradeLevels();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
@@ -274,7 +261,7 @@ const Library: React.FC = () => {
     try {
       await api.delete(`/library/${material.id}`);
       toast.success('Material deleted successfully.');
-      fetchMaterials();
+      refetch();
     } catch {
       toast.error('Failed to delete material.');
     }

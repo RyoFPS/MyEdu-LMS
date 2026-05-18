@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/badge';
 import { Avatar } from '../../components/ui/avatar';
 import { CardGridSkeleton } from '../../components/skeletons';
 import { useTranslation } from '../../hooks/useTranslation';
-import api from '../../lib/axios';
+import { useTeachers } from '../../hooks/useApi';
 import type { User } from '../../types';
 import {
   Search,
@@ -19,26 +19,8 @@ import {
 
 const TeacherList: React.FC = () => {
   const { t } = useTranslation();
-  const [teachers, setTeachers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: teachers = [], isLoading: loading } = useTeachers();
   const [search, setSearch] = useState('');
-
-  useEffect(() => {
-    fetchTeachers();
-  }, []);
-
-  const fetchTeachers = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/users', { params: { role: 'teacher' } });
-      const data = response.data.data || response.data;
-      setTeachers(Array.isArray(data) ? data : data.data || []);
-    } catch {
-      setTeachers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const filteredTeachers = teachers.filter((teacher) => {
     if (!search) return true;
