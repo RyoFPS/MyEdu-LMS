@@ -346,15 +346,17 @@ class AssignmentController extends Controller
     /**
      * Download a submission file.
      */
-    public function download($id): JsonResponse
+    public function download(Request $request, $id)
     {
-        $submission = AssignmentSubmission::findOrFail($id);
+        $submission = AssignmentSubmission::with('assignment')->findOrFail($id);
+        $user = $request->user();
+
+        if ($user->isStudent() && $submission->student_id !== $user->id) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
 
         if (!Storage::disk('public')->exists($submission->file_path)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'File not found',
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'File not found'], 404);
         }
 
         return response()->download(
@@ -366,15 +368,20 @@ class AssignmentController extends Controller
     /**
      * Download assignment attachment.
      */
-    public function downloadAttachment($id): JsonResponse
+    public function downloadAttachment(Request $request, $id)
     {
         $assignment = Assignment::findOrFail($id);
+        $user = $request->user();
+
+        if ($user->isStudent()) {
+            $enrolledClassIds = $user->enrolledClasses()->pluck('classes.id')->toArray();
+            if (!in_array($assignment->class_id, $enrolledClassIds)) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        }
 
         if (!$assignment->file_path || !Storage::disk('public')->exists($assignment->file_path)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'File not found',
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'File not found'], 404);
         }
 
         return response()->download(
