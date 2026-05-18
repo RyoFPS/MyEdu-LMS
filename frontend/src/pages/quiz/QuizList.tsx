@@ -205,7 +205,7 @@ const QuizList: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Search */}
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   placeholder={t.common.search + '...'}
                   value={search}
@@ -262,7 +262,7 @@ const QuizList: React.FC = () => {
         {/* Results info */}
         {!loading && meta.total > 0 && (
           <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
               Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
               {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} quizzes
             </p>
@@ -273,7 +273,7 @@ const QuizList: React.FC = () => {
         {loading ? (
           <CardGridSkeleton count={6} columns={3} />
         ) : quizzes.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
             <p className="text-lg font-medium">{t.quizzes.noQuizzes}</p>
             <p className="text-sm mt-1">
@@ -299,31 +299,31 @@ const QuizList: React.FC = () => {
                       </Badge>
                     </div>
 
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 line-clamp-1">{quiz.title}</h3>
+                    <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 line-clamp-1">{quiz.title}</h3>
                     {quiz.description && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">{quiz.description}</p>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4 line-clamp-2">{quiz.description}</p>
                     )}
 
                     <div className="space-y-2 mb-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
                         <span className="truncate">{quiz.class_room?.name || 'No class'}</span>
                       </div>
                       {quiz.subject && (
-                        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                           <Tag className="h-3.5 w-3.5 flex-shrink-0" />
                           <span className="truncate">{quiz.subject.name}</span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         <Clock className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{quiz.duration_minutes} {t.quizzes.minutes}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         <Users className="h-3.5 w-3.5 flex-shrink-0" />
                         <span>{quiz.questions_count || 0} {t.quizzes.questions}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         {quiz.max_attempts === 0 ? (
                           <>
                             <Repeat className="h-3.5 w-3.5 flex-shrink-0" />
@@ -342,14 +342,14 @@ const QuizList: React.FC = () => {
                         )}
                       </div>
                       {quiz.start_time && (
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-zinc-400">
                           Starts: {formatDateTime(quiz.start_time)}
                         </div>
                       )}
                       {quiz.end_time && (
                         <div className={cn(
                           "text-xs",
-                          quiz.is_expired ? "text-red-500 font-medium" : "text-gray-400"
+                          quiz.is_expired ? "text-red-500 font-medium" : "text-zinc-400"
                         )}>
                           {quiz.is_expired ? `⚠️ ${t.quizzes.expired}: ` : `${t.quizzes.deadline}: `}{formatDateTime(quiz.end_time)}
                         </div>
@@ -383,7 +383,7 @@ const QuizList: React.FC = () => {
                             size="icon"
                             onClick={() => navigate(`/quizzes/create?edit=${quiz.id}`)}
                           >
-                            <Edit className="h-4 w-4 text-gray-400" />
+                            <Edit className="h-4 w-4 text-zinc-400" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -413,7 +413,7 @@ const QuizList: React.FC = () => {
                 </Button>
                 {getPageNumbers().map((p, i) =>
                   p === '...' ? (
-                    <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+                    <span key={`dots-${i}`} className="px-2 text-zinc-400">...</span>
                   ) : (
                     <Button
                       key={p}

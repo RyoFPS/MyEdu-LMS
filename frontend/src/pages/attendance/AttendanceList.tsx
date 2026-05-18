@@ -214,7 +214,7 @@ const AttendanceList: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search */}
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   placeholder={t.common.search + '...'}
                   value={search}
@@ -243,7 +243,7 @@ const AttendanceList: React.FC = () => {
               />
               {/* Date From */}
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
                 <Input
                   type="date"
                   value={dateFrom}
@@ -254,7 +254,7 @@ const AttendanceList: React.FC = () => {
               </div>
               {/* Date To */}
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
                 <Input
                   type="date"
                   value={dateTo}
@@ -283,7 +283,7 @@ const AttendanceList: React.FC = () => {
               <TableSkeleton rows={8} columns={6} />
             </CardContent>
           ) : attendance.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">{t.common.noData}</p>
               <p className="text-sm mt-1">{t.library.adjustFilters}</p>
@@ -304,23 +304,23 @@ const AttendanceList: React.FC = () => {
                 <TableBody>
                   {attendance.map((record, index) => (
                     <TableRow key={record.id}>
-                      <TableCell className="text-gray-400">
+                      <TableCell className="text-zinc-400">
                         {(meta.current_page - 1) * meta.per_page + index + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar name={record.user?.name || ''} src={record.user?.avatar} size="sm" />
                           <div className="min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{record.user?.name || 'N/A'}</p>
-                            <p className="text-xs text-gray-400 truncate">{record.user?.email}</p>
+                            <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{record.user?.name || 'N/A'}</p>
+                            <p className="text-xs text-zinc-400 truncate">{record.user?.email}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-gray-700 dark:text-gray-300">{record.class_room?.name || 'N/A'}</span>
+                        <span className="text-sm text-zinc-700 dark:text-zinc-300">{record.class_room?.name || 'N/A'}</span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
                           <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                           {formatDate(record.date)}
                         </div>
@@ -331,7 +331,7 @@ const AttendanceList: React.FC = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-gray-500 dark:text-gray-400 truncate block max-w-[200px]">{record.notes || '-'}</span>
+                        <span className="text-sm text-zinc-500 dark:text-zinc-400 truncate block max-w-[200px]">{record.notes || '-'}</span>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -340,8 +340,8 @@ const AttendanceList: React.FC = () => {
 
               {/* Pagination */}
               {meta.last_page > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100 dark:border-gray-700">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-zinc-100 dark:border-zinc-700">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
                     {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} records
                   </p>
@@ -356,7 +356,7 @@ const AttendanceList: React.FC = () => {
                     </Button>
                     {getPageNumbers().map((p, i) =>
                       p === '...' ? (
-                        <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+                        <span key={`dots-${i}`} className="px-2 text-zinc-400">...</span>
                       ) : (
                         <Button
                           key={p}

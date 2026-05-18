@@ -71,8 +71,8 @@ const actionConfig: Record<string, { color: string; bgColor: string; icon: React
   create:  { color: 'text-emerald-600', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30', icon: <Plus className="h-3.5 w-3.5" /> },
   update:  { color: 'text-blue-600',    bgColor: 'bg-blue-100 dark:bg-blue-900/30',    icon: <Pencil className="h-3.5 w-3.5" /> },
   delete:  { color: 'text-red-600',     bgColor: 'bg-red-100 dark:bg-red-900/30',     icon: <Trash2 className="h-3.5 w-3.5" /> },
-  login:   { color: 'text-gray-600',    bgColor: 'bg-gray-100 dark:bg-gray-700',      icon: <LogIn className="h-3.5 w-3.5" /> },
-  logout:  { color: 'text-gray-500',    bgColor: 'bg-gray-100 dark:bg-gray-700',      icon: <LogOut className="h-3.5 w-3.5" /> },
+  login:   { color: 'text-zinc-600',    bgColor: 'bg-zinc-100 dark:bg-zinc-700',      icon: <LogIn className="h-3.5 w-3.5" /> },
+  logout:  { color: 'text-zinc-500',    bgColor: 'bg-zinc-100 dark:bg-zinc-700',      icon: <LogOut className="h-3.5 w-3.5" /> },
   assign:  { color: 'text-amber-600',   bgColor: 'bg-amber-100 dark:bg-amber-900/30', icon: <UserPlus className="h-3.5 w-3.5" /> },
   remove:  { color: 'text-orange-600',  bgColor: 'bg-orange-100 dark:bg-orange-900/30', icon: <UserMinus className="h-3.5 w-3.5" /> },
   upload:  { color: 'text-purple-600',  bgColor: 'bg-purple-100 dark:bg-purple-900/30', icon: <Upload className="h-3.5 w-3.5" /> },
@@ -232,8 +232,8 @@ const ActivityLog: React.FC = () => {
                 <Activity className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.today}</p>
-                <p className="text-xs text-gray-500">{(t as any).activityLog.today}</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.today}</p>
+                <p className="text-xs text-zinc-500">{(t as any).activityLog.today}</p>
               </div>
             </CardContent>
           </Card>
@@ -243,8 +243,8 @@ const ActivityLog: React.FC = () => {
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.this_week}</p>
-                <p className="text-xs text-gray-500">{(t as any).activityLog.thisWeek}</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.this_week}</p>
+                <p className="text-xs text-zinc-500">{(t as any).activityLog.thisWeek}</p>
               </div>
             </CardContent>
           </Card>
@@ -254,8 +254,8 @@ const ActivityLog: React.FC = () => {
                 <Activity className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.total}</p>
-                <p className="text-xs text-gray-500">{(t as any).activityLog.total}</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{stats.total}</p>
+                <p className="text-xs text-zinc-500">{(t as any).activityLog.total}</p>
               </div>
             </CardContent>
           </Card>
@@ -265,7 +265,7 @@ const ActivityLog: React.FC = () => {
           <CardContent className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   placeholder={(t as any).activityLog.searchPlaceholder}
                   value={search}
@@ -306,7 +306,7 @@ const ActivityLog: React.FC = () => {
                 placeholder={(t as any).activityLog.allTypes}
               />
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
                 <Input
                   type="date"
                   value={dateFrom}
@@ -315,7 +315,7 @@ const ActivityLog: React.FC = () => {
                 />
               </div>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
                 <Input
                   type="date"
                   value={dateTo}
@@ -340,7 +340,7 @@ const ActivityLog: React.FC = () => {
         </Card>
 
         {!loading && meta.total > 0 && (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Showing {(meta.current_page - 1) * meta.per_page + 1}–{Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} logs
           </p>
         )}
@@ -352,7 +352,7 @@ const ActivityLog: React.FC = () => {
             </CardContent>
           </Card>
         ) : logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
             <p className="text-lg font-medium">{(t as any).activityLog.noLogs}</p>
             <p className="text-sm mt-1">{(t as any).activityLog.noLogsHint}</p>
@@ -372,22 +372,22 @@ const ActivityLog: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-1">
                           <Avatar name={log.user_name} src={log.user_avatar || undefined} size="sm" />
-                          <span className="font-medium text-sm text-gray-900 dark:text-gray-100">{log.user_name}</span>
+                          <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100">{log.user_name}</span>
                           <Badge variant={roleBadgeVariant[log.user_role] || 'secondary'} className="text-xs capitalize">
                             {log.user_role}
                           </Badge>
                           <Badge variant="outline" className={cn('text-xs capitalize', config.color)}>
                             {log.action}
                           </Badge>
-                          <span className="flex items-center gap-1 text-xs text-gray-400">
+                          <span className="flex items-center gap-1 text-xs text-zinc-400">
                             {targetTypeIcon[log.target_type]}
                             {log.target_type}
                           </span>
                         </div>
 
-                        <p className="text-sm text-gray-600 dark:text-gray-300">{log.description}</p>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-300">{log.description}</p>
 
-                        <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-gray-400">
+                        <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-zinc-400">
                           <span>🎯 {log.target_name}</span>
                           {log.ip_address && <span>🌐 {log.ip_address}</span>}
                           <span>🕐 {timeAgo(log.created_at, (t.notifications as any).justNow)}</span>
@@ -409,7 +409,7 @@ const ActivityLog: React.FC = () => {
             </Button>
             {getPageNumbers().map((p, i) =>
               p === '...' ? (
-                <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+                <span key={`dots-${i}`} className="px-2 text-zinc-400">...</span>
               ) : (
                 <Button key={p} variant={p === page ? 'default' : 'outline'} size="sm" onClick={() => setPage(p)} className="min-w-[36px]">
                   {p}

@@ -245,7 +245,7 @@ const ClassDetail: React.FC = () => {
       <>
         <Header title="Class Not Found" />
         <div className="page-container">
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
             <p className="text-lg font-medium">Class not found</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/classes')}>
@@ -281,21 +281,21 @@ const ClassDetail: React.FC = () => {
                 <BookOpen className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{classRoom.name}</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-0.5">{classRoom.description || classRoom.grade_level}</p>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{classRoom.name}</h2>
+                <p className="text-zinc-500 dark:text-zinc-400 mt-0.5">{classRoom.description || classRoom.grade_level}</p>
               </div>
               <div className="flex gap-3">
-                <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{students.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.classes.studentsCount}</p>
+                <div className="text-center px-4 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{students.length}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.classes.studentsCount}</p>
                 </div>
-                <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{teachers.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.classes.teachersCount}</p>
+                <div className="text-center px-4 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{teachers.length}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.classes.teachersCount}</p>
                 </div>
-                <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{quizzes.length}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{t.sidebar.quizzes}</p>
+                <div className="text-center px-4 py-2 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+                  <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{quizzes.length}</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.sidebar.quizzes}</p>
                 </div>
               </div>
             </div>
@@ -355,21 +355,21 @@ const ClassDetail: React.FC = () => {
                   <TableBody>
                     {students.map((student, index) => (
                       <TableRow key={student.id}>
-                        <TableCell className="text-gray-400">{index + 1}</TableCell>
+                        <TableCell className="text-zinc-400">{index + 1}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar name={student.name} src={student.avatar} size="sm" previewable />
-                            <span className="font-medium text-gray-900 dark:text-gray-100">{student.name}</span>
+                            <span className="font-medium text-zinc-900 dark:text-zinc-100">{student.name}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                             <Mail className="h-3.5 w-3.5" />
                             {student.email}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                             <Calendar className="h-3.5 w-3.5" />
                             {formatDate(student.created_at)}
                           </div>
@@ -408,14 +408,14 @@ const ClassDetail: React.FC = () => {
                   {teachers.map((teacher) => (
                     <div
                       key={teacher.id}
-                      className="flex items-center gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      className="flex items-center gap-4 p-4 rounded-lg border border-zinc-100 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                     >
                       <Avatar name={teacher.name} src={teacher.avatar} size="lg" previewable />
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-gray-100">{teacher.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{teacher.email}</p>
+                        <p className="font-medium text-zinc-900 dark:text-zinc-100">{teacher.name}</p>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400">{teacher.email}</p>
                         {teacher.phone && (
-                          <p className="text-xs text-gray-400 mt-0.5">{teacher.phone}</p>
+                          <p className="text-xs text-zinc-400 mt-0.5">{teacher.phone}</p>
                         )}
                         {/* Teacher's subjects from their profile */}
                         {(teacher as any).subjects?.length > 0 && (
@@ -464,16 +464,16 @@ const ClassDetail: React.FC = () => {
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <Avatar name={record.user?.name || ''} src={record.user?.avatar} size="sm" />
-                            <span className="font-medium text-gray-900 dark:text-gray-100">{record.user?.name || 'N/A'}</span>
+                            <span className="font-medium text-zinc-900 dark:text-zinc-100">{record.user?.name || 'N/A'}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-600 dark:text-gray-400">{formatDate(record.date)}</TableCell>
+                        <TableCell className="text-sm text-zinc-600 dark:text-zinc-400">{formatDate(record.date)}</TableCell>
                         <TableCell>
                           <Badge variant={statusBadgeVariant[record.status]} className="capitalize">
                             {record.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-gray-500 dark:text-gray-400">{record.notes || '-'}</TableCell>
+                        <TableCell className="text-sm text-zinc-500 dark:text-zinc-400">{record.notes || '-'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -495,17 +495,26 @@ const ClassDetail: React.FC = () => {
                   {quizzes.map((quiz) => (
                     <div
                       key={quiz.id}
-                      className="p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                      className="p-4 rounded-lg border border-zinc-100 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
                       onClick={() => navigate(`/quizzes/${quiz.id}/results`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/quizzes/${quiz.id}/results`);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View quiz: ${quiz.title}`}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">{quiz.title}</h4>
+                        <h4 className="font-medium text-zinc-900 dark:text-zinc-100">{quiz.title}</h4>
                         <Badge variant={quiz.is_active ? 'success' : 'secondary'}>
                           {quiz.is_active ? t.quizzes.active : t.quizzes.inactive}
                         </Badge>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-1">{quiz.description}</p>
-                      <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-2 line-clamp-1">{quiz.description}</p>
+                      <div className="flex items-center gap-3 text-xs text-zinc-400">
                         <span>{quiz.duration_minutes} min</span>
                         <span>{quiz.questions_count || 0} {t.quizzes.questions}</span>
                       </div>
@@ -530,11 +539,12 @@ const ClassDetail: React.FC = () => {
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.sidebar.teachers}</label>
+                <label htmlFor="assign-teacher-select" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t.sidebar.teachers}</label>
                 {availableTeachers.length === 0 ? (
-                  <p className="text-sm text-gray-400 py-2">All teachers are already assigned to this class.</p>
+                  <p className="text-sm text-zinc-400 py-2">All teachers are already assigned to this class.</p>
                 ) : (
                   <SearchableSelect
+                    id="assign-teacher-select"
                     value={selectedTeacherId}
                     onChange={(val) => setSelectedTeacherId(val)}
                     options={availableTeachers.map((t) => ({ value: String(t.id), label: t.name, subtitle: t.email }))}
@@ -545,10 +555,11 @@ const ClassDetail: React.FC = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label htmlFor="teacher-subject-select" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {t.quizzes.subject} (optional)
                 </label>
                 <Select
+                  id="teacher-subject-select"
                   value={teacherSubject}
                   onChange={(e) => setTeacherSubject(e.target.value)}
                   options={[
@@ -565,7 +576,7 @@ const ClassDetail: React.FC = () => {
                   const teacherSubjects = (selectedTeacher as any)?.subjects;
                   if (teacherSubjects && teacherSubjects.length > 0) {
                     return (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-zinc-400">
                         This teacher teaches: {teacherSubjects.map((s: any) => s.name).join(', ')}
                       </p>
                     );
@@ -591,11 +602,12 @@ const ClassDetail: React.FC = () => {
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.sidebar.students}</label>
+                <label htmlFor="assign-student-select" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t.sidebar.students}</label>
                 {availableStudents.length === 0 ? (
-                  <p className="text-sm text-gray-400 py-2">{t.classes.allStudentsAssigned}</p>
+                  <p className="text-sm text-zinc-400 py-2">{t.classes.allStudentsAssigned}</p>
                 ) : (
                   <SearchableSelect
+                    id="assign-student-select"
                     value={selectedStudentId}
                     onChange={(val) => setSelectedStudentId(val)}
                     options={availableStudents.map((s) => ({ value: String(s.id), label: s.name, subtitle: s.email }))}
@@ -620,7 +632,7 @@ const ClassDetail: React.FC = () => {
 };
 
 const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon, message }) => (
-  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+  <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
     <div className="h-10 w-10 mb-2 opacity-50">{icon}</div>
     <p className="text-sm">{message}</p>
   </div>

@@ -14,7 +14,7 @@ export const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn('bg-gray-50/80 dark:bg-gray-800/50 [&_tr]:border-b', className)} {...props} />
+  <thead ref={ref} className={cn('bg-zinc-50/80 dark:bg-zinc-800/50 [&_tr]:border-b', className)} {...props} />
 ));
 TableHeader.displayName = 'TableHeader';
 
@@ -31,7 +31,7 @@ export const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttribut
     <tr
       ref={ref}
       className={cn(
-        'border-b border-gray-100 dark:border-gray-700 transition-colors hover:bg-gray-50/50 dark:hover:bg-gray-800/50 data-[state=selected]:bg-gray-100',
+        'border-b border-zinc-100 dark:border-zinc-700 transition-colors hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 data-[state=selected]:bg-zinc-100',
         className
       )}
       {...props}
@@ -47,7 +47,7 @@ export const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      'h-10 sm:h-11 px-3 sm:px-4 text-left align-middle font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider [&:has([role=checkbox])]:pr-0',
+      'h-10 sm:h-11 px-3 sm:px-4 text-left align-middle font-semibold text-zinc-600 dark:text-zinc-400 text-xs uppercase tracking-wider [&:has([role=checkbox])]:pr-0',
       className
     )}
     {...props}
@@ -61,7 +61,7 @@ export const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn('px-3 sm:px-4 py-2.5 sm:py-3 align-middle dark:text-gray-300 [&:has([role=checkbox])]:pr-0', className)}
+    className={cn('px-3 sm:px-4 py-2.5 sm:py-3 align-middle dark:text-zinc-300 [&:has([role=checkbox])]:pr-0', className)}
     {...props}
   />
 ));

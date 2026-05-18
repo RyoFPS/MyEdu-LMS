@@ -79,7 +79,7 @@ const StudentList: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <Input
               placeholder={t.common.search + '...'}
               value={search}
@@ -101,7 +101,7 @@ const StudentList: React.FC = () => {
           {loading ? (
             <TableSkeleton rows={8} columns={5} />
           ) : filteredStudents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">{t.common.noData}</p>
               <p className="text-sm mt-1">{t.library.adjustFilters}</p>
@@ -120,24 +120,24 @@ const StudentList: React.FC = () => {
               <TableBody>
                 {filteredStudents.map((student, index) => (
                   <TableRow key={student.id}>
-                    <TableCell className="text-gray-400">{index + 1}</TableCell>
+                    <TableCell className="text-zinc-400">{index + 1}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar name={student.name} src={student.avatar} size="sm" previewable />
-                        <span className="font-medium text-gray-900 dark:text-gray-100">{student.name}</span>
+                        <span className="font-medium text-zinc-900 dark:text-zinc-100">{student.name}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                         <Mail className="h-3.5 w-3.5" />
                         {student.email}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">{student.phone || '-'}</span>
+                      <span className="text-sm text-zinc-500 dark:text-zinc-400">{student.phone || '-'}</span>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1.5 text-sm text-zinc-500 dark:text-zinc-400">
                         <Calendar className="h-3.5 w-3.5" />
                         {formatDate(student.created_at)}
                       </div>

@@ -52,7 +52,7 @@ const getFileIcon = (fileType: string) => {
   if (fileType.includes('video')) {
     return <Film className="h-8 w-8 text-blue-500" />;
   }
-  return <File className="h-8 w-8 text-gray-500" />;
+  return <File className="h-8 w-8 text-zinc-500" />;
 };
 
 const getFileExtension = (fileName: string): string => {
@@ -352,7 +352,7 @@ const Library: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search - spans 2 cols on md+ */}
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -406,7 +406,7 @@ const Library: React.FC = () => {
             {loading ? (
               <CardGridSkeleton count={9} columns={2} />
             ) : materials.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
                 <BookOpen className="h-12 w-12 mb-3 opacity-50" />
                 <p className="text-base font-medium mb-1">{t.library.noMaterials}</p>
                 <p className="text-sm">
@@ -426,10 +426,10 @@ const Library: React.FC = () => {
                 {materials.map((material) => (
                   <div
                     key={material.id}
-                    className="flex items-start gap-4 p-4 rounded-lg border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    className="flex items-start gap-4 p-4 rounded-lg border border-zinc-100 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
                   >
                     {/* File Icon */}
-                    <div className="shrink-0 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="shrink-0 p-2 rounded-lg bg-zinc-50 dark:bg-zinc-800">
                       {getFileIcon(material.file_type)}
                     </div>
 
@@ -437,11 +437,11 @@ const Library: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <h4 className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                          <h4 className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
                             {material.title}
                           </h4>
                           {material.description && (
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
                               {material.description}
                             </p>
                           )}
@@ -449,8 +449,8 @@ const Library: React.FC = () => {
                       </div>
 
                       {/* Badges & Meta */}
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-400">
-                        <span className="font-mono bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-zinc-400">
+                        <span className="font-mono bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
                           {getFileExtension(material.file_name)}
                         </span>
                         <span>{material.file_size_formatted}</span>
@@ -527,7 +527,7 @@ const Library: React.FC = () => {
           <div className="p-6 space-y-4">
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.common.title} <span className="text-red-500">*</span>
               </label>
               <Input
@@ -539,7 +539,7 @@ const Library: React.FC = () => {
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.common.description}
               </label>
               <Textarea
@@ -552,7 +552,7 @@ const Library: React.FC = () => {
 
             {/* Grade Level */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.library.grade} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -572,7 +572,7 @@ const Library: React.FC = () => {
 
             {/* Subject */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.quizzes.subject} <span className="text-red-500">*</span>
               </label>
               <Select
@@ -587,7 +587,7 @@ const Library: React.FC = () => {
 
             {/* File Upload */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 File <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -595,27 +595,27 @@ const Library: React.FC = () => {
                   <div className="flex items-center gap-3 p-3 rounded-lg border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20">
                     <FileText className="h-5 w-5 text-primary-500 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {uploadForm.file.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-zinc-500">
                         {(uploadForm.file.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
                     <button
                       onClick={() => setUploadForm({ ...uploadForm, file: null })}
-                      className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      className="p-1 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                     >
-                      <X className="h-4 w-4 text-gray-400" />
+                      <X className="h-4 w-4 text-zinc-400" />
                     </button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer transition-colors">
-                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <label className="flex flex-col items-center justify-center p-6 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-600 hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer transition-colors">
+                    <Upload className="h-8 w-8 text-zinc-400 mb-2" />
+                    <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
                       Click to select file
                     </span>
-                    <span className="text-xs text-gray-400 mt-1">
+                    <span className="text-xs text-zinc-400 mt-1">
                       PDF, DOC, PPT, XLS, JPG, PNG, MP4 (max 10MB)
                     </span>
                     <input
@@ -663,7 +663,7 @@ const Library: React.FC = () => {
           <div className="p-6 space-y-4">
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.common.title} <span className="text-red-500">*</span>
               </label>
               <Input
@@ -675,7 +675,7 @@ const Library: React.FC = () => {
 
             {/* Description */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.common.description}
               </label>
               <Textarea
@@ -688,7 +688,7 @@ const Library: React.FC = () => {
 
             {/* Grade Level */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.library.grade} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -708,7 +708,7 @@ const Library: React.FC = () => {
 
             {/* Subject */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 {t.quizzes.subject} <span className="text-red-500">*</span>
               </label>
               <Select
@@ -723,35 +723,35 @@ const Library: React.FC = () => {
 
             {/* Replace File (optional) */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                 Replace File (optional)
               </label>
               {editForm.file ? (
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20">
                   <FileText className="h-5 w-5 text-primary-500 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {editForm.file.name}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-zinc-500">
                       {(editForm.file.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
                   <button
                     onClick={() => setEditForm({ ...editForm, file: null })}
-                    className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    className="p-1 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                   >
-                    <X className="h-4 w-4 text-gray-400" />
+                    <X className="h-4 w-4 text-zinc-400" />
                   </button>
                 </div>
               ) : (
                 <div>
-                  <p className="text-xs text-gray-400 mb-2">
+                  <p className="text-xs text-zinc-400 mb-2">
                     Current: {editingMaterial?.file_name} ({editingMaterial?.file_size_formatted})
                   </p>
-                  <label className="flex items-center justify-center gap-2 p-3 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-400 cursor-pointer transition-colors">
-                    <Upload className="h-4 w-4 text-gray-400" />
-                    <span className="text-sm text-gray-500">Click to replace file</span>
+                  <label className="flex items-center justify-center gap-2 p-3 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-600 hover:border-primary-400 cursor-pointer transition-colors">
+                    <Upload className="h-4 w-4 text-zinc-400" />
+                    <span className="text-sm text-zinc-500">Click to replace file</span>
                     <input
                       type="file"
                       className="hidden"
@@ -810,19 +810,19 @@ const Library: React.FC = () => {
             {previewLoading ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader2 className="h-10 w-10 animate-spin text-primary-500 mb-3" />
-                <p className="text-sm text-gray-500">{t.common.loading}</p>
+                <p className="text-sm text-zinc-500">{t.common.loading}</p>
               </div>
             ) : previewUrl && previewMaterial ? (
               <>
                 {previewMaterial.file_type.includes('pdf') && (
                   <iframe
                     src={previewUrl}
-                    className="w-full h-full rounded-lg border border-gray-200 dark:border-gray-700"
+                    className="w-full h-full rounded-lg border border-zinc-200 dark:border-zinc-700"
                     title={previewMaterial.title}
                   />
                 )}
                 {previewMaterial.file_type.includes('image') && (
-                  <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900 rounded-lg overflow-auto">
+                  <div className="flex items-center justify-center h-full bg-zinc-50 dark:bg-zinc-900 rounded-lg overflow-auto">
                     <img
                       src={previewUrl}
                       alt={previewMaterial.title}
@@ -844,7 +844,7 @@ const Library: React.FC = () => {
                 )}
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+              <div className="flex flex-col items-center justify-center h-full text-zinc-400">
                 <FileText className="h-12 w-12 mb-3 opacity-50" />
                 <p className="text-sm">Unable to load preview</p>
               </div>
@@ -852,7 +852,7 @@ const Library: React.FC = () => {
           </div>
           <DialogFooter>
             <div className="flex items-center gap-2 w-full justify-between">
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-zinc-400">
                 {previewMaterial?.file_name} • {previewMaterial?.file_size_formatted}
               </div>
               <div className="flex items-center gap-2">

@@ -47,14 +47,14 @@ export const DialogContent: React.FC<{
 }> = ({ className, children, onClose }) => (
   <div
     className={cn(
-      'bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-100 dark:border-gray-700 w-full max-w-lg mx-3 sm:mx-4 max-h-[90vh] overflow-y-auto',
+      'bg-white dark:bg-zinc-800 rounded-xl shadow-2xl border border-zinc-100 dark:border-zinc-700 w-full max-w-lg mx-3 sm:mx-4 max-h-[90vh] overflow-y-auto',
       className
     )}
   >
     {onClose && (
       <button
         onClick={onClose}
-        className="absolute right-4 top-4 rounded-md p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="absolute right-4 top-4 rounded-md p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
       >
         <X className="h-4 w-4" />
       </button>
@@ -76,7 +76,7 @@ export const DialogTitle: React.FC<{ className?: string; children: React.ReactNo
 export const DialogDescription: React.FC<{ className?: string; children: React.ReactNode }> = ({
   className,
   children,
-}) => <p className={cn('text-sm text-gray-500 dark:text-gray-400', className)}>{children}</p>;
+}) => <p className={cn('text-sm text-zinc-500 dark:text-zinc-400', className)}>{children}</p>;
 
 export const DialogFooter: React.FC<{ className?: string; children: React.ReactNode }> = ({
   className,

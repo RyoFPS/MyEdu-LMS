@@ -146,19 +146,19 @@ const QuizResults: React.FC = () => {
                     <p className="text-2xl font-bold text-green-600">
                       {myAttempt.answers?.filter((a) => a.is_correct).length || 0}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.quizzes.correct}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.quizzes.correct}</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-red-600">
                       {myAttempt.answers?.filter((a) => !a.is_correct).length || 0}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.quizzes.incorrect}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.quizzes.incorrect}</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                    <p className="text-2xl font-bold text-zinc-600 dark:text-zinc-400">
                       {myAttempt.completed_at ? formatDateTime(myAttempt.completed_at) : 'N/A'}
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{t.quizzes.completed}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.quizzes.completed}</p>
                   </div>
                 </div>
               </CardContent>
@@ -198,11 +198,11 @@ const QuizResults: React.FC = () => {
                           )}
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                          <p className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
                             Q{index + 1}. {answer.question?.question || t.quizzes.question}
                           </p>
                           <div className="mt-2 space-y-1 text-sm">
-                            <p className="text-gray-600 dark:text-gray-400">
+                            <p className="text-zinc-600 dark:text-zinc-400">
                               {t.quizzes.yourAnswer}:{' '}
                               <span className={cn('font-medium', answer.is_correct ? 'text-green-600' : 'text-red-600')}>
                                 {answer.selected_answer?.toUpperCase()}
@@ -230,7 +230,7 @@ const QuizResults: React.FC = () => {
         {/* Student View - No attempt */}
         {isStudent && !myAttempt && (
           <Card>
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">{t.quizzes.noResults}</p>
               <p className="text-sm mt-1">{t.quizzes.noResultsHint}</p>
@@ -260,7 +260,7 @@ const QuizResults: React.FC = () => {
               </div>
             </CardHeader>
             {attempts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+              <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
                 <FileX className="h-12 w-12 mb-3 opacity-50" />
                 <p className="text-lg font-medium">{t.quizzes.noResults}</p>
                 <p className="text-sm mt-1">{t.quizzes.noResultsHint}</p>
@@ -288,10 +288,10 @@ const QuizResults: React.FC = () => {
                           <div className="flex items-center gap-3">
                             <Avatar name={attempt.student?.name || ''} src={attempt.student?.avatar} size="sm" />
                             <div>
-                              <p className="font-medium text-gray-900 dark:text-gray-100">
+                              <p className="font-medium text-zinc-900 dark:text-zinc-100">
                                 {attempt.student?.name || 'N/A'}
                               </p>
-                              <p className="text-xs text-gray-400">{attempt.student?.email}</p>
+                              <p className="text-xs text-zinc-400">{attempt.student?.email}</p>
                             </div>
                           </div>
                         </TableCell>
@@ -307,13 +307,13 @@ const QuizResults: React.FC = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
                             <Clock className="h-3.5 w-3.5" />
                             {formatDateTime(attempt.started_at)}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="text-sm text-zinc-500 dark:text-zinc-400">
                             {attempt.completed_at ? formatDateTime(attempt.completed_at) : t.quizzes.notCompleted}
                           </span>
                         </TableCell>

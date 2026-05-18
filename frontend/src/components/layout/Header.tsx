@@ -34,7 +34,7 @@ const getNotificationIcon = (type: string) => {
     case 'material': return <BookOpen className="h-4 w-4 text-blue-500" />;
     case 'library': return <BookOpen className="h-4 w-4 text-purple-500" />;
     case 'class': return <UsersIcon className="h-4 w-4 text-amber-500" />;
-    default: return <Bell className="h-4 w-4 text-gray-500" />;
+    default: return <Bell className="h-4 w-4 text-zinc-500" />;
   }
 };
 
@@ -254,13 +254,13 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-700">
+    <header className="sticky top-0 z-20 bg-white/80 dark:bg-zinc-800/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-700">
       <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
         {/* Title */}
         <div className="pl-11 lg:pl-0 min-w-0 flex-1 mr-2 sm:mr-3">
-          <h1 className="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{title}</h1>
+          <h1 className="text-base sm:text-xl font-bold text-zinc-900 dark:text-zinc-100 truncate">{title}</h1>
           {description && (
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate hidden sm:block">{description}</p>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 truncate hidden sm:block">{description}</p>
           )}
         </div>
 
@@ -273,7 +273,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
           <div ref={notifRef} className="relative">
             <button
               onClick={handleBellClick}
-              className="relative p-1.5 sm:p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="relative p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
             >
               <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
               {unreadCount > 0 && (
@@ -285,10 +285,10 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
 
             {/* Dropdown */}
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[70vh] rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl z-50 overflow-hidden">
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 max-h-[70vh] rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-xl z-50 overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                  <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100">{t.notifications.title}</h3>
+                <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-700">
+                  <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">{t.notifications.title}</h3>
                   {unreadCount > 0 && (
                     <button
                       onClick={handleMarkAllRead}
@@ -303,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
                 {/* Notification list */}
                 <div className="overflow-y-auto max-h-[calc(70vh-52px)]">
                   {notifications.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <div className="flex flex-col items-center justify-center py-10 text-zinc-400">
                       <Bell className="h-8 w-8 mb-2 opacity-50" />
                       <p className="text-sm">{t.notifications.noNotifications}</p>
                     </div>
@@ -313,14 +313,14 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
                         key={notif.id}
                         onClick={() => handleNotifClick(notif)}
                         className={cn(
-                          'w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0',
+                          'w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-zinc-50 dark:border-zinc-700/50 last:border-0',
                           notif.is_read
-                            ? 'hover:bg-gray-50 dark:hover:bg-gray-700/30'
+                            ? 'hover:bg-zinc-50 dark:hover:bg-zinc-700/30'
                             : 'bg-primary-50/50 dark:bg-primary-900/10 hover:bg-primary-50 dark:hover:bg-primary-900/20'
                         )}
                       >
                         {/* Icon */}
-                        <div className="shrink-0 mt-0.5 p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700">
+                        <div className="shrink-0 mt-0.5 p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-700">
                           {getNotificationIcon(notif.type)}
                         </div>
 
@@ -330,8 +330,8 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
                             <p className={cn(
                               'text-sm truncate',
                               notif.is_read
-                                ? 'text-gray-700 dark:text-gray-300'
-                                : 'font-semibold text-gray-900 dark:text-gray-100'
+                                ? 'text-zinc-700 dark:text-zinc-300'
+                                : 'font-semibold text-zinc-900 dark:text-zinc-100'
                             )}>
                               {translateNotif(notif).title}
                             </p>
@@ -339,10 +339,10 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
                               <span className="shrink-0 h-2 w-2 rounded-full bg-primary-500" />
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2">
                             {translateNotif(notif).message}
                           </p>
-                          <p className="text-[10px] text-gray-400 mt-1">
+                          <p className="text-[10px] text-zinc-400 mt-1">
                             {timeAgo(notif.created_at)}
                           </p>
                         </div>
@@ -357,11 +357,11 @@ export const Header: React.FC<HeaderProps> = ({ title, description }) => {
           {/* User Menu */}
           <DropdownMenu
             trigger={
-              <div className="flex items-center gap-2 p-1 sm:p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+              <div className="flex items-center gap-2 p-1 sm:p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors cursor-pointer">
                 <Avatar name={user?.name || ''} src={user?.avatar} size="sm" />
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-200 max-w-[120px] truncate">{user?.name}</p>
-                  <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
+                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200 max-w-[120px] truncate">{user?.name}</p>
+                  <p className="text-xs text-zinc-400 capitalize">{user?.role}</p>
                 </div>
               </div>
             }

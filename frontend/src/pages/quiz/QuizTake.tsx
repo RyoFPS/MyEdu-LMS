@@ -177,7 +177,7 @@ const QuizTake: React.FC = () => {
       <>
         <Header title={t.sidebar.quizzes} />
         <div className="page-container">
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
             <p className="text-lg font-medium">{t.quizzes.quizNotAvailable}</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/quizzes')}>
@@ -214,7 +214,7 @@ const QuizTake: React.FC = () => {
                   'flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono text-lg font-bold',
                   isTimeLow
                     ? 'bg-red-50 dark:bg-red-900/30 text-red-600 animate-pulse'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300'
                 )}
               >
                 <Clock className="h-4 w-4" />
@@ -237,7 +237,7 @@ const QuizTake: React.FC = () => {
                   ? 'bg-primary-500 text-white shadow-md'
                   : answers[q.id!]
                   ? 'bg-green-100 dark:bg-green-900/40 text-green-700 border border-green-200'
-                  : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  : 'bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800'
               )}
             >
               {i + 1}
@@ -270,7 +270,7 @@ const QuizTake: React.FC = () => {
                     'w-full flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all duration-200',
                     isSelected
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      : 'border-zinc-200 dark:border-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800'
                   )}
                 >
                   <span
@@ -278,7 +278,7 @@ const QuizTake: React.FC = () => {
                       'flex items-center justify-center h-8 w-8 rounded-full text-sm font-semibold shrink-0 transition-colors',
                       isSelected
                         ? 'bg-primary-500 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                        : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400'
                     )}
                   >
                     {option.toUpperCase()}

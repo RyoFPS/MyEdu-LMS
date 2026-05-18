@@ -116,7 +116,7 @@ export const Sidebar: React.FC = () => {
         {!collapsed && (
           <div className="animate-fade-in">
             <h1 className="text-lg font-bold text-white tracking-tight">MyEdu</h1>
-            <p className="text-[10px] text-gray-400 uppercase tracking-widest">Learning Management</p>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-widest">Learning Management</p>
           </div>
         )}
       </div>
@@ -133,7 +133,7 @@ export const Sidebar: React.FC = () => {
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group',
                 isActive
                   ? 'bg-primary-500/20 text-primary-400'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                  : 'text-zinc-400 hover:bg-white/5 hover:text-white',
                 collapsed && 'justify-center px-2'
               )
             }
@@ -158,14 +158,14 @@ export const Sidebar: React.FC = () => {
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-              <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
+              <p className="text-xs text-zinc-400 capitalize">{user?.role}</p>
             </div>
           )}
         </NavLink>
         <button
           onClick={handleLogout}
           className={cn(
-            'flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors mt-1',
+            'flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:bg-red-500/10 hover:text-red-400 transition-colors mt-1',
             collapsed && 'justify-center px-2'
           )}
         >
@@ -177,7 +177,7 @@ export const Sidebar: React.FC = () => {
       {/* Collapse Toggle (Desktop) */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="hidden lg:flex items-center justify-center py-3 border-t border-white/10 text-gray-400 hover:text-white transition-colors"
+        className="hidden lg:flex items-center justify-center py-3 border-t border-white/10 text-zinc-400 hover:text-white transition-colors"
       >
         {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
       </button>
@@ -211,7 +211,7 @@ export const Sidebar: React.FC = () => {
       >
         <button
           onClick={() => setMobileOpen(false)}
-          className="absolute top-4 right-4 p-1 rounded-md text-gray-400 hover:text-white"
+          className="absolute top-4 right-4 p-1 rounded-md text-zinc-400 hover:text-white"
         >
           <X className="h-5 w-5" />
         </button>

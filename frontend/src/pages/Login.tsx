@@ -54,22 +54,22 @@ const Login: React.FC = () => {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-3xl" />
         {/* Floating shapes */}
-        <div className="absolute top-20 left-20 w-4 h-4 bg-white/20 rounded-full animate-pulse" />
-        <div className="absolute top-40 right-32 w-3 h-3 bg-white/15 rounded-full animate-pulse-slow" />
-        <div className="absolute bottom-32 left-40 w-5 h-5 bg-white/10 rounded-full animate-pulse" />
-        <div className="absolute bottom-20 right-20 w-3 h-3 bg-white/20 rounded-full animate-pulse-slow" />
+        <div className="absolute top-20 left-20 size-4 bg-white/20 rounded-full animate-pulse" />
+        <div className="absolute top-40 right-32 size-3 bg-white/15 rounded-full animate-pulse-slow" />
+        <div className="absolute bottom-32 left-40 size-5 bg-white/10 rounded-full animate-pulse" />
+        <div className="absolute bottom-20 right-20 size-3 bg-white/20 rounded-full animate-pulse-slow" />
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-4">
         {/* Login Card */}
-        <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 animate-slide-up">
+        <div className="bg-white/95 dark:bg-zinc-800/95 backdrop-blur-xl rounded-2xl shadow-2xl p-8 animate-slide-up">
           {/* Logo & Title */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white mb-4 shadow-lg shadow-blue-500/30">
               <GraduationCap className="h-8 w-8" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t.auth.loginTitle}</h1>
-            <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{t.auth.loginSubtitle}</p>
+            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{t.auth.loginTitle}</h1>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-sm">{t.auth.loginSubtitle}</p>
           </div>
 
           {/* Error Message */}
@@ -84,7 +84,7 @@ const Login: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="email">{t.auth.email}</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   id="email"
                   type="email"
@@ -101,7 +101,7 @@ const Login: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="password">{t.auth.password}</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -114,7 +114,7 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -128,7 +128,7 @@ const Login: React.FC = () => {
 
           {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-zinc-400">
               MyEdu Learning Management System
             </p>
           </div>

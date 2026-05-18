@@ -34,7 +34,7 @@ export const TabsList: React.FC<{ className?: string; children: React.ReactNode 
 }) => (
   <div
     className={cn(
-      'flex h-10 items-center rounded-lg bg-gray-100 dark:bg-gray-800 p-1 text-gray-500',
+      'flex h-10 items-center rounded-lg bg-zinc-100 dark:bg-zinc-800 p-1 text-zinc-500',
       'overflow-x-auto scrollbar-none',
       'w-full',
       className
@@ -60,8 +60,8 @@ export const TabsTrigger: React.FC<{
       className={cn(
         'inline-flex items-center justify-center whitespace-nowrap rounded-md px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none shrink-0',
         isActive
-          ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-          : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
+          ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
+          : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200',
         className
       )}
     >

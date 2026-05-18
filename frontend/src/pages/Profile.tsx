@@ -166,8 +166,8 @@ const Profile: React.FC = () => {
               </div>
 
               <div className="text-center sm:text-left flex-1">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{user?.name}</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">{user?.email}</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-zinc-900 dark:text-zinc-100">{user?.name}</h2>
+                <p className="text-zinc-500 dark:text-zinc-400 mt-1 text-sm">{user?.email}</p>
                 <div className="flex flex-wrap items-center gap-2 mt-2 justify-center sm:justify-start">
                   <Badge variant={roleBadgeVariant} className="capitalize">
                     <Shield className="h-3 w-3 mr-1" />
@@ -230,7 +230,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="name" required>{t.users.fullName}</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                     <Input
                       id="name"
                       value={formData.name}
@@ -243,7 +243,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email" required>{t.common.email}</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                     <Input
                       id="email"
                       type="email"
@@ -257,7 +257,7 @@ const Profile: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="phone">{t.common.phone}</Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                     <Input
                       id="phone"
                       value={formData.phone}
@@ -363,10 +363,10 @@ const InfoRow: React.FC<{
   className?: string;
 }> = ({ icon, label, value, className }) => (
   <div className="flex items-center gap-4">
-    <div className="text-gray-400">{icon}</div>
+    <div className="text-zinc-400">{icon}</div>
     <div>
-      <p className="text-xs text-gray-400 uppercase tracking-wider">{label}</p>
-      <p className={`text-sm font-medium text-gray-900 dark:text-gray-100 ${className || ''}`}>{value}</p>
+      <p className="text-xs text-zinc-400 uppercase tracking-wider">{label}</p>
+      <p className={`text-sm font-medium text-zinc-900 dark:text-zinc-100 ${className || ''}`}>{value}</p>
     </div>
   </div>
 );

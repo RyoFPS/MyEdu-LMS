@@ -44,16 +44,16 @@ const AttendanceRow: React.FC<{
       bgVariant === 'blue'
         ? 'border-blue-100 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-900/10 hover:bg-blue-50/50 dark:hover:bg-blue-900/20'
         : index % 2 === 0
-          ? 'border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50'
-          : 'border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/30 hover:bg-gray-50/50 dark:hover:bg-gray-800/50'
+          ? 'border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50'
+          : 'border-zinc-100 dark:border-zinc-700 bg-zinc-50/30 dark:bg-zinc-800/30 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50'
     )}
   >
     <div className="flex items-center gap-3 min-w-0">
-      <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
+      <span className="text-xs text-zinc-400 w-6 text-right flex-shrink-0">{index + 1}.</span>
       <Avatar name={user.name} src={user.avatar} size="sm" />
       <div className="min-w-0">
-        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
-        <p className="text-xs text-gray-400 truncate">{user.email}</p>
+        <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{user.name}</p>
+        <p className="text-xs text-zinc-400 truncate">{user.email}</p>
       </div>
     </div>
     <div className="w-full sm:w-[320px] flex-shrink-0">
@@ -239,7 +239,7 @@ const RecordAttendance: React.FC = () => {
               <div className="space-y-2">
                 <Label required>{t.common.date}</Label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                   <Input
                     type="date"
                     value={date}
@@ -263,7 +263,7 @@ const RecordAttendance: React.FC = () => {
                 </CardTitle>
                 {(teachers.length + students.length) > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{t.attendance.setAll}:</span>
+                    <span className="text-xs text-zinc-500 dark:text-zinc-400">{t.attendance.setAll}:</span>
                     <Button variant="outline" size="sm" onClick={() => setAllStatus('present')}>
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
                       {t.attendance.present}
@@ -300,7 +300,7 @@ const RecordAttendance: React.FC = () => {
                   ))}
                 </div>
               ) : (teachers.length + students.length) === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                <div className="flex flex-col items-center justify-center py-12 text-zinc-400">
                   <UserX className="h-12 w-12 mb-3 opacity-50" />
                   <p className="text-lg font-medium">{t.attendance.noMembers}</p>
                   <p className="text-sm mt-1">{t.attendance.noMembersHint}</p>
@@ -314,14 +314,14 @@ const RecordAttendance: React.FC = () => {
                         <div className="p-1 rounded bg-blue-100 dark:bg-blue-900/30">
                           <Shield className="h-4 w-4 text-blue-600" />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t.sidebar.teachers} ({teachers.length})</h3>
+                        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t.sidebar.teachers} ({teachers.length})</h3>
                       </div>
                       <div className="space-y-3">
                         {/* Column headers */}
                         <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t.sidebar.teachers}</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">{t.common.status}</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">{t.attendance.notes}</span>
+                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{t.sidebar.teachers}</span>
+                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider text-center w-[320px]">{t.common.status}</span>
+                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider text-right">{t.attendance.notes}</span>
                         </div>
                         {teachers.map((teacher, index) => (
                           <AttendanceRow
@@ -340,7 +340,7 @@ const RecordAttendance: React.FC = () => {
 
                   {/* Divider */}
                   {teachers.length > 0 && students.length > 0 && (
-                    <div className="border-t border-gray-200 dark:border-gray-700" />
+                    <div className="border-t border-zinc-200 dark:border-zinc-700" />
                   )}
 
                   {/* Students Section */}
@@ -350,14 +350,14 @@ const RecordAttendance: React.FC = () => {
                         <div className="p-1 rounded bg-green-100 dark:bg-green-900/30">
                           <GraduationCap className="h-4 w-4 text-green-600" />
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{t.sidebar.students} ({students.length})</h3>
+                        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{t.sidebar.students} ({students.length})</h3>
                       </div>
                       <div className="space-y-3">
                         {/* Column headers */}
                         <div className="hidden sm:grid sm:grid-cols-[minmax(0,1fr)_auto_160px] items-center gap-4 px-4 pb-1">
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t.sidebar.students}</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-center w-[320px]">{t.common.status}</span>
-                          <span className="text-xs font-medium text-gray-400 uppercase tracking-wider text-right">{t.attendance.notes}</span>
+                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider">{t.sidebar.students}</span>
+                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider text-center w-[320px]">{t.common.status}</span>
+                          <span className="text-xs font-medium text-zinc-400 uppercase tracking-wider text-right">{t.attendance.notes}</span>
                         </div>
                         {students.map((student, index) => (
                           <AttendanceRow
@@ -380,7 +380,7 @@ const RecordAttendance: React.FC = () => {
 
         {/* Submit */}
         {(teachers.length + students.length) > 0 && (
-          <div className="flex flex-col items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
+          <div className="flex flex-col items-center gap-3 p-4 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-700 shadow-sm sticky bottom-4">
             {/* Status badges — centered row */}
             <div className="flex items-center justify-center gap-2">
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">

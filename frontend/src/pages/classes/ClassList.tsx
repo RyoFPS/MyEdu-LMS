@@ -166,7 +166,7 @@ const ClassList: React.FC = () => {
           <CardContent className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   placeholder={t.classes.searchClasses}
                   value={search}
@@ -198,7 +198,7 @@ const ClassList: React.FC = () => {
         {loading ? (
           <CardGridSkeleton count={6} columns={3} />
         ) : filteredClasses.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
             <p className="text-lg font-medium">{t.classes.noClasses}</p>
             <p className="text-sm mt-1">
@@ -221,12 +221,12 @@ const ClassList: React.FC = () => {
                     <Badge variant="secondary">{cls.academic_year}</Badge>
                   </div>
 
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1 group-hover:text-primary-600 transition-colors">
+                  <h3 className="font-semibold text-zinc-900 dark:text-zinc-100 mb-1 group-hover:text-primary-600 transition-colors">
                     {cls.name}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{cls.grade_level}</p>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">{cls.grade_level}</p>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-400">
                     <div className="flex items-center gap-1.5">
                       <GraduationCap className="h-3.5 w-3.5" />
                       <span>{cls.students_count || 0} {t.classes.students}</span>
@@ -237,14 +237,20 @@ const ClassList: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-700">
                     <span className="text-xs text-primary-500 font-medium group-hover:underline flex items-center gap-1">
                       {t.classes.viewDetails} <ArrowRight className="h-3 w-3" />
                     </span>
                     {isAdmin && (
-                      <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                      <div 
+                        className="flex gap-1" 
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        role="group"
+                        aria-label="Class actions"
+                      >
                         <Button variant="ghost" size="icon" onClick={() => openEdit(cls)}>
-                          <Edit className="h-3.5 w-3.5 text-gray-400" />
+                          <Edit className="h-3.5 w-3.5 text-zinc-400" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => setDeleteSlug(cls.slug)}>
                           <Trash2 className="h-3.5 w-3.5 text-red-400" />
@@ -275,12 +281,12 @@ const ClassList: React.FC = () => {
                         <button
                           key={gl}
                           type="button"
-                          onClick={() => setFormData({ ...formData, grade_level: gl })}
+                          onClick={() => setFormData(prev => ({ ...prev, grade_level: gl }))}
                           className={cn(
                             'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
                             formData.grade_level === gl
                               ? 'bg-primary-500 text-white border-primary-500'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary-400 hover:text-primary-600'
+                              : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-600 hover:border-primary-400 hover:text-primary-600'
                           )}
                         >
                           {gl}
@@ -290,11 +296,11 @@ const ClassList: React.FC = () => {
                   )}
                   <Input
                     value={formData.grade_level}
-                    onChange={(e) => setFormData({ ...formData, grade_level: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, grade_level: e.target.value }))}
                     placeholder="e.g., 7, 8, 9, 10"
                     required
                   />
-                  <p className="text-xs text-gray-400">Select an existing grade or type a new one</p>
+                  <p className="text-xs text-zinc-400">Select an existing grade or type a new one</p>
                 </div>
 
                 {/* Step 2: Class Name — with suggestions based on selected grade */}
@@ -302,9 +308,9 @@ const ClassList: React.FC = () => {
                   <Label required>{t.classes.className}</Label>
                   {formData.grade_level && classesByGrade[formData.grade_level]?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-1">
-                      <span className="text-xs text-gray-400 w-full">Existing in Grade {formData.grade_level}:</span>
+                      <span className="text-xs text-zinc-400 w-full">Existing in Grade {formData.grade_level}:</span>
                       {classesByGrade[formData.grade_level].map((name) => (
-                        <span key={name} className="px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
+                        <span key={name} className="px-2 py-0.5 rounded text-xs bg-zinc-100 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400">
                           {name}
                         </span>
                       ))}
@@ -312,7 +318,7 @@ const ClassList: React.FC = () => {
                   )}
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder={formData.grade_level ? `e.g., ${formData.grade_level}A, ${formData.grade_level}B` : 'e.g., 7A, 8B'}
                     required
                   />
@@ -323,7 +329,7 @@ const ClassList: React.FC = () => {
                   <Label required>{t.classes.academicYear}</Label>
                   <Input
                     value={formData.academic_year}
-                    onChange={(e) => setFormData({ ...formData, academic_year: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, academic_year: e.target.value }))}
                     placeholder="e.g., 2024/2025"
                     required
                   />
@@ -334,7 +340,7 @@ const ClassList: React.FC = () => {
                   <Label>{t.common.description}</Label>
                   <Input
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="Optional description"
                   />
                 </div>
@@ -361,7 +367,7 @@ const ClassList: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-2">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {t.classes.deleteConfirm}
               </p>
             </div>

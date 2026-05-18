@@ -32,9 +32,9 @@ export const LanguageSwitcher: React.FC = () => {
         onClick={() => setOpen(!open)}
         className={cn(
           'relative p-1.5 sm:p-2 rounded-lg transition-colors',
-          'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
-          'hover:bg-gray-100 dark:hover:bg-gray-700',
-          open && 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+          'text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300',
+          'hover:bg-zinc-100 dark:hover:bg-zinc-700',
+          open && 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300'
         )}
         title={t.language.title}
       >
@@ -42,7 +42,7 @@ export const LanguageSwitcher: React.FC = () => {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-44 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1 z-50 animate-fade-in">
+        <div className="absolute right-0 mt-2 w-44 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 shadow-lg py-1 z-50 animate-fade-in">
           {options.map(({ value, flag, label }) => (
             <button
               key={value}
@@ -54,7 +54,7 @@ export const LanguageSwitcher: React.FC = () => {
                 'flex items-center gap-2.5 w-full px-3 py-2 text-sm transition-colors',
                 language === value
                   ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                  : 'text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700/50'
               )}
             >
               <span className="text-base">{flag}</span>

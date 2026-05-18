@@ -263,12 +263,12 @@ const UserList: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+              <div className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400">
                 <Users className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.total}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{t.users.totalUsers}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.users.totalUsers}</p>
               </div>
             </CardContent>
           </Card>
@@ -279,7 +279,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.admin}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{t.users.admins}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.users.admins}</p>
               </div>
             </CardContent>
           </Card>
@@ -290,7 +290,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.teacher}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{t.sidebar.teachers}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.sidebar.teachers}</p>
               </div>
             </CardContent>
           </Card>
@@ -301,7 +301,7 @@ const UserList: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">{counts.student}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{t.sidebar.students}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{t.sidebar.students}</p>
               </div>
             </CardContent>
           </Card>
@@ -313,7 +313,7 @@ const UserList: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* Search - spans 2 cols */}
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   placeholder={`${t.common.search}...`}
                   value={search}
@@ -348,7 +348,7 @@ const UserList: React.FC = () => {
               </div>
               {/* Date From */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t.users.joinedFrom}</label>
+                <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{t.users.joinedFrom}</label>
                 <Input
                   type="date"
                   value={joinedFrom}
@@ -357,7 +357,7 @@ const UserList: React.FC = () => {
               </div>
               {/* Date To */}
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 dark:text-gray-400">{t.users.joinedTo}</label>
+                <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{t.users.joinedTo}</label>
                 <Input
                   type="date"
                   value={joinedTo}
@@ -384,7 +384,7 @@ const UserList: React.FC = () => {
               <TableSkeleton rows={10} columns={7} />
             </CardContent>
           ) : users.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
               <FileX className="h-12 w-12 mb-3 opacity-50" />
               <p className="text-lg font-medium">{t.common.noData}</p>
               <p className="text-sm mt-1">Try adjusting your filters</p>
@@ -406,15 +406,15 @@ const UserList: React.FC = () => {
                 <TableBody>
                   {users.map((user, index) => (
                     <TableRow key={user.id}>
-                      <TableCell className="text-gray-400 hidden sm:table-cell">
+                      <TableCell className="text-zinc-400 hidden sm:table-cell">
                         {(meta.current_page - 1) * meta.per_page + index + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar name={user.name} src={user.avatar} size="sm" previewable />
                           <div className="min-w-0">
-                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{user.name}</p>
-                            <p className="text-xs text-gray-400 flex items-center gap-1 truncate">
+                            <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{user.name}</p>
+                            <p className="text-xs text-zinc-400 flex items-center gap-1 truncate">
                               <Mail className="h-3 w-3 flex-shrink-0" />
                               {user.email}
                             </p>
@@ -436,21 +436,21 @@ const UserList: React.FC = () => {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-sm text-gray-400">-</span>
+                          <span className="text-sm text-zinc-400">-</span>
                         )}
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
                         {user.phone ? (
-                          <span className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
+                          <span className="text-sm text-zinc-600 dark:text-zinc-400 flex items-center gap-1">
                             <Phone className="h-3 w-3 flex-shrink-0" />
                             {user.phone}
                           </span>
                         ) : (
-                          <span className="text-sm text-gray-400">-</span>
+                          <span className="text-sm text-zinc-400">-</span>
                         )}
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                        <span className="text-sm text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
                           <Calendar className="h-3 w-3 flex-shrink-0" />
                           {formatDate(user.created_at)}
                         </span>
@@ -458,7 +458,7 @@ const UserList: React.FC = () => {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
-                            <Edit className="h-4 w-4 text-gray-400" />
+                            <Edit className="h-4 w-4 text-zinc-400" />
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => setDeleteId(user.id)}>
                             <Trash2 className="h-4 w-4 text-red-400" />
@@ -472,8 +472,8 @@ const UserList: React.FC = () => {
 
               {/* Pagination */}
               {meta.last_page > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-gray-100 dark:border-gray-700">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-zinc-100 dark:border-zinc-700">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
                     {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} users
                   </p>
@@ -488,7 +488,7 @@ const UserList: React.FC = () => {
                     </Button>
                     {getPageNumbers().map((p, i) =>
                       p === '...' ? (
-                        <span key={`dots-${i}`} className="px-2 text-gray-400">...</span>
+                        <span key={`dots-${i}`} className="px-2 text-zinc-400">...</span>
                       ) : (
                         <Button
                           key={p}
@@ -528,7 +528,7 @@ const UserList: React.FC = () => {
                   <Label required>{t.users.fullName}</Label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     placeholder={t.users.fullName}
                     required
                   />
@@ -538,7 +538,7 @@ const UserList: React.FC = () => {
                   <Input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     placeholder={t.common.email}
                     required
                   />
@@ -550,7 +550,7 @@ const UserList: React.FC = () => {
                   <Input
                     type="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                     placeholder={editingUser ? t.users.passwordHint : t.users.password}
                     required={!editingUser}
                     minLength={8}
@@ -560,7 +560,7 @@ const UserList: React.FC = () => {
                   <Label required>{t.common.role}</Label>
                   <Select
                     value={formData.role}
-                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
                     options={[
                       { value: 'admin', label: t.users.admin },
                       { value: 'teacher', label: t.users.teacher },
@@ -571,60 +571,60 @@ const UserList: React.FC = () => {
                 {formData.role === 'teacher' && (
                   <div className="space-y-2">
                     <Label>{t.users.subjects}</Label>
-                    <div className="border border-gray-300 dark:border-gray-600 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                    <div className="border border-zinc-300 dark:border-zinc-600 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
                       {subjects.length === 0 ? (
-                        <p className="text-sm text-gray-400">{t.users.noSubjectsAvailable}</p>
+                        <p className="text-sm text-zinc-400">{t.users.noSubjectsAvailable}</p>
                       ) : (
                         <>
                           {subjects.map((subject) => (
-                            <label key={subject.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
+                            <label key={subject.id} className="flex items-center gap-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700 p-1.5 rounded">
                               <input
                                 type="checkbox"
                                 checked={formData.subject_ids.includes(subject.id)}
                                 onChange={(e) => {
                                   if (e.target.checked) {
-                                    setFormData({ ...formData, subject_ids: [...formData.subject_ids.filter(id => id !== 0), subject.id] });
+                                    setFormData(prev => ({ ...prev, subject_ids: [...prev.subject_ids.filter(id => id !== 0), subject.id] }));
                                   } else {
-                                    setFormData({ ...formData, subject_ids: formData.subject_ids.filter((id) => id !== subject.id) });
+                                    setFormData(prev => ({ ...prev, subject_ids: prev.subject_ids.filter((id) => id !== subject.id) }));
                                   }
                                 }}
-                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                className="rounded border-zinc-300 text-primary-600 focus:ring-primary-500"
                               />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">{subject.name}</span>
+                              <span className="text-sm text-zinc-700 dark:text-zinc-300">{subject.name}</span>
                               <Badge variant="outline" className="text-xs ml-auto">{subject.code}</Badge>
                               {subject.category && (
-                                <span className="text-xs text-gray-400">{subject.category}</span>
+                                <span className="text-xs text-zinc-400">{subject.category}</span>
                               )}
                             </label>
                           ))}
-                          <div className="border-t border-gray-200 dark:border-gray-600 my-1" />
-                          <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 p-1.5 rounded">
+                          <div className="border-t border-zinc-200 dark:border-zinc-600 my-1" />
+                          <label className="flex items-center gap-2 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-700 p-1.5 rounded">
                             <input
                               type="checkbox"
                               checked={formData.subject_ids.includes(0)}
                               onChange={(e) => {
                                 if (e.target.checked) {
-                                  setFormData({ ...formData, subject_ids: [0] });
+                                  setFormData(prev => ({ ...prev, subject_ids: [0] }));
                                 } else {
-                                  setFormData({ ...formData, subject_ids: formData.subject_ids.filter((id) => id !== 0) });
+                                  setFormData(prev => ({ ...prev, subject_ids: prev.subject_ids.filter((id) => id !== 0) }));
                                 }
                               }}
-                              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              className="rounded border-zinc-300 text-primary-600 focus:ring-primary-500"
                             />
-                            <span className="text-sm text-gray-700 dark:text-gray-300">Other</span>
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">Other</span>
                             <Badge variant="secondary" className="text-xs ml-auto">Versatile</Badge>
                           </label>
                         </>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400">{t.users.selectSubjects}</p>
+                    <p className="text-xs text-zinc-400">{t.users.selectSubjects}</p>
                   </div>
                 )}
                 <div className="space-y-2">
                   <Label>{t.common.phone}</Label>
                   <Input
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     placeholder={t.users.phoneOptional}
                   />
                 </div>
@@ -651,7 +651,7 @@ const UserList: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="px-6 pb-2">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 {t.users.deleteConfirm}
               </p>
             </div>

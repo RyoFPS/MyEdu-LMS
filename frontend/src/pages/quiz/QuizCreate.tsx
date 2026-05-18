@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 
 interface QuestionForm {
+  id?: string; // Stable ID for React keys
   question: string;
   option_a: string;
   option_b: string;
@@ -41,6 +42,7 @@ interface QuestionForm {
 }
 
 const emptyQuestion: QuestionForm = {
+  id: crypto.randomUUID(),
   question: '',
   option_a: '',
   option_b: '',
@@ -116,6 +118,7 @@ const QuizCreate: React.FC = () => {
       if (quiz.questions && quiz.questions.length > 0) {
         setQuestions(
           quiz.questions.map((q: QuizQuestion) => ({
+            id: crypto.randomUUID(),
             question: q.question,
             option_a: q.option_a,
             option_b: q.option_b,
@@ -143,7 +146,7 @@ const QuizCreate: React.FC = () => {
   }, [editId, fetchClasses, fetchSubjects, fetchQuiz]);
 
   const addQuestion = () => {
-    setQuestions([...questions, { ...emptyQuestion }]);
+    setQuestions([...questions, { ...emptyQuestion, id: crypto.randomUUID() }]);
   };
 
   const removeQuestion = (index: number) => {
@@ -325,7 +328,7 @@ const QuizCreate: React.FC = () => {
                   <Label required>{t.common.title}</Label>
                   <Input
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                     placeholder={t.quizzes.quizTitle}
                     required
                   />
@@ -334,7 +337,7 @@ const QuizCreate: React.FC = () => {
                   <Label>{t.common.description}</Label>
                   <Textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder={t.common.description}
                     rows={3}
                   />
@@ -343,7 +346,7 @@ const QuizCreate: React.FC = () => {
                   <Label required>{t.sidebar.classes}</Label>
                   <Select
                     value={formData.class_id}
-                    onChange={(e) => setFormData({ ...formData, class_id: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, class_id: e.target.value }))}
                     options={classes.map((c) => ({ value: String(c.id), label: c.name }))}
                     placeholder={t.quizzes.selectClass}
                   />
@@ -352,7 +355,7 @@ const QuizCreate: React.FC = () => {
                   <Label>{t.quizzes.subject}</Label>
                   <Select
                     value={formData.subject_id}
-                    onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subject_id: e.target.value }))}
                     options={subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` }))}
                     placeholder={t.quizzes.selectSubject}
                   />
@@ -364,7 +367,7 @@ const QuizCreate: React.FC = () => {
                     min="1"
                     max="300"
                     value={formData.duration_minutes}
-                    onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, duration_minutes: e.target.value }))}
                     required
                   />
                 </div>
@@ -373,7 +376,7 @@ const QuizCreate: React.FC = () => {
                   <Input
                     type="datetime-local"
                     value={formData.start_time}
-                    onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-2">
@@ -381,7 +384,7 @@ const QuizCreate: React.FC = () => {
                   <Input
                     type="datetime-local"
                     value={formData.end_time}
-                    onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
                   />
                 </div>
                 {/* Attempt Mode */}
@@ -391,17 +394,17 @@ const QuizCreate: React.FC = () => {
                     {/* Single Attempt */}
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, max_attempts: '1' })}
+                      onClick={() => setFormData(prev => ({ ...prev, max_attempts: '1' }))}
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
                         formData.max_attempts === '1'
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 shadow-sm'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          : 'border-zinc-200 dark:border-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                       )}
                     >
                       <div className={cn(
                         'p-2.5 rounded-lg',
-                        formData.max_attempts === '1' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700'
+                        formData.max_attempts === '1' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-zinc-100 dark:bg-zinc-700'
                       )}>
                         <Shield className="h-5 w-5" />
                       </div>
@@ -414,17 +417,17 @@ const QuizCreate: React.FC = () => {
                     {/* Unlimited Attempts */}
                     <button
                       type="button"
-                      onClick={() => setFormData({ ...formData, max_attempts: '0' })}
+                      onClick={() => setFormData(prev => ({ ...prev, max_attempts: '0' }))}
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
                         formData.max_attempts === '0'
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 shadow-sm'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          : 'border-zinc-200 dark:border-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                       )}
                     >
                       <div className={cn(
                         'p-2.5 rounded-lg',
-                        formData.max_attempts === '0' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700'
+                        formData.max_attempts === '0' ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-zinc-100 dark:bg-zinc-700'
                       )}>
                         <Repeat className="h-5 w-5" />
                       </div>
@@ -439,19 +442,19 @@ const QuizCreate: React.FC = () => {
                       type="button"
                       onClick={() => {
                         if (formData.max_attempts === '0' || formData.max_attempts === '1') {
-                          setFormData({ ...formData, max_attempts: '3' });
+                          setFormData(prev => ({ ...prev, max_attempts: '3' }));
                         }
                       }}
                       className={cn(
                         'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200',
                         Number(formData.max_attempts) > 1
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 shadow-sm'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                          : 'border-zinc-200 dark:border-zinc-600 hover:border-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
                       )}
                     >
                       <div className={cn(
                         'p-2.5 rounded-lg',
-                        Number(formData.max_attempts) > 1 ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-gray-100 dark:bg-gray-700'
+                        Number(formData.max_attempts) > 1 ? 'bg-primary-100 dark:bg-primary-900/40' : 'bg-zinc-100 dark:bg-zinc-700'
                       )}>
                         <Hash className="h-5 w-5" />
                       </div>
@@ -463,7 +466,7 @@ const QuizCreate: React.FC = () => {
                             min="2"
                             max="100"
                             value={formData.max_attempts}
-                            onChange={(e) => setFormData({ ...formData, max_attempts: e.target.value })}
+                            onChange={(e) => setFormData(prev => ({ ...prev, max_attempts: e.target.value }))}
                             onClick={(e) => e.stopPropagation()}
                             className="w-16 h-7 text-center text-xs"
                           />
@@ -484,8 +487,8 @@ const QuizCreate: React.FC = () => {
           {/* Questions */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t.quizzes.questionsSection} ({questions.length})</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{t.quizzes.points}: {totalPoints}</p>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{t.quizzes.questionsSection} ({questions.length})</h3>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">{t.quizzes.points}: {totalPoints}</p>
             </div>
             <Button type="button" variant="outline" onClick={addQuestion}>
               <Plus className="h-4 w-4" />
@@ -495,7 +498,7 @@ const QuizCreate: React.FC = () => {
 
           {questions.map((question, index) => (
             <Card
-              key={index}
+              key={question.id || index}
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragOver={(e) => handleDragOver(e, index)}
@@ -517,10 +520,10 @@ const QuizCreate: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-base">
                     <div
-                      className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                      className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                       title="Drag to reorder"
                     >
-                      <GripVertical className="h-4 w-4 text-gray-400" />
+                      <GripVertical className="h-4 w-4 text-zinc-400" />
                     </div>
                     <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 text-xs font-bold">
                       {index + 1}
@@ -536,7 +539,7 @@ const QuizCreate: React.FC = () => {
                       size="icon"
                       onClick={() => moveQuestion(index, 'up')}
                       disabled={index === 0}
-                      className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:text-gray-400"
+                      className="h-8 w-8 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400"
                       title="Move up"
                     >
                       <ChevronUp className="h-4 w-4" />
@@ -548,7 +551,7 @@ const QuizCreate: React.FC = () => {
                       size="icon"
                       onClick={() => moveQuestion(index, 'down')}
                       disabled={index === questions.length - 1}
-                      className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:text-gray-400"
+                      className="h-8 w-8 text-zinc-400 hover:text-zinc-600 dark:text-zinc-400"
                       title="Move down"
                     >
                       <ChevronDown className="h-4 w-4" />
@@ -583,7 +586,7 @@ const QuizCreate: React.FC = () => {
                   {(['a', 'b', 'c', 'd'] as const).map((option) => (
                     <div key={option} className="space-y-1">
                       <Label className="flex items-center gap-1">
-                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+                        <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-zinc-100 dark:bg-zinc-700 text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase">
                           {option}
                         </span>
                         {optionLabels[option]}
@@ -632,8 +635,8 @@ const QuizCreate: React.FC = () => {
           ))}
 
           {/* Submit */}
-          <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm sticky bottom-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-between p-4 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-100 dark:border-zinc-700 shadow-sm sticky bottom-4">
+            <div className="text-sm text-zinc-500 dark:text-zinc-400">
               {questions.length} {t.quizzes.questions} &middot; {totalPoints} {t.quizzes.points}
             </div>
             <div className="flex gap-2">

@@ -18,6 +18,7 @@ interface SearchableSelectProps {
   emptyMessage?: string;
   className?: string;
   disabled?: boolean;
+  id?: string;
 }
 
 export const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -29,6 +30,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   emptyMessage = 'No results found.',
   className,
   disabled = false,
+  id,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,13 +215,13 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     <div
       ref={dropdownRef}
       style={dropdownStyle}
-      className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 shadow-xl"
+      className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-800 shadow-xl"
       onKeyDown={handleKeyDown}
     >
       {/* Search input */}
-      <div className="p-2 border-b border-gray-100 dark:border-gray-700">
+      <div className="p-2 border-b border-zinc-100 dark:border-zinc-700">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
           <input
             ref={inputRef}
             type="text"
@@ -227,7 +229,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={searchPlaceholder}
-            className="w-full h-8 pl-8 pr-3 text-sm rounded-md border border-gray-200 bg-gray-50 focus:outline-none focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white dark:border-gray-600 dark:bg-gray-700 dark:focus:bg-gray-800 dark:text-gray-100 placeholder:text-gray-400 transition-colors"
+            className="w-full h-8 pl-8 pr-3 text-sm rounded-md border border-zinc-200 bg-zinc-50 focus:outline-none focus:ring-1 focus:ring-primary-500/30 focus:border-primary-500 focus:bg-white dark:border-zinc-600 dark:bg-zinc-700 dark:focus:bg-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 transition-colors"
           />
         </div>
       </div>
@@ -235,7 +237,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
       {/* Options list */}
       <div ref={listRef} className="max-h-[240px] overflow-y-auto p-1">
         {filteredOptions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-6 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-6 text-zinc-400">
             <Search className="h-5 w-5 mb-1.5 opacity-50" />
             <p className="text-sm">{emptyMessage}</p>
           </div>
@@ -251,7 +253,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 hasKeyboardFocus && index === highlightedIndex && 'bg-primary-50 dark:bg-primary-900/20',
                 option.value === value
                   ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700',
+                  : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-700',
               )}
             >
               <div
@@ -265,7 +267,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{option.label}</p>
                 {option.subtitle && (
-                  <p className="text-xs text-gray-400 truncate">{option.subtitle}</p>
+                  <p className="text-xs text-zinc-400 truncate">{option.subtitle}</p>
                 )}
               </div>
               {option.value === value && (
@@ -278,7 +280,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
 
       {/* Footer with count */}
       {filteredOptions.length > 0 && (
-        <div className="px-3 py-1.5 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-400">
+        <div className="px-3 py-1.5 border-t border-zinc-100 dark:border-zinc-700 text-xs text-zinc-400">
           {filteredOptions.length} of {options.length}{' '}
           {options.length === 1 ? 'result' : 'results'}
         </div>
@@ -294,9 +296,12 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setIsOpen(!isOpen)}
+        id={id}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
         className={cn(
-          'flex h-10 w-full items-center justify-between rounded-lg border border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800 px-3 py-2 text-sm transition-colors',
-          'hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
+          'flex h-10 w-full items-center justify-between rounded-lg border border-zinc-300 bg-white dark:border-zinc-600 dark:bg-zinc-800 px-3 py-2 text-sm transition-colors',
+          'hover:border-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500',
           'disabled:cursor-not-allowed disabled:opacity-50',
           isOpen && 'ring-2 ring-primary-500/20 border-primary-500',
         )}
@@ -311,15 +316,15 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
             >
               {getInitials(selectedOption.label)}
             </div>
-            <span className="truncate text-gray-900 dark:text-gray-100">{selectedOption.label}</span>
+            <span className="truncate text-zinc-900 dark:text-zinc-100">{selectedOption.label}</span>
             {selectedOption.subtitle && (
-              <span className="text-xs text-gray-400 truncate hidden sm:inline">
+              <span className="text-xs text-zinc-400 truncate hidden sm:inline">
                 ({selectedOption.subtitle})
               </span>
             )}
           </div>
         ) : (
-          <span className="text-gray-400">{placeholder}</span>
+          <span className="text-zinc-400">{placeholder}</span>
         )}
         <div className="flex items-center gap-1 flex-shrink-0 ml-2">
           {value && (
@@ -327,13 +332,13 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
               role="button"
               tabIndex={-1}
               onClick={handleClear}
-              className="p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300 transition-colors"
+              className="p-0.5 rounded hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300 transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </span>
           )}
           <ChevronDown
-            className={cn('h-4 w-4 text-gray-400 transition-transform', isOpen && 'rotate-180')}
+            className={cn('h-4 w-4 text-zinc-400 transition-transform', isOpen && 'rotate-180')}
           />
         </div>
       </button>

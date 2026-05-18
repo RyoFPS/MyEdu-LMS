@@ -58,10 +58,10 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle
     <CardContent className="p-6">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 mt-1">{value}</p>
+          <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{title}</p>
+          <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mt-1">{value}</p>
           {subtitle && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{subtitle}</p>
           )}
         </div>
         <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
@@ -73,7 +73,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color, subtitle
 // ─── Empty State ─────────────────────────────────────────────────────────────
 
 const EmptyState: React.FC<{ icon: React.ReactNode; message: string }> = ({ icon, message }) => (
-  <div className="text-center py-8 text-gray-400">
+  <div className="text-center py-8 text-zinc-400">
     <div className="mx-auto mb-2 opacity-50 flex justify-center">{icon}</div>
     <p className="text-sm">{message}</p>
   </div>
@@ -139,7 +139,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
               : statusConfig.variant === 'destructive'
                 ? 'border-red-200 bg-red-50/50 dark:border-red-800 dark:bg-red-900/20'
                 : 'border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/20'
-          : 'border-gray-200 bg-gray-50/50 dark:border-gray-700 dark:bg-gray-800/50'
+          : 'border-zinc-200 bg-zinc-50/50 dark:border-zinc-700 dark:bg-zinc-800/50'
       }>
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
@@ -152,12 +152,12 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                     : statusConfig.variant === 'destructive'
                       ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
                       : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
-                : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+                : 'bg-zinc-100 text-zinc-400 dark:bg-zinc-700 dark:text-zinc-500'
             }`}>
               {statusConfig ? statusConfig.icon : <Clock className="h-5 w-5" />}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t.dashboard.todayAttendance}</p>
+              <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{t.dashboard.todayAttendance}</p>
               <div className="flex items-center gap-2 mt-1">
                 {statusConfig ? (
                   <Badge variant={statusConfig.variant} className="text-sm px-3 py-1">
@@ -183,7 +183,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                   </>
                 )}
                 {todayAttendance?.notes && (
-                  <span className="text-xs text-gray-400">- {todayAttendance.notes}</span>
+                  <span className="text-xs text-zinc-400">- {todayAttendance.notes}</span>
                 )}
               </div>
             </div>
@@ -204,23 +204,23 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                     {classInfo.name}
                   </h3>
                   <Badge variant="info">Grade {classInfo.grade_level}</Badge>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {classInfo.students_count} {t.sidebar.students.toLowerCase()}
                 </p>
               </div>
               {classInfo.teachers && classInfo.teachers.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {classInfo.teachers.map((teacher: any) => (
-                    <div key={teacher.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
+                    <div key={teacher.id} className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 rounded-lg px-3 py-2">
                       <GraduationCap className="h-4 w-4 text-primary-500" />
                       <div>
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{teacher.name}</p>
-                        <p className="text-xs text-gray-400">{teacher.subject}</p>
+                        <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{teacher.name}</p>
+                        <p className="text-xs text-zinc-400">{teacher.subject}</p>
                       </div>
                     </div>
                   ))}
@@ -278,22 +278,22 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 {availableQuizzes.map((quiz: any) => (
                   <div
                     key={quiz.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-750 transition-colors cursor-pointer"
                     onClick={() => navigate(`/quizzes/${quiz.id}`)}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {quiz.title}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary">{quiz.class_name}</Badge>
-                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                        <span className="text-xs text-zinc-400 flex items-center gap-1">
                           <Timer className="h-3 w-3" />
                           {quiz.duration_minutes} min
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-gray-400 shrink-0 ml-2" />
+                    <ArrowRight className="h-4 w-4 text-zinc-400 shrink-0 ml-2" />
                   </div>
                 ))}
               </div>
@@ -320,18 +320,18 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 {todayMaterials.map((material: any) => (
                   <div
                     key={material.id}
-                    className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                    className="flex items-center gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
                   >
                     <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                       <FileText className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {material.title}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary">{material.class_name}</Badge>
-                        <span className="text-xs text-gray-400">by {material.uploader}</span>
+                        <span className="text-xs text-zinc-400">by {material.uploader}</span>
                       </div>
                     </div>
                     <Badge variant="outline">{material.type}</Badge>
@@ -367,7 +367,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 >
                   <Clock className="h-4 w-4 text-amber-500 shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {deadline.title}
                     </p>
                     <p className="text-xs text-amber-600 dark:text-amber-400">
@@ -395,13 +395,13 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
               {recentResults.slice(0, 5).map((result: any, i: number) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {result.quiz_title}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-zinc-400 mt-0.5">
                       {result.score}/{result.total_points} points &middot; {formatDate(result.completed_at)}
                     </p>
                   </div>
@@ -487,13 +487,13 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
               {classes.map((cls: any) => (
                 <div
                   key={cls.id}
-                  className="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all cursor-pointer"
+                  className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:shadow-md transition-all cursor-pointer"
                   onClick={() => navigate(`/classes/${cls.slug}`)}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">{cls.name}</h4>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{cls.subject}</p>
+                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{cls.name}</h4>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">{cls.subject}</p>
                     </div>
                     <Badge variant="secondary">{cls.students_count} {t.sidebar.students.toLowerCase()}</Badge>
                   </div>
@@ -553,22 +553,22 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 {activeQuizList.map((quiz: any) => (
                   <div
                     key={quiz.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
+                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-750 transition-colors cursor-pointer"
                     onClick={() => navigate(`/quizzes/${quiz.id}`)}
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {quiz.title}
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary">{quiz.class_name}</Badge>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-zinc-400">
                           {quiz.attempts_count} attempts
                         </span>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-zinc-400">
                         Ends {formatDateTime(quiz.end_time)}
                       </p>
                     </div>
@@ -598,13 +598,13 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 {recentAttempts.map((attempt: any, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                         {attempt.student_name}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5">
+                      <p className="text-xs text-zinc-400 mt-0.5">
                         {attempt.quiz_title} &middot; {attempt.score}/{attempt.total_points}
                       </p>
                     </div>
@@ -647,13 +647,13 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
               {todayMaterials.map((material: any) => (
                 <div
                   key={material.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
                 >
                   <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                     <FileText className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {material.title}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -764,7 +764,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
           <CardContent className="space-y-6">
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">{t.sidebar.students}</span>
+                <span className="text-zinc-600 dark:text-zinc-400">{t.sidebar.students}</span>
                 <span className="font-semibold">{stats?.total_students ?? 0}</span>
               </div>
               <Progress
@@ -776,7 +776,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">{t.sidebar.teachers}</span>
+                <span className="text-zinc-600 dark:text-zinc-400">{t.sidebar.teachers}</span>
                 <span className="font-semibold">{stats?.total_teachers ?? 0}</span>
               </div>
               <Progress
@@ -788,7 +788,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-600 dark:text-gray-400">{t.dashboard.attendanceRate}</span>
+                <span className="text-zinc-600 dark:text-zinc-400">{t.dashboard.attendanceRate}</span>
                 <span className="font-semibold">{todayAttendance?.rate ?? 0}%</span>
               </div>
               <Progress
@@ -821,13 +821,13 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
               {recentUsers.map((u: any, i: number) => (
                 <div
                   key={u.id ?? i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {u.name}
                     </p>
-                    <p className="text-xs text-gray-400">{u.email}</p>
+                    <p className="text-xs text-zinc-400">{u.email}</p>
                   </div>
                   <Badge variant={u.role === 'admin' ? 'destructive' : u.role === 'teacher' ? 'info' : 'secondary'}>
                     {u.role}
@@ -853,13 +853,13 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
               {todayMaterials.map((material: any) => (
                 <div
                   key={material.id}
-                  className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800"
                 >
                   <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600">
                     <FileText className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                       {material.title}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -929,11 +929,11 @@ const Dashboard: React.FC = () => {
         {!isAdmin && !isTeacher && !isStudent && (
           <Card>
             <CardContent className="p-12 text-center">
-              <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+              <AlertCircle className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">
                 Dashboard Unavailable
               </h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-zinc-400 mt-1">
                 Your role could not be determined. Please contact an administrator.
               </p>
             </CardContent>

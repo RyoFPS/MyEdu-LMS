@@ -14,9 +14,15 @@ interface AuthState {
   initialize: () => Promise<void>;
 }
 
+// localStorage keys with versioning for future schema changes
+const STORAGE_KEYS = {
+  TOKEN: 'token:v1',
+  USER: 'user:v1',
+} as const;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: localStorage.getItem('token'),
+  token: localStorage.getItem(STORAGE_KEYS.TOKEN),
   isLoading: false,
   isInitialized: false,
 
@@ -25,8 +31,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const response = await api.post('/login', { email, password });
       const { user, token } = response.data.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
       set({ user, token, isLoading: false });
     } catch (error) {
       set({ isLoading: false });
@@ -40,8 +46,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       // Ignore logout errors
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
       set({ user: null, token: null });
     }
   },
@@ -54,23 +60,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const response = await api.get('/me');
       const user = response.data.data;
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
       set({ user, isLoading: false });
     } catch {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
       set({ user: null, token: null, isLoading: false });
     }
   },
 
   setUser: (user: User) => {
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
     set({ user });
   },
 
   initialize: async () => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    // Cache localStorage reads to avoid multiple calls
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
 
     if (token && storedUser) {
       try {
@@ -79,8 +86,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         // Fetch fresh user data in background
         get().fetchUser();
       } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER);
         set({ user: null, token: null, isInitialized: true });
       }
     } else {

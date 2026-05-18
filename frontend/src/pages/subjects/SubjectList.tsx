@@ -190,8 +190,8 @@ const SubjectList: React.FC = () => {
                 <BookOpen className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{subjects.length}</p>
-                <p className="text-xs text-gray-500">{t.subjects.totalSubjects}</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{subjects.length}</p>
+                <p className="text-xs text-zinc-500">{t.subjects.totalSubjects}</p>
               </div>
             </CardContent>
           </Card>
@@ -201,8 +201,8 @@ const SubjectList: React.FC = () => {
                 <FolderOpen className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{categories.length}</p>
-                <p className="text-xs text-gray-500">{t.subjects.categories}</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{categories.length}</p>
+                <p className="text-xs text-zinc-500">{t.subjects.categories}</p>
               </div>
             </CardContent>
           </Card>
@@ -212,10 +212,10 @@ const SubjectList: React.FC = () => {
                 <FileText className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                   {subjects.reduce((sum, s) => sum + s.subject_matters_count, 0)}
                 </p>
-                <p className="text-xs text-gray-500">{t.subjects.totalMaterials}</p>
+                <p className="text-xs text-zinc-500">{t.subjects.totalMaterials}</p>
               </div>
             </CardContent>
           </Card>
@@ -226,7 +226,7 @@ const SubjectList: React.FC = () => {
           <CardContent className="p-5">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="relative md:col-span-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -258,7 +258,7 @@ const SubjectList: React.FC = () => {
         ) : subjects.length === 0 ? (
           <Card>
             <CardContent className="py-16">
-              <div className="flex flex-col items-center justify-center text-gray-400">
+              <div className="flex flex-col items-center justify-center text-zinc-400">
                 <BookOpen className="h-12 w-12 mb-3 opacity-50" />
                 <p className="text-lg font-medium">{t.subjects.noSubjects}</p>
                 <p className="text-sm mt-1">{t.subjects.addFirst}</p>
@@ -294,13 +294,13 @@ const SubjectList: React.FC = () => {
                     {groupedSubjects[category].map((subject) => (
                       <TableRow key={subject.id}>
                         <TableCell>
-                          <span className="font-medium text-gray-900 dark:text-gray-100">{subject.name}</span>
+                          <span className="font-medium text-zinc-900 dark:text-zinc-100">{subject.name}</span>
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className="font-mono">{subject.code}</Badge>
                         </TableCell>
                         <TableCell>
-                          <span className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">
+                          <span className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1">
                             {subject.description || '-'}
                           </span>
                         </TableCell>
@@ -336,41 +336,43 @@ const SubjectList: React.FC = () => {
             </DialogHeader>
             <div className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {t.subjects.subjectName} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g., Matematika"
+                  onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Mathematics"
+                  required
+                  autoFocus
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   {t.subjects.code} <span className="text-red-500">*</span>
                 </label>
                 <Input
                   value={form.code}
-                  onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+                  onChange={(e) => setForm(prev => ({ ...prev, code: e.target.value }))}
                   placeholder="e.g., MTK"
                   maxLength={20}
                 />
-                <p className="text-xs text-gray-400">{t.subjects.codeHint}</p>
+                <p className="text-xs text-zinc-400">{t.subjects.codeHint}</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.common.category}</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t.common.category}</label>
                 {categories.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mb-2">
                     {categories.map((c) => (
                       <button
                         key={c}
                         type="button"
-                        onClick={() => setForm({ ...form, category: c })}
+                        onClick={() => setForm(prev => ({ ...prev, category: c }))}
                         className={cn(
                           'px-2.5 py-1 rounded-full text-xs font-medium border transition-colors',
                           form.category === c
                             ? 'bg-primary-500 text-white border-primary-500'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-primary-400 hover:text-primary-600'
+                            : 'bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-600 hover:border-primary-400 hover:text-primary-600'
                         )}
                       >
                         {c}
@@ -380,16 +382,16 @@ const SubjectList: React.FC = () => {
                 )}
                 <Input
                   value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, category: e.target.value }))}
                   placeholder="e.g., Science, Language, Mathematics"
                 />
-                <p className="text-xs text-gray-400">{t.subjects.categoryHint}</p>
+                <p className="text-xs text-zinc-400">{t.subjects.categoryHint}</p>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{t.common.description}</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t.common.description}</label>
                 <Textarea
                   value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Brief description of the subject..."
                   rows={3}
                 />

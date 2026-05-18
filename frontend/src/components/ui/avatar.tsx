@@ -76,7 +76,7 @@ const AvatarPreviewModal: React.FC<{
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xs sm:max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+        className="relative w-full max-w-xs sm:max-w-sm bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close button */}
@@ -88,7 +88,7 @@ const AvatarPreviewModal: React.FC<{
         </button>
 
         {/* Photo */}
-        <div className="bg-gray-100 dark:bg-gray-900">
+        <div className="bg-zinc-100 dark:bg-zinc-900">
           <img
             src={src}
             alt={alt || name}
@@ -98,8 +98,8 @@ const AvatarPreviewModal: React.FC<{
 
         {/* Name bar */}
         {name && (
-          <div className="px-4 py-3 text-center border-t border-gray-100 dark:border-gray-700">
-            <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 truncate">
+          <div className="px-4 py-3 text-center border-t border-zinc-100 dark:border-zinc-700">
+            <p className="font-semibold text-sm sm:text-base text-zinc-900 dark:text-zinc-100 truncate">
               {name}
             </p>
           </div>

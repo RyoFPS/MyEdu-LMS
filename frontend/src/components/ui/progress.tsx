@@ -37,10 +37,10 @@ export const Progress: React.FC<ProgressProps> = ({
     <div className={cn('w-full', className)} {...props}>
       {showLabel && (
         <div className="flex justify-between mb-1">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{Math.round(percentage)}%</span>
+          <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{Math.round(percentage)}%</span>
         </div>
       )}
-      <div className={cn('w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700', progressSizes[size])}>
+      <div className={cn('w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700', progressSizes[size])}>
         <div
           className={cn(
             'h-full rounded-full transition-all duration-500 ease-out',
