@@ -5,6 +5,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { CardGridSkeleton } from '../../components/skeletons';
+import { Skeleton } from '../../components/ui/skeleton';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAssignment, useAssignmentSubmissions } from '../../hooks/useApi';
@@ -116,25 +117,53 @@ const AssignmentDetail: React.FC = () => {
   };
 
   if (loadingAssignment) {
-    return <CardGridSkeleton count={1} />;
+    return (
+      <>
+        <Header title="..." description="..." />
+        <div className="page-container">
+          <div className="space-y-6">
+            <Skeleton className="h-9 w-24" />
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <Skeleton className="h-7 w-2/3" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-10 w-40" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </>
+    );
   }
 
   if (!assignment) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">Assignment Not Found</h1>
+      <>
+        <Header title="Assignment" description="" />
+        <div className="page-container">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <AlertTriangle className="h-12 w-12 text-zinc-400 mb-4" />
+              <p className="text-zinc-600 dark:text-zinc-400">Assignment not found</p>
+              <Button onClick={() => navigate('/assignments')} className="mt-4">
+                {t.common.back}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <AlertTriangle className="h-12 w-12 text-zinc-400 mb-4" />
-            <p className="text-zinc-600 dark:text-zinc-400">Assignment not found</p>
-            <Button onClick={() => navigate('/assignments')} className="mt-4">
-              {t.common.back}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      </>
     );
   }
 
