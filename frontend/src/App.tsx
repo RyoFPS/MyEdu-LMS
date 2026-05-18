@@ -93,6 +93,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/assignments/:id/edit"
+          element={
+            <ProtectedRoute roles={['admin', 'teacher']}>
+              <AssignmentCreate />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/assignments/:id" element={<AssignmentDetail />} />
 
         {/* Classes */}

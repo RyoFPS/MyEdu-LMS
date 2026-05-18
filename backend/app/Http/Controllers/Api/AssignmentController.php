@@ -25,46 +25,45 @@ class AssignmentController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        $query = Assignment::with(['class', 'subject', 'teacher']);
+        $query = Assignment::with(['classRoom', 'subject', 'teacher:id,name']);
 
-        // Filter by role
-        if ($user->role === 'student') {
-            // Students see assignments for their class
-            $query->where('class_id', $user->class_id)
+        if ($user->isStudent()) {
+            $enrolledClassIds = $user->enrolledClasses()->pluck('classes.id');
+            $query->whereIn('class_id', $enrolledClassIds)
                   ->where('is_published', true);
-        } elseif ($user->role === 'teacher') {
-            // Teachers see their own assignments
+        } elseif ($user->isTeacher()) {
             $query->where('teacher_id', $user->id);
         }
 
-        // Filter by class
-        if ($request->has('class_id')) {
-            $query->where('class_id', $request->class_id);
+        if ($request->filled('class_id')) {
+            $query->where('class_id', $request->input('class_id'));
         }
-
-        // Filter by subject
-        if ($request->has('subject_id')) {
-            $query->where('subject_id', $request->subject_id);
+        if ($request->filled('subject_id')) {
+            $query->where('subject_id', $request->input('subject_id'));
         }
-
-        // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->input('search') . '%');
+        }
+        if ($request->filled('status')) {
             $now = Carbon::now();
-            switch ($request->status) {
-                case 'upcoming':
-                    $query->where('due_date', '>', $now);
-                    break;
-                case 'overdue':
-                    $query->where('due_date', '<', $now);
-                    break;
-            }
+            match ($request->input('status')) {
+                'upcoming' => $query->where('due_date', '>', $now),
+                'overdue'  => $query->where('due_date', '<', $now),
+                default    => null,
+            };
         }
 
-        $assignments = $query->orderBy('due_date', 'desc')->get();
+        $perPage = $request->input('per_page', 12);
+        $assignments = $query->orderBy('due_date', 'desc')->paginate($perPage);
 
         return response()->json([
-            'success' => true,
             'data' => AssignmentResource::collection($assignments),
+            'meta' => [
+                'current_page' => $assignments->currentPage(),
+                'last_page'    => $assignments->lastPage(),
+                'per_page'     => $assignments->perPage(),
+                'total'        => $assignments->total(),
+            ],
         ]);
     }
 
@@ -103,7 +102,7 @@ class AssignmentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Assignment created successfully',
-            'data' => new AssignmentResource($assignment->load(['class', 'subject', 'teacher'])),
+            'data' => new AssignmentResource($assignment->load(['classRoom', 'subject', 'teacher'])),
         ], 201);
     }
 
@@ -112,7 +111,7 @@ class AssignmentController extends Controller
      */
     public function show(Request $request, $id): JsonResponse
     {
-        $assignment = Assignment::with(['class', 'subject', 'teacher'])->findOrFail($id);
+        $assignment = Assignment::with(['classRoom', 'subject', 'teacher'])->findOrFail($id);
         $user = $request->user();
 
         // Check authorization
@@ -179,7 +178,7 @@ class AssignmentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Assignment updated successfully',
-            'data' => new AssignmentResource($assignment->load(['class', 'subject', 'teacher'])),
+            'data' => new AssignmentResource($assignment->load(['classRoom', 'subject', 'teacher'])),
         ]);
     }
 

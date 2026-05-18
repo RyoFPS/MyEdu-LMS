@@ -45,7 +45,7 @@ class Assignment extends Model
     /**
      * Get the class that owns the assignment.
      */
-    public function class(): BelongsTo
+    public function classRoom(): BelongsTo
     {
         return $this->belongsTo(ClassRoom::class, 'class_id');
     }

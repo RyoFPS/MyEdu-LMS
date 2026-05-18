@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Header } from '../../components/layout/Header';
 import { Card, CardContent } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Select } from '../../components/ui/select';
+import { Skeleton } from '../../components/ui/skeleton';
 import { useTranslation } from '../../hooks/useTranslation';
-import { useClasses, useSubjects } from '../../hooks/useApi';
+import { useClasses, useSubjects, useAssignment } from '../../hooks/useApi';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Loader2, Upload, X } from 'lucide-react';
@@ -15,6 +17,9 @@ import { ArrowLeft, Loader2, Upload, X } from 'lucide-react';
 const AssignmentCreate: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { id } = useParams<{ id: string }>();
+  const isEditing = !!id;
 
   const [formData, setFormData] = useState({
     title: '',
@@ -29,6 +34,27 @@ const AssignmentCreate: React.FC = () => {
 
   const [attachment, setAttachment] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const { data: existingAssignment, isLoading: loadingAssignment } = useAssignment(id || '', {
+    enabled: isEditing,
+  });
+
+  useEffect(() => {
+    if (existingAssignment && isEditing) {
+      setFormData({
+        title: existingAssignment.title || '',
+        description: existingAssignment.description || '',
+        class_id: String(existingAssignment.class_id || ''),
+        subject_id: String(existingAssignment.subject_id || ''),
+        due_date: existingAssignment.due_date
+          ? new Date(existingAssignment.due_date).toISOString().slice(0, 16)
+          : '',
+        max_score: String(existingAssignment.max_score || 100),
+        allow_late_submission: existingAssignment.allow_late_submission || false,
+        allow_resubmission: existingAssignment.allow_resubmission || false,
+      });
+    }
+  }, [existingAssignment, isEditing]);
 
   // Fetch classes and subjects
   const { data: classesData } = useClasses({ per_page: 100 });
@@ -104,26 +130,54 @@ const AssignmentCreate: React.FC = () => {
         data.append('attachment', attachment);
       }
 
-      const response = await api.post('/assignments', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      let response;
+      if (isEditing) {
+        data.append('_method', 'PUT');
+        response = await api.post(`/assignments/${id}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        toast.success(t.assignments?.updateSuccess || 'Assignment updated successfully!');
+      } else {
+        response = await api.post('/assignments', data, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        toast.success(t.assignments.createSuccess);
+      }
 
-      toast.success(t.assignments.createSuccess);
-      navigate(`/assignments/${response.data.data.id}`);
+      queryClient.invalidateQueries({ queryKey: ['assignments'] });
+      if (id || response.data.data?.id) {
+        queryClient.invalidateQueries({ queryKey: ['assignments', id || String(response.data.data.id)] });
+      }
+      navigate(`/assignments/${id || response.data.data?.id}`);
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error(error.response?.data?.message || 'Failed to create assignment');
+        toast.error(error.response?.data?.message || 'Failed to save assignment');
       }
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (isEditing && loadingAssignment) {
+    return (
+      <>
+        <Header title="Edit Assignment" description="" />
+        <div className="page-container">
+          <div className="space-y-4">
+            <Skeleton className="h-9 w-24" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
-      <Header title={t.assignments.createAssignment} description={t.assignments.subtitle} />
+      <Header
+        title={isEditing ? (t.assignments?.editAssignment || 'Edit Assignment') : t.assignments.createAssignment}
+        description={t.assignments.subtitle}
+      />
       <div className="page-container">
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => navigate('/assignments')} className="gap-2">
@@ -289,7 +343,7 @@ const AssignmentCreate: React.FC = () => {
               </Button>
               <Button type="submit" disabled={submitting} className="gap-2">
                 {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {t.common.create}
+                {isEditing ? (t.assignments?.editAssignment || 'Update Assignment') : t.common.create}
               </Button>
             </div>
           </CardContent>
