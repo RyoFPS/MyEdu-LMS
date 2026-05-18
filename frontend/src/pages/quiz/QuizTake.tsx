@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Progress } from '../../components/ui/progress';
+import { Skeleton } from '../../components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,6 @@ import {
   ChevronRight,
   Send,
   AlertTriangle,
-  Loader2,
   CheckCircle2,
   FileX,
 } from 'lucide-react';
@@ -136,9 +136,39 @@ const QuizTake: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-      </div>
+      <>
+        <Header title={t.sidebar.quizzes} />
+        <div className="page-container max-w-3xl mx-auto">
+          <Card className="mb-4">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-6 w-48" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            </CardHeader>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-64 mb-2" />
+              <Skeleton className="h-4 w-32" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-24 w-full" />
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-12 w-full" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-between mt-6">
+            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-10 w-24" />
+          </div>
+        </div>
+      </>
     );
   }
 

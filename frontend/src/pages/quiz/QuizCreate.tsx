@@ -9,6 +9,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Select } from '../../components/ui/select';
 import { RadioGroup, RadioGroupItem } from '../../components/ui/radio-group';
 import { Badge } from '../../components/ui/badge';
+import { Skeleton } from '../../components/ui/skeleton';
 import { cn } from '../../lib/utils';
 import api from '../../lib/axios';
 import toast from 'react-hot-toast';
@@ -20,7 +21,6 @@ import {
   Trash2,
   Save,
   GripVertical,
-  Loader2,
   ArrowLeft,
   CheckCircle2,
   ChevronUp,
@@ -248,9 +248,44 @@ const QuizCreate: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-      </div>
+      <>
+        <Header title={t.quizzes.createQuiz} />
+        <div className="page-container max-w-4xl mx-auto">
+          <Skeleton className="h-8 w-32 mb-6" />
+          
+          <Card className="mb-6">
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {[1, 2].map((i) => (
+            <Card key={i} className="mb-4">
+              <CardHeader>
+                <Skeleton className="h-6 w-64" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <div className="grid grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((j) => (
+                    <Skeleton key={j} className="h-10 w-full" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </>
     );
   }
 

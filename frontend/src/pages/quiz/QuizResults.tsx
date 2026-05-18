@@ -7,6 +7,8 @@ import { Badge } from '../../components/ui/badge';
 import { Progress } from '../../components/ui/progress';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/table';
 import { Avatar } from '../../components/ui/avatar';
+import { Skeleton } from '../../components/ui/skeleton';
+import { TableSkeleton } from '../../components/skeletons';
 import { useAuth } from '../../hooks/useAuth';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
@@ -19,7 +21,6 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Loader2,
   FileX,
   Target,
   Download,
@@ -74,9 +75,37 @@ const QuizResults: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-      </div>
+      <>
+        <Header title={t.quizzes.quizResults} />
+        <div className="page-container max-w-4xl mx-auto">
+          <Skeleton className="h-8 w-32 mb-6" />
+          
+          <Card className="mb-6">
+            <div className="gradient-primary p-8 text-center">
+              <Skeleton className="h-12 w-12 rounded-full mx-auto mb-3 bg-white/20" />
+              <Skeleton className="h-10 w-32 mx-auto mb-2 bg-white/20" />
+              <Skeleton className="h-4 w-24 mx-auto bg-white/20" />
+            </div>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-3 gap-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="text-center">
+                    <Skeleton className="h-8 w-16 mx-auto mb-2" />
+                    <Skeleton className="h-4 w-20 mx-auto" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <TableSkeleton rows={5} columns={6} />
+          </Card>
+        </div>
+      </>
     );
   }
 

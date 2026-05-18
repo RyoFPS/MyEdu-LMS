@@ -6,6 +6,7 @@ import { Input } from '../../components/ui/input';
 import { Textarea } from '../../components/ui/textarea';
 import { Select } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { CardGridSkeleton } from '../../components/skeletons';
 import api from '../../lib/axios';
 import { formatDate } from '../../lib/utils';
 import { useAuth } from '../../hooks/useAuth';
@@ -339,9 +340,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
 
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-            </div>
+            <CardGridSkeleton count={6} columns={2} />
           ) : materials.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <BookOpen className="h-10 w-10 mb-2 opacity-50" />

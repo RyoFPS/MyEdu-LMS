@@ -4,6 +4,7 @@ import { Card, CardContent } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/badge';
 import { Avatar } from '../../components/ui/avatar';
+import { CardGridSkeleton } from '../../components/skeletons';
 import { useTranslation } from '../../hooks/useTranslation';
 import api from '../../lib/axios';
 import type { User } from '../../types';
@@ -12,7 +13,6 @@ import {
   Mail,
   Phone,
   BookOpen,
-  Loader2,
   FileX,
   UserCircle,
 } from 'lucide-react';
@@ -72,9 +72,7 @@ const TeacherList: React.FC = () => {
 
         {/* Teacher Grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-          </div>
+          <CardGridSkeleton count={6} columns={3} />
         ) : filteredTeachers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
