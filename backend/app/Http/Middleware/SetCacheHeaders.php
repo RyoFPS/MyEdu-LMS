@@ -49,13 +49,18 @@ class SetCacheHeaders
     {
         $response = $next($request);
 
+        if ($response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse ||
+            $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse) {
+            return $response;
+        }
+
         // Only cache GET requests
         if ($request->method() !== 'GET') {
             return $response->header('Cache-Control', 'no-store, no-cache, must-revalidate');
         }
 
         // Only cache successful responses
-        if ($response->status() !== 200) {
+        if ($response->getStatusCode() !== 200) {
             return $response;
         }
 
@@ -63,15 +68,12 @@ class SetCacheHeaders
         $duration = $this->getCacheDuration($path);
 
         if ($duration > 0) {
-            // Private cache (browser only, not shared proxies)
-            // max-age: how long the response is fresh
             return $response
                 ->header('Cache-Control', "private, max-age={$duration}")
                 ->header('Expires', gmdate('D, d M Y H:i:s', time() + $duration) . ' GMT')
                 ->header('Last-Modified', gmdate('D, d M Y H:i:s') . ' GMT');
         }
 
-        // No cache for real-time data
         return $response->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
     }
 
