@@ -532,7 +532,7 @@ const Library: React.FC = () => {
               </label>
               <Input
                 value={uploadForm.title}
-                onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g., Chapter 1 - Introduction to Algebra"
               />
             </div>
@@ -544,7 +544,7 @@ const Library: React.FC = () => {
               </label>
               <Textarea
                 value={uploadForm.description}
-                onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Brief description of the material..."
                 rows={3}
               />
@@ -558,7 +558,7 @@ const Library: React.FC = () => {
               <div className="relative">
                 <Input
                   value={uploadForm.grade_level}
-                  onChange={(e) => setUploadForm({ ...uploadForm, grade_level: e.target.value })}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, grade_level: e.target.value }))}
                   placeholder="e.g., 7, 8, 9, 10"
                   list="grade-level-options"
                 />
@@ -577,7 +577,7 @@ const Library: React.FC = () => {
               </label>
               <Select
                 value={uploadForm.subject_id}
-                onChange={(e) => setUploadForm({ ...uploadForm, subject_id: e.target.value })}
+                onChange={(e) => setUploadForm(prev => ({ ...prev, subject_id: e.target.value }))}
                 options={[
                   { value: '', label: t.attendance.selectAClass },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
@@ -603,7 +603,7 @@ const Library: React.FC = () => {
                       </p>
                     </div>
                     <button
-                      onClick={() => setUploadForm({ ...uploadForm, file: null })}
+                      onClick={() => setUploadForm(prev => ({ ...prev, file: null }))}
                       className="p-1 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                     >
                       <X className="h-4 w-4 text-zinc-400" />
@@ -629,7 +629,7 @@ const Library: React.FC = () => {
                             toast.error('File size must be less than 10MB.');
                             return;
                           }
-                          setUploadForm({ ...uploadForm, file });
+                          setUploadForm(prev => ({ ...prev, file }));
                         }
                       }}
                     />
@@ -668,7 +668,7 @@ const Library: React.FC = () => {
               </label>
               <Input
                 value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Material title"
               />
             </div>
@@ -680,7 +680,7 @@ const Library: React.FC = () => {
               </label>
               <Textarea
                 value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Brief description..."
                 rows={3}
               />
@@ -694,7 +694,7 @@ const Library: React.FC = () => {
               <div className="relative">
                 <Input
                   value={editForm.grade_level}
-                  onChange={(e) => setEditForm({ ...editForm, grade_level: e.target.value })}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, grade_level: e.target.value }))}
                   placeholder="e.g., 7, 8, 9, 10"
                   list="edit-grade-level-options"
                 />
@@ -713,7 +713,7 @@ const Library: React.FC = () => {
               </label>
               <Select
                 value={editForm.subject_id}
-                onChange={(e) => setEditForm({ ...editForm, subject_id: e.target.value })}
+                onChange={(e) => setEditForm(prev => ({ ...prev, subject_id: e.target.value }))}
                 options={[
                   { value: '', label: t.attendance.selectAClass },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
@@ -738,7 +738,7 @@ const Library: React.FC = () => {
                     </p>
                   </div>
                   <button
-                    onClick={() => setEditForm({ ...editForm, file: null })}
+                    onClick={() => setEditForm(prev => ({ ...prev, file: null }))}
                     className="p-1 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                   >
                     <X className="h-4 w-4 text-zinc-400" />
@@ -763,7 +763,7 @@ const Library: React.FC = () => {
                             toast.error('File size must be less than 10MB.');
                             return;
                           }
-                          setEditForm({ ...editForm, file });
+                          setEditForm(prev => ({ ...prev, file }));
                         }
                       }}
                     />

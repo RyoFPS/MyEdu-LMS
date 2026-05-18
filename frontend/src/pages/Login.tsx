@@ -50,9 +50,9 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center gradient-bg animate-gradient relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 size-80 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 size-80 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] bg-white/5 rounded-full blur-3xl" />
         {/* Floating shapes */}
         <div className="absolute top-20 left-20 size-4 bg-white/20 rounded-full animate-pulse" />
         <div className="absolute top-40 right-32 size-3 bg-white/15 rounded-full animate-pulse-slow" />
@@ -93,7 +93,6 @@ const Login: React.FC = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10"
                   autoComplete="email"
-                  autoFocus
                 />
               </div>
             </div>
@@ -135,7 +134,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Bottom text */}
-        <p className="text-center text-white/60 text-xs mt-6">
+        <p className="text-center text-white/60 text-xs mt-6" suppressHydrationWarning>
           &copy; {new Date().getFullYear()} MyEdu LMS. All rights reserved.
         </p>
       </div>

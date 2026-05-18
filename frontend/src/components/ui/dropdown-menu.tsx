@@ -67,20 +67,32 @@ export const DropdownMenuItem: React.FC<{
   className?: string;
   children: React.ReactNode;
   destructive?: boolean;
-}> = ({ onClick, className, children, destructive }) => (
-  <button
-    onClick={onClick}
-    className={cn(
-      'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
-      destructive
-        ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
-        : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-700',
-      className
-    )}
-  >
-    {children}
-  </button>
-);
+}> = ({ onClick, className, children, destructive }) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role="menuitem"
+      tabIndex={0}
+      className={cn(
+        'flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors',
+        destructive
+          ? 'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
+          : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-700',
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
+};
 
 export const DropdownMenuSeparator: React.FC = () => (
   <div className="my-1 h-px bg-zinc-200 dark:bg-zinc-700" />
