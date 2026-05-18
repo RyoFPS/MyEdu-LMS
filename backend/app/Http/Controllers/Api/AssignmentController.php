@@ -115,11 +115,11 @@ class AssignmentController extends Controller
         $user = $request->user();
 
         // Check authorization
-        if ($user->role === 'student' && $assignment->class_id !== $user->class_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 403);
+        if ($user->isStudent()) {
+            $enrolledClassIds = $user->enrolledClasses()->pluck('classes.id')->toArray();
+            if (!in_array($assignment->class_id, $enrolledClassIds)) {
+                return response()->json(['success' => false, 'message' => 'You are not enrolled in this class.'], 403);
+            }
         }
 
         return response()->json([
@@ -247,11 +247,9 @@ class AssignmentController extends Controller
         }
 
         // Check if student is in the correct class
-        if ($assignment->class_id !== $student->class_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are not enrolled in this class',
-            ], 403);
+        $enrolledClassIds = $student->enrolledClasses()->pluck('classes.id')->toArray();
+        if (!in_array($assignment->class_id, $enrolledClassIds)) {
+            return response()->json(['success' => false, 'message' => 'You are not enrolled in this class.'], 403);
         }
 
         // Handle file upload
