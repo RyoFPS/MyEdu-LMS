@@ -89,13 +89,16 @@ class AssignmentController extends Controller
         $assignment = Assignment::create($data);
 
         // Log activity
-        ActivityLog::create([
-            'user_id' => $request->user()->id,
-            'action' => 'create',
-            'model' => 'Assignment',
-            'model_id' => $assignment->id,
-            'description' => "Created assignment '{$assignment->title}'",
-        ]);
+        ActivityLog::log(
+            $request->user(),
+            'create',
+            'assignment',
+            $assignment->title,
+            "{$request->user()->name} created assignment '{$assignment->title}'.",
+            $assignment->id,
+            ['class_id' => $assignment->class_id],
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,
@@ -162,13 +165,16 @@ class AssignmentController extends Controller
         $assignment->update($data);
 
         // Log activity
-        ActivityLog::create([
-            'user_id' => $user->id,
-            'action' => 'update',
-            'model' => 'Assignment',
-            'model_id' => $assignment->id,
-            'description' => "Updated assignment '{$assignment->title}'",
-        ]);
+        ActivityLog::log(
+            $user,
+            'update',
+            'assignment',
+            $assignment->title,
+            "{$user->name} updated assignment '{$assignment->title}'.",
+            $assignment->id,
+            null,
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,
@@ -208,13 +214,16 @@ class AssignmentController extends Controller
         $assignment->delete();
 
         // Log activity
-        ActivityLog::create([
-            'user_id' => $user->id,
-            'action' => 'delete',
-            'model' => 'Assignment',
-            'model_id' => $id,
-            'description' => "Deleted assignment '{$title}'",
-        ]);
+        ActivityLog::log(
+            $user,
+            'delete',
+            'assignment',
+            $title,
+            "{$user->name} deleted assignment '{$title}'.",
+            (int) $id,
+            null,
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,
@@ -277,13 +286,16 @@ class AssignmentController extends Controller
         ]);
 
         // Log activity
-        ActivityLog::create([
-            'user_id' => $student->id,
-            'action' => 'create',
-            'model' => 'AssignmentSubmission',
-            'model_id' => $submission->id,
-            'description' => "Submitted assignment '{$assignment->title}'",
-        ]);
+        ActivityLog::log(
+            $student,
+            'submit',
+            'assignment',
+            $assignment->title,
+            "{$student->name} submitted assignment '{$assignment->title}'.",
+            $assignment->id,
+            ['submission_id' => $submission->id, 'is_late' => $submission->is_late],
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,
@@ -316,13 +328,16 @@ class AssignmentController extends Controller
         ]);
 
         // Log activity
-        ActivityLog::create([
-            'user_id' => $user->id,
-            'action' => 'update',
-            'model' => 'AssignmentSubmission',
-            'model_id' => $submission->id,
-            'description' => "Graded {$submission->student->name}'s submission for '{$submission->assignment->title}'",
-        ]);
+        ActivityLog::log(
+            $user,
+            'update',
+            'assignment',
+            $submission->assignment->title,
+            "{$user->name} graded {$submission->student->name}'s submission for '{$submission->assignment->title}' with score {$submission->score}.",
+            $submission->assignment_id,
+            ['submission_id' => $submission->id, 'score' => $submission->score, 'student_id' => $submission->student_id],
+            $request->ip()
+        );
 
         return response()->json([
             'success' => true,

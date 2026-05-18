@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\ClassRoom;
 use Carbon\Carbon;
 
 class Assignment extends Model
@@ -46,7 +47,7 @@ class Assignment extends Model
      */
     public function class(): BelongsTo
     {
-        return $this->belongsTo(ClassModel::class, 'class_id');
+        return $this->belongsTo(ClassRoom::class, 'class_id');
     }
 
     /**
