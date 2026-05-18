@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { Header } from '../components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -97,6 +98,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
   t,
 }) => {
   const [markingAttendance, setMarkingAttendance] = useState(false);
+  const queryClient = useQueryClient();
   const attendanceConfig = getAttendanceConfig(t);
 
   const handleSelfAttendance = async () => {
@@ -104,8 +106,8 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
     try {
       await api.post('/attendances/self');
       toast.success('Attendance recorded! You are present today.');
-      // Reload dashboard
-      window.location.reload();
+      // Invalidate dashboard cache to force fresh data
+      await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     } catch (error: any) {
       if (error.response?.status === 422 && error.response?.data?.message) {
         toast.error(error.response.data.message);
