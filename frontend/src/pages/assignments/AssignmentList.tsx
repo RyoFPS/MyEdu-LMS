@@ -408,7 +408,7 @@ const AssignmentList: React.FC = () => {
           )}
         </>
       )}
-      </div>
+    </div>
     </>
   );
 };

@@ -295,7 +295,7 @@ const AssignmentCreate: React.FC = () => {
           </CardContent>
         </Card>
       </form>
-      </div>
+    </div>
     </>
   );
 };
