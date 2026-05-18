@@ -17,6 +17,7 @@ import {
   Users,
   BookOpen,
   ClipboardCheck,
+  ClipboardList,
   FileQuestion,
   TrendingUp,
   Clock,
@@ -126,6 +127,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
   const upcomingDeadlines: any[] = stats?.upcoming_deadlines ?? [];
   const recentResults: any[] = stats?.recent_results ?? [];
   const todayMaterials: any[] = stats?.today_materials ?? [];
+  const upcomingAssignments: any[] = stats?.upcoming_assignments ?? [];
   const latestScore = recentResults.length > 0 ? `${recentResults[0].percentage}%` : '-';
 
   const statusConfig = todayAttendance?.status ? attendanceConfig[todayAttendance.status] : null;
@@ -351,7 +353,80 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
         </Card>
       </div>
 
-      {/* 5. Upcoming Deadlines */}
+      {/* 5. Upcoming Assignments */}
+      {upcomingAssignments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-purple-500" />
+              {(t as any).assignments?.title || 'Assignments'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {upcomingAssignments.map((assignment: any) => {
+                const isOverdue = assignment.is_overdue;
+                const daysLeft = assignment.days_until_due;
+                const dueDate = new Date(assignment.due_date);
+
+                return (
+                  <div
+                    key={assignment.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-750 transition-colors cursor-pointer"
+                    onClick={() => navigate(`/assignments/${assignment.id}`)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                        {assignment.title}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-zinc-400 flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {dueDate.toLocaleDateString()}
+                        </span>
+                        <Badge variant="secondary" className="text-xs">
+                          {assignment.max_score} pts
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="ml-2 shrink-0">
+                      {isOverdue ? (
+                        <Badge variant="destructive" className="text-xs gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Overdue
+                        </Badge>
+                      ) : daysLeft === 0 ? (
+                        <Badge variant="warning" className="text-xs">
+                          Due Today
+                        </Badge>
+                      ) : daysLeft <= 2 ? (
+                        <Badge variant="warning" className="text-xs">
+                          {daysLeft}d left
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="text-xs">
+                          {daysLeft}d left
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-2"
+                onClick={() => navigate('/assignments')}
+              >
+                {(t as any).assignments?.viewAll || 'View All Assignments'}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 6. Upcoming Deadlines */}
       {upcomingDeadlines.length > 0 && (
         <Card className="border-amber-200 dark:border-amber-800">
           <CardHeader>

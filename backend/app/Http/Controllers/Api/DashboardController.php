@@ -317,6 +317,31 @@ class DashboardController extends Controller
                     'created_at' => $m->created_at?->toISOString(),
                 ]);
 
+            // Upcoming assignments (not yet submitted, due within 7 days or overdue)
+            $upcomingAssignments = \App\Models\Assignment::whereIn('class_id', $classIds)
+                ->where('is_published', true)
+                ->whereDoesntHave('submissions', fn ($q) => $q->where('student_id', $user->id))
+                ->where(function ($q) {
+                    $q->where('due_date', '>', now())
+                      ->orWhere(function ($q2) {
+                          $q2->where('due_date', '<', now())
+                             ->where('allow_late_submission', true);
+                      });
+                })
+                ->orderBy('due_date')
+                ->take(5)
+                ->get()
+                ->map(fn ($a) => [
+                    'id'         => $a->id,
+                    'title'      => $a->title,
+                    'due_date'   => $a->due_date?->toISOString(),
+                    'max_score'  => $a->max_score,
+                    'is_overdue' => $a->isOverdue(),
+                    'days_until_due' => $a->isOverdue()
+                        ? -\Carbon\Carbon::now()->diffInDays($a->due_date)
+                        : \Carbon\Carbon::now()->diffInDays($a->due_date),
+                ]);
+
             return response()->json([
                 'data' => [
                     'role'               => 'student',
@@ -331,10 +356,11 @@ class DashboardController extends Controller
                         'total'    => $totalAttendance,
                         'rate'     => $attendanceRate,
                     ],
-                    'available_quizzes'  => $availableQuizzes,
-                    'upcoming_deadlines' => $upcomingDeadlines,
-                    'recent_results'     => $recentResults,
-                    'today_materials'    => $todayMaterials,
+                    'available_quizzes'    => $availableQuizzes,
+                    'upcoming_deadlines'   => $upcomingDeadlines,
+                    'recent_results'       => $recentResults,
+                    'today_materials'      => $todayMaterials,
+                    'upcoming_assignments' => $upcomingAssignments,
                 ],
             ]);
         });
