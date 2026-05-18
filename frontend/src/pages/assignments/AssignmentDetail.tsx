@@ -588,44 +588,43 @@ const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent onClose={onClose}>
         <DialogHeader>
-          <DialogTitle>{previousSubmission ? t.assignments.resubmit : t.assignments.submitAssignment}</DialogTitle>
-          <DialogDescription>
-            {previousSubmission && (
-              <div className="mt-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  {t.assignments.previousSubmission}: {previousSubmission.file_name}
-                </p>
-              </div>
-            )}
-          </DialogDescription>
+          <DialogTitle className="pr-8">
+            {previousSubmission ? t.assignments.resubmit : t.assignments.submitAssignment}
+          </DialogTitle>
+          {previousSubmission && (
+            <div className="mt-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {t.assignments.previousSubmission}: <span className="font-medium">{previousSubmission.file_name}</span>
+              </p>
+            </div>
+          )}
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="px-6 pb-2 space-y-4">
           <div>
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
               {t.assignments.submissionFile}
             </label>
             {file ? (
-              <div className="flex items-center gap-3 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-white">{file.name}</p>
+              <div className="flex items-center gap-3 p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 mt-2">
+                <FileText className="h-8 w-8 text-primary-500 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-zinc-900 dark:text-white truncate">{file.name}</p>
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">
                     {(file.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
-                  <XCircle className="h-4 w-4" />
+                  <XCircle className="h-4 w-4 text-zinc-400" />
                 </Button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <Upload className="h-8 w-8 text-zinc-400 mb-2" />
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{t.assignments.dragDropFile}</p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1">{t.assignments.allowedFormats}</p>
-                </div>
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors mt-2">
+                <Upload className="h-8 w-8 text-zinc-400 mb-2" />
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">{t.assignments.dragDropFile}</p>
+                <p className="text-xs text-zinc-500 mt-1">{t.assignments.allowedFormats}</p>
                 <input type="file" className="hidden" onChange={handleFileChange} accept=".pdf,.doc,.docx,image/*" />
               </label>
             )}
@@ -633,7 +632,7 @@ const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             {t.common.cancel}
           </Button>
           <Button onClick={handleSubmit} disabled={!file || submitting} className="gap-2">
@@ -678,7 +677,7 @@ const GradeSubmissionModal: React.FC<GradeSubmissionModalProps> = ({
 
     setGrading(true);
     try {
-      await api.post(`/assignments/${assignmentId}/submissions/${submission.id}/grade`, {
+      await api.post(`/assignment-submissions/${submission.id}/grade`, {
         score: scoreNum,
         feedback: feedback.trim() || null,
       });
@@ -696,28 +695,28 @@ const GradeSubmissionModal: React.FC<GradeSubmissionModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent onClose={onClose}>
         <DialogHeader>
           <DialogTitle>{t.assignments.gradeSubmission}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="px-6 pb-2 space-y-4">
           {/* Student Info */}
-          <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
             <h4 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{t.assignments.studentInfo}</h4>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">{submission.student_name}</p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-500">{submission.student_email}</p>
+            <p className="text-sm text-zinc-700 dark:text-zinc-300 font-medium">{submission.student_name}</p>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">{submission.student_email}</p>
           </div>
 
           {/* Submission Info */}
-          <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-            <h4 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">
-              {t.assignments.submissionInfo}
-            </h4>
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-white mb-2">{t.assignments.submissionInfo}</h4>
             <p className="text-sm text-zinc-600 dark:text-zinc-400">
               {t.assignments.submittedAt}: {formatDateTime(submission.submitted_at)}
             </p>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">File: {submission.file_name}</p>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+              File: <span className="font-medium">{submission.file_name}</span>
+            </p>
             {submission.is_late && (
               <Badge variant="warning" className="mt-2 gap-1">
                 <AlertTriangle className="h-3 w-3" />
@@ -757,12 +756,12 @@ const GradeSubmissionModal: React.FC<GradeSubmissionModalProps> = ({
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="outline" onClick={onClose}>
             {t.common.cancel}
           </Button>
           <Button onClick={handleSubmit} disabled={grading} className="gap-2">
             {grading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {t.common.submit}
+            {t.assignments.gradeSubmission}
           </Button>
         </DialogFooter>
       </DialogContent>

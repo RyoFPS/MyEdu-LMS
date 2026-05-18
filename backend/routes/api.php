@@ -70,16 +70,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Assignments ──────────────────────────────────────────────────────
     Route::get('/assignments', [AssignmentController::class, 'index']);
-    Route::post('/assignments', [AssignmentController::class, 'store'])->middleware('role:admin,teacher');
+    Route::post('/assignments', [AssignmentController::class, 'store'])->middleware('role:admin|teacher');
     Route::get('/assignments/{id}', [AssignmentController::class, 'show']);
-    Route::put('/assignments/{id}', [AssignmentController::class, 'update'])->middleware('role:admin,teacher');
-    Route::delete('/assignments/{id}', [AssignmentController::class, 'destroy'])->middleware('role:admin,teacher');
+    Route::put('/assignments/{id}', [AssignmentController::class, 'update'])->middleware('role:admin|teacher');
+    Route::delete('/assignments/{id}', [AssignmentController::class, 'destroy'])->middleware('role:admin|teacher');
 
     // Submissions
     Route::post('/assignments/{id}/submit', [AssignmentController::class, 'submit'])->middleware('role:student');
     Route::get('/assignments/{id}/my-submission', [AssignmentController::class, 'mySubmission'])->middleware('role:student');
-    Route::get('/assignments/{id}/submissions', [AssignmentController::class, 'submissions'])->middleware('role:admin,teacher');
-    Route::post('/assignment-submissions/{id}/grade', [AssignmentController::class, 'grade'])->middleware('role:admin,teacher');
+    Route::get('/assignments/{id}/submissions', [AssignmentController::class, 'submissions'])->middleware('role:admin|teacher');
+    Route::post('/assignment-submissions/{id}/grade', [AssignmentController::class, 'grade'])->middleware('role:admin|teacher');
     Route::get('/assignment-submissions/{id}/download', [AssignmentController::class, 'download']);
     Route::get('/assignments/{id}/download-attachment', [AssignmentController::class, 'downloadAttachment']);
 
