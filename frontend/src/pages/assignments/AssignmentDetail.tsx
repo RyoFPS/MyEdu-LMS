@@ -142,30 +142,26 @@ const AssignmentDetail: React.FC = () => {
   const canEdit = isTeacher || isAdmin;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-white">{assignment.title}</h1>
-          <p className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">{t.assignments.assignmentDetails}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={() => navigate('/assignments')} className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            {t.common.back}
-          </Button>
-          {canEdit && (
-            <>
-              <Button variant="ghost" onClick={() => navigate(`/assignments/${id}/edit`)} className="gap-2">
-                <Edit className="h-4 w-4" />
-                {t.common.edit}
-              </Button>
-              <Button variant="ghost" onClick={() => setDeleteDialogOpen(true)} className="gap-2 text-red-600">
-                <Trash2 className="h-4 w-4" />
-                {t.common.delete}
-              </Button>
-            </>
-          )}
-        </div>
+    <>
+      <Header title={assignment.title} description={t.assignments.assignmentDetails} />
+      <div className="page-container">
+      <div className="flex items-center justify-between mb-2">
+        <Button variant="ghost" onClick={() => navigate('/assignments')} className="gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          {t.common.back}
+        </Button>
+        {canEdit && (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => navigate(`/assignments/${id}/edit`)} className="gap-2">
+              <Edit className="h-4 w-4" />
+              {t.common.edit}
+            </Button>
+            <Button variant="ghost" onClick={() => setDeleteDialogOpen(true)} className="gap-2 text-red-600">
+              <Trash2 className="h-4 w-4" />
+              {t.common.delete}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Assignment Info */}
@@ -480,7 +476,8 @@ const AssignmentDetail: React.FC = () => {
           }}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
