@@ -50,9 +50,9 @@ const QuizResults: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('Export downloaded!');
+      toast.success(t.common.exportDownloaded);
     } catch {
-      toast.error('Failed to export.');
+      toast.error(t.common.exportFailed);
     }
   };
 
@@ -199,7 +199,7 @@ const QuizResults: React.FC = () => {
                           </div>
                         </div>
                         <Badge variant={answer.is_correct ? 'success' : 'destructive'}>
-                          {answer.question?.points || 0} pts
+                          {answer.question?.points || 0} {t.common.points}
                         </Badge>
                       </div>
                     </div>
@@ -272,7 +272,7 @@ const QuizResults: React.FC = () => {
                             <Avatar name={attempt.student?.name || ''} src={attempt.student?.avatar} size="sm" />
                             <div>
                               <p className="font-medium text-zinc-900 dark:text-zinc-100">
-                                {attempt.student?.name || 'N/A'}
+                                {attempt.student?.name || t.common.na}
                               </p>
                               <p className="text-xs text-zinc-400">{attempt.student?.email}</p>
                             </div>
@@ -310,7 +310,11 @@ const QuizResults: React.FC = () => {
                                 : 'destructive'
                             }
                           >
-                            {percentage >= 80 ? 'Excellent' : percentage >= 60 ? 'Good' : 'Needs Improvement'}
+                            {percentage >= 80
+                              ? ((t as any).assignments?.excellent || 'Excellent')
+                              : percentage >= 60
+                              ? ((t as any).assignments?.good || 'Good')
+                              : ((t as any).assignments?.needsImprovement || 'Needs Improvement')}
                           </Badge>
                         </TableCell>
                       </TableRow>

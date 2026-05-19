@@ -106,14 +106,14 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
     setMarkingAttendance(true);
     try {
       await api.post('/attendances/self');
-      toast.success('Attendance recorded! You are present today.');
+      toast.success(t.dashboard.attendanceRecorded);
       // Invalidate dashboard cache to force fresh data
       await queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     } catch (error: any) {
       if (error.response?.status === 422 && error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else if (!error.response || ![403].includes(error.response.status)) {
-        toast.error('Failed to record attendance.');
+        toast.error(t.dashboard.attendanceFailed);
       }
     } finally {
       setMarkingAttendance(false);
@@ -212,7 +212,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                   <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
                     {classInfo.name}
                   </h3>
-                  <Badge variant="info">Grade {classInfo.grade_level}</Badge>
+                  <Badge variant="info">{t.dashboard.grade} {classInfo.grade_level}</Badge>
                 </div>
                 <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                   {classInfo.students_count} {t.sidebar.students.toLowerCase()}
@@ -243,14 +243,14 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           value={`${attendance?.rate ?? 0}%`}
           icon={<UserCheck className="h-5 w-5" />}
           color="emerald"
-          subtitle={`${attendance?.present ?? 0}/${attendance?.total ?? 0} days present`}
+          subtitle={`${attendance?.present ?? 0}/${attendance?.total ?? 0} ${t.common.daysPresent}`}
         />
         <StatCard
           title={t.dashboard.availableQuizzes}
           value={availableQuizzes.length}
           icon={<FileQuestion className="h-5 w-5" />}
           color="amber"
-          subtitle="Ready to take"
+          subtitle={t.common.readyToTake}
         />
         <StatCard
           title={t.dashboard.totalClasses}
@@ -336,7 +336,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       </p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary">{material.class_name}</Badge>
-                        <span className="text-xs text-zinc-400">by {material.uploader}</span>
+                        <span className="text-xs text-zinc-400">{t.dashboard.byUploader} {material.uploader}</span>
                       </div>
                     </div>
                     <Badge variant="outline">{material.type}</Badge>
@@ -359,7 +359,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-purple-500" />
-              {(t as any).assignments?.title || 'Assignments'}
+              {(t as any).assignments?.title || t.sidebar.quizzes}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -393,19 +393,19 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       {isOverdue ? (
                         <Badge variant="destructive" className="text-xs gap-1">
                           <AlertTriangle className="h-3 w-3" />
-                          Overdue
+                          {(t as any).assignments?.overdue || 'Overdue'}
                         </Badge>
                       ) : daysLeft === 0 ? (
                         <Badge variant="warning" className="text-xs">
-                          Due Today
+                          {(t as any).assignments?.dueToday || 'Due Today'}
                         </Badge>
                       ) : daysLeft <= 2 ? (
                         <Badge variant="warning" className="text-xs">
-                          {daysLeft}d left
+                          {((t as any).assignments?.daysLeft || '{n}d left').replace('{n}', daysLeft)}
                         </Badge>
                       ) : (
                         <Badge variant="secondary" className="text-xs">
-                          {daysLeft}d left
+                          {((t as any).assignments?.daysLeft || '{n}d left').replace('{n}', daysLeft)}
                         </Badge>
                       )}
                     </div>
@@ -418,7 +418,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                 className="w-full mt-2"
                 onClick={() => navigate('/assignments')}
               >
-                {(t as any).assignments?.viewAll || 'View All Assignments'}
+                {(t as any).assignments?.viewAll || t.common.search}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </div>
@@ -449,7 +449,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       {deadline.title}
                     </p>
                     <p className="text-xs text-amber-600 dark:text-amber-400">
-                      Due: {formatDateTime(deadline.end_time)}
+                      {((t as any).assignments?.due || 'Due')}: {formatDateTime(deadline.end_time)}
                     </p>
                   </div>
                 </div>
@@ -480,7 +480,7 @@ const StudentDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       {result.quiz_title}
                     </p>
                     <p className="text-xs text-zinc-400 mt-0.5">
-                      {result.score}/{result.total_points} points &middot; {formatDate(result.completed_at)}
+                      {result.score}/{result.total_points} {t.common.points} &middot; {formatDate(result.completed_at)}
                     </p>
                   </div>
                   <Badge
@@ -541,7 +541,7 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
           value={stats?.active_quizzes ?? 0}
           icon={<FileQuestion className="h-5 w-5" />}
           color="indigo"
-          subtitle={`${stats?.total_quizzes ?? 0} total`}
+          subtitle={`${stats?.total_quizzes ?? 0} ${t.common.total}`}
         />
         <StatCard
           title={t.dashboard.totalStudents}
@@ -641,13 +641,13 @@ const TeacherDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNa
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary">{quiz.class_name}</Badge>
                         <span className="text-xs text-zinc-400">
-                          {quiz.attempts_count} attempts
+                          {quiz.attempts_count} {t.common.attempts}
                         </span>
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-2">
                       <p className="text-xs text-zinc-400">
-                        Ends {formatDateTime(quiz.end_time)}
+                        {t.dashboard.endsAt} {formatDateTime(quiz.end_time)}
                       </p>
                     </div>
                   </div>
@@ -789,7 +789,7 @@ const AdminDashboard: React.FC<{ stats: any; navigate: ReturnType<typeof useNavi
           value={stats?.active_quizzes ?? 0}
           icon={<FileQuestion className="h-5 w-5" />}
           color="amber"
-          subtitle={`${stats?.total_quizzes ?? 0} total`}
+          subtitle={`${stats?.total_quizzes ?? 0} ${t.common.total}`}
         />
       </div>
 
@@ -998,10 +998,10 @@ const Dashboard: React.FC = () => {
             <CardContent className="p-12 text-center">
               <AlertCircle className="h-12 w-12 text-zinc-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-zinc-700 dark:text-zinc-300">
-                Dashboard Unavailable
+                {t.dashboard.dashboardUnavailable}
               </h3>
               <p className="text-sm text-zinc-400 mt-1">
-                Your role could not be determined. Please contact an administrator.
+                {t.dashboard.dashboardUnavailableMsg}
               </p>
             </CardContent>
           </Card>

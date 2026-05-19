@@ -26,22 +26,22 @@ const Login: React.FC = () => {
     setError('');
 
     if (!email || !password) {
-      setError('Please fill in all fields');
+      setError(t.profile.fillAllFields);
       return;
     }
 
     try {
       await login(email, password);
-      toast.success('Welcome back!');
+      toast.success(t.profile.welcomeBack);
       navigate('/dashboard');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string }; status?: number } };
       if (error.response?.status === 401) {
-        setError('Invalid email or password');
+        setError(t.profile.invalidCredentials);
       } else if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else {
-        setError('An error occurred. Please try again.');
+        setError(t.profile.errorOccurred);
       }
     }
   };
@@ -128,14 +128,14 @@ const Login: React.FC = () => {
           {/* Footer */}
           <div className="mt-6 text-center">
             <p className="text-xs text-zinc-400">
-              MyEdu Learning Management System
+              {t.profile.footerText}
             </p>
           </div>
         </div>
 
         {/* Bottom text */}
         <p className="text-center text-white/60 text-xs mt-6" suppressHydrationWarning>
-          &copy; {new Date().getFullYear()} MyEdu LMS. All rights reserved.
+          {t.profile.copyright.replace('{year}', new Date().getFullYear().toString())}
         </p>
       </div>
     </div>

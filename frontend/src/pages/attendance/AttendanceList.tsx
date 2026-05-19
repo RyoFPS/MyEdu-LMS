@@ -132,9 +132,9 @@ const AttendanceList: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('Export downloaded!');
+      toast.success(t.common.exportDownloaded);
     } catch {
-      toast.error('Failed to export.');
+      toast.error(t.common.exportFailed);
     }
   };
 
@@ -170,7 +170,7 @@ const AttendanceList: React.FC = () => {
             <ClipboardCheck className="h-6 w-6 text-primary-500" />
             <h2 className="text-lg font-semibold">{t.attendance.title}</h2>
             {meta.total > 0 && (
-              <Badge variant="secondary" className="ml-1">{meta.total} records</Badge>
+              <Badge variant="secondary" className="ml-1">{meta.total} {t.common.records}</Badge>
             )}
           </div>
           {(isTeacher || isAdmin) && (
@@ -228,7 +228,6 @@ const AttendanceList: React.FC = () => {
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
                   className="pl-10"
-                  placeholder="From date"
                 />
               </div>
               {/* Date To */}
@@ -239,7 +238,6 @@ const AttendanceList: React.FC = () => {
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
                   className="pl-10"
-                  placeholder="To date"
                 />
               </div>
               {/* Clear filters */}
@@ -290,13 +288,13 @@ const AttendanceList: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <Avatar name={record.user?.name || ''} src={record.user?.avatar} size="sm" />
                           <div className="min-w-0">
-                            <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{record.user?.name || 'N/A'}</p>
+                            <p className="font-medium text-zinc-900 dark:text-zinc-100 truncate">{record.user?.name || t.common.na}</p>
                             <p className="text-xs text-zinc-400 truncate">{record.user?.email}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm text-zinc-700 dark:text-zinc-300">{record.class_room?.name || 'N/A'}</span>
+                        <span className="text-sm text-zinc-700 dark:text-zinc-300">{record.class_room?.name || t.common.na}</span>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1.5 text-sm text-zinc-600 dark:text-zinc-400">
@@ -321,8 +319,8 @@ const AttendanceList: React.FC = () => {
               {meta.last_page > 1 && (
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-zinc-100 dark:border-zinc-700">
                   <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                    Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
-                    {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} records
+                    {t.common.showing} {(meta.current_page - 1) * meta.per_page + 1} {t.common.to}{' '}
+                    {Math.min(meta.current_page * meta.per_page, meta.total)} {t.common.of} {meta.total} {t.common.records}
                   </p>
                   <div className="flex items-center gap-1">
                     <Button

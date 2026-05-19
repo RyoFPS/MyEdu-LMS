@@ -92,23 +92,23 @@ const AssignmentCreate: React.FC = () => {
 
     // Validation
     if (!formData.title.trim()) {
-      toast.error('Title is required');
+      toast.error(t.common.required);
       return;
     }
     if (!formData.description.trim()) {
-      toast.error('Description is required');
+      toast.error(t.common.required);
       return;
     }
     if (!formData.class_id) {
-      toast.error('Class is required');
+      toast.error(t.common.required);
       return;
     }
     if (!formData.due_date) {
-      toast.error('Due date is required');
+      toast.error(t.common.required);
       return;
     }
     if (!formData.max_score || parseInt(formData.max_score) <= 0) {
-      toast.error('Max score must be greater than 0');
+      toast.error(t.common.required);
       return;
     }
 
@@ -151,7 +151,7 @@ const AssignmentCreate: React.FC = () => {
       navigate(`/assignments/${id || response.data.data?.id}`);
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error(error.response?.data?.message || 'Failed to save assignment');
+        toast.error(error.response?.data?.message || (t as any).assignments?.failedSave || 'Failed to save assignment');
       }
     } finally {
       setSubmitting(false);
@@ -161,7 +161,7 @@ const AssignmentCreate: React.FC = () => {
   if (isEditing && loadingAssignment) {
     return (
       <>
-        <Header title="Edit Assignment" description="" />
+        <Header title={(t as any).assignments?.editAssignment || 'Edit Assignment'} description="" />
         <div className="page-container">
           <div className="space-y-4">
             <Skeleton className="h-9 w-24" />
@@ -198,7 +198,7 @@ const AssignmentCreate: React.FC = () => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="Enter assignment title"
+                placeholder={t.common.title}
                 required
               />
             </div>
@@ -212,7 +212,7 @@ const AssignmentCreate: React.FC = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Enter assignment description"
+                placeholder={t.common.description}
                 rows={6}
                 required
               />
@@ -229,7 +229,7 @@ const AssignmentCreate: React.FC = () => {
                   value={formData.class_id}
                   onChange={handleChange}
                   options={classes.map((cls) => ({ value: cls.id.toString(), label: cls.name }))}
-                  placeholder="Select class"
+                  placeholder={t.quizzes.selectClass}
                   required
                 />
               </div>
@@ -243,7 +243,7 @@ const AssignmentCreate: React.FC = () => {
                   value={formData.subject_id}
                   onChange={handleChange}
                   options={subjects?.map((subject) => ({ value: subject.id.toString(), label: subject.name })) || []}
-                  placeholder="Select subject (optional)"
+                  placeholder={t.quizzes.selectSubject}
                 />
               </div>
             </div>

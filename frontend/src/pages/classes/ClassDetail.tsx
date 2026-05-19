@@ -118,7 +118,7 @@ const ClassDetail: React.FC = () => {
         teacher_id: Number(selectedTeacherId),
         subject: teacherSubject || null,
       });
-      toast.success('Teacher assigned successfully');
+      toast.success(t.classes.assignTeacher);
       setShowAssignTeacher(false);
       setSelectedTeacherId('');
       setTeacherSubject('');
@@ -139,7 +139,7 @@ const ClassDetail: React.FC = () => {
       await api.post(`/classes/${id}/assign-student`, {
         student_id: Number(selectedStudentId),
       });
-      toast.success('Student assigned successfully');
+      toast.success(t.classes.assignStudent);
       setShowAssignStudent(false);
       setSelectedStudentId('');
       refetch();
@@ -155,10 +155,10 @@ const ClassDetail: React.FC = () => {
   };
 
   const handleRemoveTeacher = async (teacherId: number) => {
-    if (!confirm('Remove this teacher from the class?')) return;
+    if (!confirm(t.classes.removeTeacher + '?')) return;
     try {
       await api.delete(`/classes/${id}/remove-teacher/${teacherId}`);
-      toast.success('Teacher removed');
+      toast.success(t.classes.removeTeacher);
       refetch();
     } catch {
       toast.error('Failed to remove teacher');
@@ -166,10 +166,10 @@ const ClassDetail: React.FC = () => {
   };
 
   const handleRemoveStudent = async (studentId: number) => {
-    if (!confirm('Remove this student from the class?')) return;
+    if (!confirm(t.classes.removeStudent + '?')) return;
     try {
       await api.delete(`/classes/${id}/remove-student/${studentId}`);
-      toast.success('Student removed');
+      toast.success(t.classes.removeStudent);
       refetch();
     } catch {
       toast.error('Failed to remove student');
@@ -222,11 +222,11 @@ const ClassDetail: React.FC = () => {
   if (!classRoom) {
     return (
       <>
-        <Header title="Class Not Found" />
+        <Header title={t.classes.noClasses} />
         <div className="page-container">
           <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <FileX className="h-12 w-12 mb-3 opacity-50" />
-            <p className="text-lg font-medium">Class not found</p>
+            <p className="text-lg font-medium">{t.classes.noClasses}</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/classes')}>
               {t.common.back}
             </Button>
@@ -520,22 +520,22 @@ const ClassDetail: React.FC = () => {
               <div className="space-y-2">
                 <label htmlFor="assign-teacher-select" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{t.sidebar.teachers}</label>
                 {availableTeachers.length === 0 ? (
-                  <p className="text-sm text-zinc-400 py-2">All teachers are already assigned to this class.</p>
+                  <p className="text-sm text-zinc-400 py-2">{t.classes.allTeachersAssigned}</p>
                 ) : (
                   <SearchableSelect
                     id="assign-teacher-select"
                     value={selectedTeacherId}
                     onChange={(val) => setSelectedTeacherId(val)}
                     options={availableTeachers.map((t) => ({ value: String(t.id), label: t.name, subtitle: t.email }))}
-                    placeholder="Choose a teacher..."
+                    placeholder={t.classes.chooseTeacher}
                     searchPlaceholder={t.common.search + '...'}
-                    emptyMessage="No teachers found."
+                    emptyMessage={t.classes.noTeachersFound}
                   />
                 )}
               </div>
               <div className="space-y-2">
                 <label htmlFor="teacher-subject-select" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                  {t.quizzes.subject} (optional)
+                  {t.quizzes.subject} ({t.common.optional})
                 </label>
                 <Select
                   id="teacher-subject-select"
@@ -546,9 +546,9 @@ const ClassDetail: React.FC = () => {
                       value: s.name,
                       label: `${s.name} (${s.code})${s.category ? ` — ${s.category}` : ''}`,
                     })),
-                    { value: 'Other', label: 'Other (Versatile Teacher)' },
+                    { value: 'Other', label: t.classes.versatileTeacher },
                   ]}
-                  placeholder={`${t.quizzes.subject} (optional)`}
+                  placeholder={`${t.quizzes.subject} (${t.common.optional})`}
                 />
                 {selectedTeacherId && (() => {
                   const selectedTeacher = availableTeachers.find(t => String(t.id) === selectedTeacherId);
@@ -556,7 +556,7 @@ const ClassDetail: React.FC = () => {
                   if (teacherSubjects && teacherSubjects.length > 0) {
                     return (
                       <p className="text-xs text-zinc-400">
-                        This teacher teaches: {teacherSubjects.map((s: any) => s.name).join(', ')}
+                        {t.classes.teacherTeaches}: {teacherSubjects.map((s: any) => s.name).join(', ')}
                       </p>
                     );
                   }
@@ -590,9 +590,9 @@ const ClassDetail: React.FC = () => {
                     value={selectedStudentId}
                     onChange={(val) => setSelectedStudentId(val)}
                     options={availableStudents.map((s) => ({ value: String(s.id), label: s.name, subtitle: s.email }))}
-                    placeholder="Choose a student..."
+                    placeholder={t.classes.chooseStudent}
                     searchPlaceholder={t.common.search + '...'}
-                    emptyMessage="No students found."
+                    emptyMessage={t.classes.noStudentsFound}
                   />
                 )}
               </div>

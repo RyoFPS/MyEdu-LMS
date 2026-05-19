@@ -68,7 +68,7 @@ const AssignmentDetail: React.FC = () => {
       navigate('/assignments');
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error('Failed to delete assignment');
+        toast.error((t as any).assignments?.failedDelete || 'Failed to delete');
       }
     } finally {
       setDeleting(false);
@@ -90,7 +90,7 @@ const AssignmentDetail: React.FC = () => {
       link.click();
       link.remove();
     } catch (error) {
-      toast.error('Failed to download attachment');
+      toast.error((t as any).assignments?.failedDownloadAttachment || 'Failed to download');
     }
   };
 
@@ -107,7 +107,7 @@ const AssignmentDetail: React.FC = () => {
       link.click();
       link.remove();
     } catch (error) {
-      toast.error('Failed to download submission');
+      toast.error((t as any).assignments?.failedDownloadSubmission || 'Failed to download');
     }
   };
 
@@ -151,12 +151,12 @@ const AssignmentDetail: React.FC = () => {
   if (!assignment) {
     return (
       <>
-        <Header title="Assignment" description="" />
+        <Header title={(t as any).assignments?.assignmentNotFound || 'Assignment Not Found'} description="" />
         <div className="page-container">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <AlertTriangle className="h-12 w-12 text-zinc-400 mb-4" />
-              <p className="text-zinc-600 dark:text-zinc-400">Assignment not found</p>
+              <p className="text-zinc-600 dark:text-zinc-400">{(t as any).assignments?.assignmentNotFoundMsg || 'Assignment not found'}</p>
               <Button onClick={() => navigate('/assignments')} className="mt-4">
                 {t.common.back}
               </Button>
@@ -215,7 +215,7 @@ const AssignmentDetail: React.FC = () => {
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-zinc-400" />
               <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                Due: {formatDateTime(assignment.due_date)}
+                {(t as any).assignments?.due || 'Due'}: {formatDateTime(assignment.due_date)}
               </span>
             </div>
           </div>
@@ -237,7 +237,7 @@ const AssignmentDetail: React.FC = () => {
                   : t.assignments.daysUntilDue.replace('{days}', assignment.days_until_due.toString())}
               </Badge>
             )}
-            <Badge variant="secondary">Max Score: {assignment.max_score}</Badge>
+            <Badge variant="secondary">{(t as any).assignments?.maxScore || 'Max Score'}: {assignment.max_score}</Badge>
             {assignment.allow_late_submission && (
               <Badge variant="secondary">{t.assignments.lateSubmissionAllowed}</Badge>
             )}
@@ -362,20 +362,20 @@ const AssignmentDetail: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-900 dark:text-white">
-                        Student
+                       <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-900 dark:text-white">
+                        {(t as any).assignments?.tableStudent || 'Student'}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-900 dark:text-white">
-                        Submitted At
+                        {(t as any).assignments?.tableSubmittedAt || 'Submitted At'}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-900 dark:text-white">
-                        Status
+                        {(t as any).assignments?.tableStatus || 'Status'}
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-zinc-900 dark:text-white">
-                        Score
+                        {(t as any).assignments?.tableScore || 'Score'}
                       </th>
                       <th className="text-right py-3 px-4 text-sm font-semibold text-zinc-900 dark:text-white">
-                        Actions
+                        {(t as any).assignments?.tableActions || 'Actions'}
                       </th>
                     </tr>
                   </thead>
@@ -560,7 +560,7 @@ const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
 
   const handleSubmit = async () => {
     if (!file) {
-      toast.error('Please select a file');
+      toast.error((t as any).assignments?.pleaseSelectFile || 'Please select a file');
       return;
     }
 
@@ -579,7 +579,7 @@ const SubmitAssignmentModal: React.FC<SubmitAssignmentModalProps> = ({
       onSuccess();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error(error.response?.data?.message || 'Failed to submit assignment');
+        toast.error(error.response?.data?.message || (t as any).assignments?.failedSubmit || 'Failed to submit assignment');
       }
     } finally {
       setSubmitting(false);
@@ -671,7 +671,7 @@ const GradeSubmissionModal: React.FC<GradeSubmissionModalProps> = ({
   const handleSubmit = async () => {
     const scoreNum = parseFloat(score);
     if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > maxScore) {
-      toast.error(`Score must be between 0 and ${maxScore}`);
+      toast.error(((t as any).assignments?.scoreRange || 'Score must be between 0 and {max}').replace('{max}', maxScore));
       return;
     }
 
@@ -686,7 +686,7 @@ const GradeSubmissionModal: React.FC<GradeSubmissionModalProps> = ({
       onSuccess();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error('Failed to grade submission');
+        toast.error((t as any).assignments?.failedGrade || 'Failed to grade');
       }
     } finally {
       setGrading(false);
@@ -749,7 +749,7 @@ const GradeSubmissionModal: React.FC<GradeSubmissionModalProps> = ({
             <Textarea
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Enter feedback for the student..."
+              placeholder={(t as any).assignments?.enterFeedback || 'Enter feedback...'}
               rows={4}
             />
           </div>

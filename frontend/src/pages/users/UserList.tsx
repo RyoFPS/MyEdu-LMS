@@ -567,8 +567,8 @@ const UserList: React.FC = () => {
                               }}
                               className="rounded border-zinc-300 text-primary-600 focus:ring-primary-500"
                             />
-                            <span className="text-sm text-zinc-700 dark:text-zinc-300">Other</span>
-                            <Badge variant="secondary" className="text-xs ml-auto">Versatile</Badge>
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">{t.users.other}</span>
+                            <Badge variant="secondary" className="text-xs ml-auto">{t.users.versatile}</Badge>
                           </label>
                         </>
                       )}

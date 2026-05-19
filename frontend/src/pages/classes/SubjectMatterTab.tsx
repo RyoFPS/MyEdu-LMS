@@ -116,7 +116,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
   // Upload handler
   const handleUpload = async () => {
     if (!uploadForm.title || !uploadForm.file) {
-      toast.error('Title and file are required.');
+      toast.error(t.materials.titleRequired);
       return;
     }
 
@@ -135,13 +135,13 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('Material uploaded successfully!');
+      toast.success(t.materials.uploadSuccess);
       setShowUploadDialog(false);
       resetUploadForm();
       refetch();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
-        toast.error('Failed to upload material.');
+        toast.error(t.materials.failedUpload);
       }
     } finally {
       setUploading(false);
@@ -171,7 +171,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
 
   const handleEdit = async () => {
     if (!editingMaterial || !editForm.title) {
-      toast.error('Title is required.');
+      toast.error(t.materials.titleRequiredEdit);
       return;
     }
 
@@ -191,13 +191,13 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('Material updated successfully!');
+      toast.success(t.materials.updateSuccess);
       setShowEditDialog(false);
       setEditingMaterial(null);
       refetch();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
-        toast.error('Failed to update material.');
+        toast.error(t.materials.failedUpdate);
       }
     } finally {
       setSaving(false);
@@ -206,14 +206,14 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
 
   // Delete handler
   const handleDelete = async (material: SubjectMatter) => {
-    if (!confirm(`Delete "${material.title}"? This action cannot be undone.`)) return;
+    if (!confirm(t.materials.deleteConfirm.replace('{name}', material.title))) return;
 
     try {
       await api.delete(`/subject-matters/${material.id}`);
-      toast.success('Material deleted successfully.');
+      toast.success(t.materials.deleteSuccess);
       refetch();
     } catch {
-      toast.error('Failed to delete material.');
+      toast.error(t.materials.failedDelete);
     }
   };
 
@@ -233,7 +233,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      toast.error('Failed to download file.');
+      toast.error(t.materials.failedDownload);
     }
   };
 
@@ -251,7 +251,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
       const url = window.URL.createObjectURL(blob);
       setPreviewUrl(url);
     } catch {
-      toast.error('Failed to load preview.');
+      toast.error(t.materials.failedPreview);
       setShowPreviewDialog(false);
     } finally {
       setPreviewLoading(false);
@@ -360,7 +360,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                           {material.subject.name}
                         </Badge>
                       )}
-                      <span>by {material.uploader?.name || 'Unknown'}</span>
+                      <span>{t.materials.byUploader} {material.uploader?.name || t.materials.unknown}</span>
                       {material.created_at && <span>{formatDate(material.created_at)}</span>}
                     </div>
 
@@ -448,14 +448,14 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Subject */}
             <div className="space-y-2">
               <label htmlFor="upload-subject" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {t.quizzes.subject} (optional)
+                {t.quizzes.subject} ({t.common.optional})
               </label>
               <Select
                 id="upload-subject"
                 value={uploadForm.subject_id}
                 onChange={(e) => setUploadForm({ ...uploadForm, subject_id: e.target.value })}
                 options={[
-                  { value: '', label: 'No specific subject' },
+                  { value: '', label: t.materials.noSpecificSubject },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -491,10 +491,10 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                   <label htmlFor="upload-file-input" className="flex flex-col items-center justify-center p-6 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-600 hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer transition-colors">
                     <Upload className="h-8 w-8 text-zinc-400 mb-2" />
                     <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                      Click to select file
+                      {t.materials.clickToSelect}
                     </span>
                     <span className="text-xs text-zinc-400 mt-1">
-                      PDF, DOC, PPT, XLS, JPG, PNG, MP4 (max 10MB)
+                      {t.materials.uploadHint}
                     </span>
                     <input
                       id="upload-file-input"
@@ -505,7 +505,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           if (file.size > 10 * 1024 * 1024) {
-                            toast.error('File size must be less than 10MB.');
+                            toast.error(t.common.fileTooLarge);
                             return;
                           }
                           setUploadForm({ ...uploadForm, file });
@@ -570,14 +570,14 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Subject */}
             <div className="space-y-2">
               <label htmlFor="edit-subject" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                {t.quizzes.subject} (optional)
+                {t.quizzes.subject} ({t.common.optional})
               </label>
               <Select
                 id="edit-subject"
                 value={editForm.subject_id}
                 onChange={(e) => setEditForm({ ...editForm, subject_id: e.target.value })}
                 options={[
-                  { value: '', label: 'No specific subject' },
+                  { value: '', label: t.materials.noSpecificSubject },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -586,7 +586,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             {/* Replace File (optional) */}
             <div className="space-y-2">
               <label htmlFor="edit-file-input" className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Replace File (optional)
+                {t.materials.replaceFile}
               </label>
               {editForm.file ? (
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20">
@@ -611,11 +611,11 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
               ) : (
                 <div>
                   <p className="text-xs text-zinc-400 mb-2">
-                    Current: {editingMaterial?.file_name} ({editingMaterial?.file_size_formatted})
+                    {t.materials.currentFile}: {editingMaterial?.file_name} ({editingMaterial?.file_size_formatted})
                   </p>
                   <label htmlFor="edit-file-input" className="flex items-center justify-center gap-2 p-3 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-600 hover:border-primary-400 cursor-pointer transition-colors">
                     <Upload className="h-4 w-4 text-zinc-400" />
-                    <span className="text-sm text-zinc-500">Click to replace file</span>
+                    <span className="text-sm text-zinc-500">{t.materials.clickToReplace}</span>
                     <input
                       id="edit-file-input"
                       type="file"
@@ -625,7 +625,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           if (file.size > 10 * 1024 * 1024) {
-                            toast.error('File size must be less than 10MB.');
+                            toast.error(t.common.fileTooLarge);
                             return;
                           }
                           setEditForm({ ...editForm, file });
@@ -689,7 +689,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
                       autoPlay
                       className="max-w-full max-h-full"
                     >
-                      Your browser does not support the video tag.
+                      {t.common.videoNotSupported}
                     </video>
                   </div>
                 )}
@@ -697,7 +697,7 @@ const SubjectMatterTab: React.FC<SubjectMatterTabProps> = ({ classId }) => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-zinc-400">
                 <FileText className="h-12 w-12 mb-3 opacity-50" />
-                <p className="text-sm">Unable to load preview</p>
+                <p className="text-sm">{t.common.previewError}</p>
               </div>
             )}
           </div>

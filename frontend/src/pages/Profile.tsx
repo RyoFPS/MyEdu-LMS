@@ -45,7 +45,7 @@ const Profile: React.FC = () => {
       setIsEditing(false);
       toast.success(t.profile.profileUpdated);
     } catch {
-      toast.error('Failed to update profile');
+      toast.error(t.profile.failedUpdate);
     } finally {
       setLoading(false);
     }
@@ -54,11 +54,11 @@ const Profile: React.FC = () => {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.password !== passwordData.password_confirmation) {
-      toast.error('Passwords do not match');
+      toast.error(t.profile.passwordMismatch);
       return;
     }
     if (passwordData.password.length < 8) {
-      toast.error('Password must be at least 8 characters');
+      toast.error(t.profile.passwordTooShort);
       return;
     }
     setLoading(true);
@@ -68,7 +68,7 @@ const Profile: React.FC = () => {
       setIsChangingPassword(false);
       toast.success(t.profile.passwordChanged);
     } catch {
-      toast.error('Failed to change password');
+      toast.error(t.profile.failedPassword);
     } finally {
       setLoading(false);
     }
@@ -80,11 +80,11 @@ const Profile: React.FC = () => {
 
     // Validate on client side
     if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
-      toast.error('Only JPG, PNG, and WEBP images are allowed.');
+      toast.error(t.profile.onlyImages);
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image must be less than 2MB.');
+      toast.error(t.profile.imageTooLarge);
       return;
     }
 
@@ -102,7 +102,7 @@ const Profile: React.FC = () => {
       toast.success(t.profile.photoUpdated);
     } catch (error: any) {
       if (!error.response || ![422].includes(error.response.status)) {
-        toast.error('Failed to upload photo.');
+        toast.error(t.profile.failedUploadPhoto);
       }
     } finally {
       setUploadingAvatar(false);
@@ -114,7 +114,7 @@ const Profile: React.FC = () => {
   };
 
   const handleRemoveAvatar = async () => {
-    if (!confirm('Remove your profile photo?')) return;
+    if (!confirm(t.profile.removePhotoConfirm)) return;
 
     setUploadingAvatar(true);
     try {
@@ -123,7 +123,7 @@ const Profile: React.FC = () => {
       setUser(updatedUser);
       toast.success(t.profile.photoRemoved);
     } catch {
-      toast.error('Failed to remove photo.');
+      toast.error(t.profile.failedRemovePhoto);
     } finally {
       setUploadingAvatar(false);
     }
@@ -175,7 +175,7 @@ const Profile: React.FC = () => {
                   </Badge>
                   <Badge variant="secondary">
                     <Calendar className="h-3 w-3 mr-1" />
-                    {t.users.joined} {user?.created_at ? formatDate(user.created_at) : 'N/A'}
+                    {t.users.joined} {user?.created_at ? formatDate(user.created_at) : t.common.na}
                   </Badge>
                 </div>
 
@@ -283,7 +283,7 @@ const Profile: React.FC = () => {
                 <Separator />
                 <InfoRow icon={<Mail className="h-4 w-4" />} label={t.common.email} value={user?.email || ''} />
                 <Separator />
-                <InfoRow icon={<Phone className="h-4 w-4" />} label={t.common.phone} value={user?.phone || 'Not set'} />
+                <InfoRow icon={<Phone className="h-4 w-4" />} label={t.common.phone} value={user?.phone || t.common.notSet} />
                 <Separator />
                 <InfoRow icon={<Shield className="h-4 w-4" />} label={t.common.role} value={user?.role || ''} className="capitalize" />
               </div>
@@ -325,7 +325,7 @@ const Profile: React.FC = () => {
                     value={passwordData.password}
                     onChange={(e) => setPasswordData({ ...passwordData, password: e.target.value })}
                     required
-                    placeholder="Minimum 8 characters"
+                    placeholder={t.profile.passwordTooShort}
                   />
                 </div>
                 <div className="space-y-2">

@@ -173,7 +173,7 @@ const Library: React.FC = () => {
 
   const handleUpload = async () => {
     if (!uploadForm.title || !uploadForm.file || !uploadForm.grade_level || !uploadForm.subject_id) {
-      toast.error('Title, grade level, subject, and file are required.');
+      toast.error(t.library.titleRequired);
       return;
     }
 
@@ -190,14 +190,14 @@ const Library: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('Material uploaded successfully!');
+      toast.success(t.library.uploadSuccess);
       setShowUploadDialog(false);
       resetUploadForm();
       refetch();
       fetchGradeLevels(); // refresh grade levels in case a new one was added
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
-        toast.error('Failed to upload material.');
+        toast.error(t.library.failedUpload);
       }
     } finally {
       setUploading(false);
@@ -220,7 +220,7 @@ const Library: React.FC = () => {
 
   const handleEdit = async () => {
     if (!editingMaterial || !editForm.title || !editForm.grade_level || !editForm.subject_id) {
-      toast.error('Title, grade level, and subject are required.');
+      toast.error(t.library.titleRequiredEdit);
       return;
     }
 
@@ -239,14 +239,14 @@ const Library: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      toast.success('Material updated successfully!');
+      toast.success(t.library.updateSuccess);
       setShowEditDialog(false);
       setEditingMaterial(null);
       refetch();
       fetchGradeLevels();
     } catch (error: any) {
       if (!error.response || ![403, 422].includes(error.response.status)) {
-        toast.error('Failed to update material.');
+        toast.error(t.library.failedUpdate);
       }
     } finally {
       setSaving(false);
@@ -256,14 +256,14 @@ const Library: React.FC = () => {
   // ─── Delete ─────────────────────────────────────────────────────────────────
 
   const handleDelete = async (material: SubjectMatter) => {
-    if (!confirm(`Delete "${material.title}"? This action cannot be undone.`)) return;
+    if (!confirm(t.library.deleteConfirm.replace('{name}', material.title))) return;
 
     try {
       await api.delete(`/library/${material.id}`);
-      toast.success('Material deleted successfully.');
+      toast.success(t.library.deleteSuccess);
       refetch();
     } catch {
-      toast.error('Failed to delete material.');
+      toast.error(t.library.failedDelete);
     }
   };
 
@@ -284,7 +284,7 @@ const Library: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch {
-      toast.error('Failed to download file.');
+      toast.error(t.library.failedDownload);
     }
   };
 
@@ -303,7 +303,7 @@ const Library: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       setPreviewUrl(url);
     } catch {
-      toast.error('Failed to load preview.');
+      toast.error(t.library.failedPreview);
       setShowPreviewDialog(false);
     } finally {
       setPreviewLoading(false);
@@ -453,7 +453,7 @@ const Library: React.FC = () => {
                             {material.subject.name}
                           </Badge>
                         )}
-                        <span>by {material.uploader?.name || 'Unknown'}</span>
+                        <span>{t.library.byUploader} {material.uploader?.name || t.library.unknown}</span>
                         {material.created_at && <span>{formatDate(material.created_at)}</span>}
                       </div>
 
@@ -566,7 +566,7 @@ const Library: React.FC = () => {
                 value={uploadForm.subject_id}
                 onChange={(e) => setUploadForm(prev => ({ ...prev, subject_id: e.target.value }))}
                 options={[
-                  { value: '', label: t.attendance.selectAClass },
+                  { value: '', label: t.library.selectSubject },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -600,10 +600,10 @@ const Library: React.FC = () => {
                   <label className="flex flex-col items-center justify-center p-6 rounded-lg border-2 border-dashed border-zinc-300 dark:border-zinc-600 hover:border-primary-400 dark:hover:border-primary-500 cursor-pointer transition-colors">
                     <Upload className="h-8 w-8 text-zinc-400 mb-2" />
                     <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                      Click to select file
+                      {t.library.clickToSelect}
                     </span>
                     <span className="text-xs text-zinc-400 mt-1">
-                      PDF, DOC, PPT, XLS, JPG, PNG, MP4 (max 10MB)
+                      {t.library.uploadHint}
                     </span>
                     <input
                       type="file"
@@ -613,7 +613,7 @@ const Library: React.FC = () => {
                         const file = e.target.files?.[0];
                         if (file) {
                           if (file.size > 10 * 1024 * 1024) {
-                            toast.error('File size must be less than 10MB.');
+                            toast.error(t.library.fileTooLarge);
                             return;
                           }
                           setUploadForm(prev => ({ ...prev, file }));
@@ -702,7 +702,7 @@ const Library: React.FC = () => {
                 value={editForm.subject_id}
                 onChange={(e) => setEditForm(prev => ({ ...prev, subject_id: e.target.value }))}
                 options={[
-                  { value: '', label: t.attendance.selectAClass },
+                  { value: '', label: t.library.selectSubject },
                   ...subjects.map((s) => ({ value: String(s.id), label: `${s.name} (${s.code})` })),
                 ]}
               />
@@ -711,7 +711,7 @@ const Library: React.FC = () => {
             {/* Replace File (optional) */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                Replace File (optional)
+                {t.library.replaceFile}
               </label>
               {editForm.file ? (
                 <div className="flex items-center gap-3 p-3 rounded-lg border border-primary-200 dark:border-primary-700 bg-primary-50 dark:bg-primary-900/20">
@@ -734,11 +734,11 @@ const Library: React.FC = () => {
               ) : (
                 <div>
                   <p className="text-xs text-zinc-400 mb-2">
-                    Current: {editingMaterial?.file_name} ({editingMaterial?.file_size_formatted})
+                    {t.library.currentFile}: {editingMaterial?.file_name} ({editingMaterial?.file_size_formatted})
                   </p>
                   <label className="flex items-center justify-center gap-2 p-3 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-600 hover:border-primary-400 cursor-pointer transition-colors">
                     <Upload className="h-4 w-4 text-zinc-400" />
-                    <span className="text-sm text-zinc-500">Click to replace file</span>
+                    <span className="text-sm text-zinc-500">{t.library.clickToReplace}</span>
                     <input
                       type="file"
                       className="hidden"
@@ -747,7 +747,7 @@ const Library: React.FC = () => {
                         const file = e.target.files?.[0];
                         if (file) {
                           if (file.size > 10 * 1024 * 1024) {
-                            toast.error('File size must be less than 10MB.');
+                            toast.error(t.library.fileTooLarge);
                             return;
                           }
                           setEditForm(prev => ({ ...prev, file }));
@@ -825,7 +825,7 @@ const Library: React.FC = () => {
                       autoPlay
                       className="max-w-full max-h-full"
                     >
-                      Your browser does not support the video tag.
+                      {t.common.videoNotSupported}
                     </video>
                   </div>
                 )}
@@ -833,7 +833,7 @@ const Library: React.FC = () => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-zinc-400">
                 <FileText className="h-12 w-12 mb-3 opacity-50" />
-                <p className="text-sm">Unable to load preview</p>
+                <p className="text-sm">{t.common.previewError}</p>
               </div>
             )}
           </div>

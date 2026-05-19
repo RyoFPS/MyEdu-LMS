@@ -98,14 +98,14 @@ const roleBadgeVariant: Record<string, 'destructive' | 'info' | 'success'> = {
   student: 'success',
 };
 
-const timeAgo = (dateStr: string, justNowLabel: string): string => {
+const timeAgo = (dateStr: string, justNowLabel: string, t: any): string => {
   const now = new Date();
   const date = new Date(dateStr);
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
   if (seconds < 60) return justNowLabel;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+  if (seconds < 3600) return (t.activityLog?.minutesAgo || '{n}m ago').replace('{n}', Math.floor(seconds / 60));
+  if (seconds < 86400) return (t.activityLog?.hoursAgo || '{n}h ago').replace('{n}', Math.floor(seconds / 3600));
+  if (seconds < 604800) return (t.activityLog?.daysAgo || '{n}d ago').replace('{n}', Math.floor(seconds / 86400));
   return date.toLocaleDateString();
 };
 
@@ -178,9 +178,9 @@ const ActivityLog: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      toast.success('Export downloaded!');
+      toast.success(t.common.exportDownloaded);
     } catch {
-      toast.error('Failed to export.');
+      toast.error(t.common.exportFailed);
     }
   };
 
@@ -334,7 +334,10 @@ const ActivityLog: React.FC = () => {
 
         {!loading && meta.total > 0 && (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Showing {(meta.current_page - 1) * meta.per_page + 1}–{Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} logs
+            {((t as any).activityLog?.showingLogs || 'Showing {from}–{to} of {total} logs')
+              .replace('{from}', String((meta.current_page - 1) * meta.per_page + 1))
+              .replace('{to}', String(Math.min(meta.current_page * meta.per_page, meta.total)))
+              .replace('{total}', String(meta.total))}
           </p>
         )}
 
@@ -383,7 +386,7 @@ const ActivityLog: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-zinc-400">
                           <span>🎯 {log.target_name}</span>
                           {log.ip_address && <span>🌐 {log.ip_address}</span>}
-                          <span>🕐 {timeAgo(log.created_at, (t.notifications as any).justNow)}</span>
+                          <span>🕐 {timeAgo(log.created_at, (t.notifications as any).justNow, t)}</span>
                           <span className="hidden sm:inline">{new Date(log.created_at).toLocaleString()}</span>
                         </div>
                       </div>

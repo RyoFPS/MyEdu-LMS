@@ -81,10 +81,10 @@ const ClassList: React.FC = () => {
     try {
       if (editingClass) {
         await api.put(`/classes/${editingClass.slug}`, formData);
-        toast.success('Class updated successfully');
+        toast.success(t.classes.editClass);
       } else {
         await api.post('/classes', formData);
-        toast.success('Class created successfully');
+        toast.success(t.classes.createClass);
       }
       resetForm();
       refetchClasses();
@@ -162,8 +162,8 @@ const ClassList: React.FC = () => {
                 value={filterGrade}
                 onChange={(e) => setFilterGrade(e.target.value)}
                 options={[
-                  { value: '', label: 'All Grades' },
-                  ...gradeLevels.map((gl) => ({ value: gl, label: `Grade ${gl}` })),
+                  { value: '', label: t.classes.allGrades },
+                  ...gradeLevels.map((gl) => ({ value: gl, label: `${t.classes.gradePrefix} ${gl}` })),
                 ]}
               />
               {isAdmin ? (
@@ -284,7 +284,7 @@ const ClassList: React.FC = () => {
                     placeholder="e.g., 7, 8, 9, 10"
                     required
                   />
-                  <p className="text-xs text-zinc-400">Select an existing grade or type a new one</p>
+                  <p className="text-xs text-zinc-400">{t.classes.selectGradeHint}</p>
                 </div>
 
                 {/* Step 2: Class Name — with suggestions based on selected grade */}
@@ -292,7 +292,7 @@ const ClassList: React.FC = () => {
                   <Label required>{t.classes.className}</Label>
                   {formData.grade_level && classesByGrade[formData.grade_level]?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-1">
-                      <span className="text-xs text-zinc-400 w-full">Existing in Grade {formData.grade_level}:</span>
+                      <span className="text-xs text-zinc-400 w-full">{t.classes.existingInGrade} {formData.grade_level}:</span>
                       {classesByGrade[formData.grade_level].map((name) => (
                         <span key={name} className="px-2 py-0.5 rounded text-xs bg-zinc-100 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400">
                           {name}
@@ -325,7 +325,7 @@ const ClassList: React.FC = () => {
                   <Input
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Optional description"
+                    placeholder={t.common.description}
                   />
                 </div>
               </div>

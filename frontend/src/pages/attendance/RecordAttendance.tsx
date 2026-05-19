@@ -146,12 +146,12 @@ const RecordAttendance: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!selectedClass || !date) {
-      toast.error('Please select a class and date');
+      toast.error(t.attendance.selectAClass);
       return;
     }
 
     if (students.length === 0 && teachers.length === 0) {
-      toast.error('No members in this class');
+      toast.error(t.attendance.noMembers);
       return;
     }
 
@@ -162,11 +162,11 @@ const RecordAttendance: React.FC = () => {
         date,
         attendances: Object.values(records),
       });
-      toast.success('Attendance recorded successfully!');
+      toast.success(t.attendance.submitAttendance);
       navigate('/attendance');
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error('Failed to record attendance');
+        toast.error(t.attendance.recordFailed || t.common.errorOccurred || 'Failed to record attendance');
       }
     } finally {
       setSubmitting(false);
@@ -183,7 +183,7 @@ const RecordAttendance: React.FC = () => {
 
   return (
     <>
-      <Header title={t.attendance.recordAttendance} description="Mark attendance for your class" />
+      <Header title={t.attendance.recordAttendance} description={t.attendance.markAttendanceDesc} />
       <div className="page-container max-w-4xl mx-auto">
         {/* Class & Date Selection */}
         <Card>
@@ -196,7 +196,7 @@ const RecordAttendance: React.FC = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label required>Class</Label>
+                <Label required>{t.attendance.recordClass}</Label>
                 <Select
                   value={selectedClass}
                   onChange={(e) => setSelectedClass(e.target.value)}

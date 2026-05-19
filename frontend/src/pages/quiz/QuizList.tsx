@@ -131,11 +131,11 @@ const QuizList: React.FC = () => {
     setDeleting(true);
     try {
       await api.delete(`/quizzes/${deleteId}`);
-      toast.success('Quiz deleted successfully');
+      toast.success(t.quizzes.deleteQuiz);
       refetch();
     } catch (error: any) {
       if (!error.response || ![403, 419, 422, 500].includes(error.response.status)) {
-        toast.error('Failed to delete quiz');
+        toast.error(t.common.cancel);
       }
     } finally {
       setDeleting(false);
@@ -231,8 +231,10 @@ const QuizList: React.FC = () => {
         {!loading && meta.total > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Showing {(meta.current_page - 1) * meta.per_page + 1} to{' '}
-              {Math.min(meta.current_page * meta.per_page, meta.total)} of {meta.total} quizzes
+              {(t.quizzes.showingResults || 'Showing {from} to {to} of {total} quizzes')
+                .replace('{from}', String((meta.current_page - 1) * meta.per_page + 1))
+                .replace('{to}', String(Math.min(meta.current_page * meta.per_page, meta.total)))
+                .replace('{total}', String(meta.total))}
             </p>
           </div>
         )}
@@ -248,8 +250,8 @@ const QuizList: React.FC = () => {
               {hasActiveFilters
                 ? t.library.adjustFilters
                 : isTeacher || isAdmin
-                ? 'Create your first quiz to get started'
-                : 'No quizzes available yet'}
+                ? t.quizzes.createQuiz
+                : t.quizzes.noQuizzes}
             </p>
           </div>
         ) : (
@@ -275,7 +277,7 @@ const QuizList: React.FC = () => {
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         <BookOpen className="h-3.5 w-3.5 flex-shrink-0" />
-                        <span className="truncate">{quiz.class_room?.name || 'No class'}</span>
+                        <span className="truncate">{quiz.class_room?.name || t.quizzes.noClassAssigned}</span>
                       </div>
                       {quiz.subject && (
                         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
@@ -311,7 +313,7 @@ const QuizList: React.FC = () => {
                       </div>
                       {quiz.start_time && (
                         <div className="text-xs text-zinc-400">
-                          Starts: {formatDateTime(quiz.start_time)}
+                          {t.quizzes.startsLabel}: {formatDateTime(quiz.start_time)}
                         </div>
                       )}
                       {quiz.end_time && (

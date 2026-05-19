@@ -71,9 +71,9 @@ const QuizTake: React.FC = () => {
       } catch (err: unknown) {
         const error = err as { response?: { data?: { message?: string }; status?: number } };
         if (error.response?.status === 409) {
-          toast.error('You have already taken this quiz');
+          toast.error(t.quizzes.quizNotAvailable);
         } else {
-          toast.error(error.response?.data?.message || 'Failed to start quiz');
+          toast.error(error.response?.data?.message || t.quizzes.quizNotAvailable);
         }
         navigate('/quizzes');
       }
@@ -111,7 +111,7 @@ const QuizTake: React.FC = () => {
         }
         navigate(`/quizzes/${id}/results`);
       } catch {
-        toast.error('Failed to submit quiz');
+        toast.error(t.common.cancel);
         setSubmitting(false);
       }
     },

@@ -99,7 +99,7 @@ const TeacherList: React.FC = () => {
                     ) : (
                       <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
                         <BookOpen className="h-3.5 w-3.5 shrink-0" />
-                        <span className="text-zinc-400 italic text-xs">No subjects assigned</span>
+                        <span className="text-zinc-400 italic text-xs">{t.users.noSubjectsAssigned}</span>
                       </div>
                     )}
                   </div>

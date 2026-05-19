@@ -82,7 +82,7 @@ const SubjectList: React.FC = () => {
   // Save (create or update)
   const handleSave = async () => {
     if (!form.name || !form.code) {
-      toast.error('Name and code are required.');
+      toast.error(t.common.required);
       return;
     }
 
@@ -90,16 +90,16 @@ const SubjectList: React.FC = () => {
     try {
       if (editingSubject) {
         await api.put(`/subjects/${editingSubject.id}`, form);
-        toast.success('Subject updated successfully!');
+        toast.success(t.subjects.editSubject);
       } else {
         await api.post('/subjects', form);
-        toast.success('Subject created successfully!');
+        toast.success(t.subjects.addSubject);
       }
       setShowDialog(false);
       refetch();
     } catch (error: any) {
       if (!error.response || ![422].includes(error.response.status)) {
-        toast.error('Failed to save subject.');
+        toast.error(t.common.cancel);
       }
     } finally {
       setSaving(false);
@@ -112,24 +112,24 @@ const SubjectList: React.FC = () => {
       toast.error(`${t.subjects.cannotDelete}: "${subject.name}" (${subject.subject_matters_count})`);
       return;
     }
-    if (!confirm(`Delete subject "${subject.name}" (${subject.code})?`)) return;
+    if (!confirm(t.common.deleteConfirmGeneric.replace('{name}', subject.name))) return;
 
     try {
       await api.delete(`/subjects/${subject.id}`);
-      toast.success('Subject deleted successfully.');
+      toast.success(t.subjects.title);
       refetch();
     } catch (error: any) {
       if (error.response?.status === 422) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Failed to delete subject.');
+        toast.error(t.common.cancel);
       }
     }
   };
 
   // Group subjects by category
   const groupedSubjects = subjects.reduce<Record<string, Subject[]>>((acc, subject) => {
-    const cat = subject.category || 'Uncategorized';
+    const cat = subject.category || t.subjects.uncategorized;
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(subject);
     return acc;
